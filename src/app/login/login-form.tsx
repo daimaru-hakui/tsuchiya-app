@@ -1,35 +1,49 @@
 "use client";
-import React, { FC } from "react";
+import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { signIn } from "next-auth/react";
 import { auth } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
-import { z } from 'zod';
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { LoaderCircle } from "lucide-react";
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   email: z.string().min(0).max(100),
-  password: z.string()
+  password: z.string(),
 });
 
 export type FormSchema = z.infer<typeof formSchema>;
 
 export default function LoginForm() {
+  const [loading, setLoading] = useState(false);
   const form = useForm<FormSchema>({
     defaultValues: {
       email: "",
-      password: ""
+      password: "",
     },
-    resolver: zodResolver(formSchema)
+    resolver: zodResolver(formSchema),
   });
 
   const onSubmit: SubmitHandler<FormSchema> = async (data) => {
     await signInHandler(data);
   };
+
   const signInHandler = async (data: FormSchema) => {
+    setLoading(true);
     const { email, password } = data;
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -38,52 +52,60 @@ export default function LoginForm() {
         password
       );
       const token = await userCredential.user.getIdToken();
-      await signIn("credentials", { token, callbackUrl: '/' });
+      await signIn("credentials", { token, callbackUrl: "/" });
     } catch (error) {
       console.error(error);
       alert("ログインに失敗しました");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Form {...form} >
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-      >
-        <div className="text-center mt-2 text-2xl">Login</div>
-        <div className="flex flex-col gap-6 mt-3">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="shadcn" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="shadcn" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex items-center justify-between">
-            <Button type="submit" className="w-full">Sign in</Button>
-          </div>
-        </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Card className={cn("w-[350px]")}>
+          <CardHeader>
+            <CardTitle className="text-center">Login</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full mt-2">
+                {loading && (
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Login
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </form>
     </Form>
   );
-};
+}

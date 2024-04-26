@@ -6,7 +6,6 @@ import { auth } from "@/auth";
 
 const LoginPage: NextPage = async () => {
   const session = await auth();
-  // console.log(session);
   return (
     <div className="flex justify-center items-center w-full max-w-[calc(400px)]">
       <LoginForm />
