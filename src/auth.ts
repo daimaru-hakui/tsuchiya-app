@@ -1,10 +1,10 @@
-import { auth as firebaseAuth } from './lib/firebase/server';
+import { auth as firebaseAuth } from "./lib/firebase/server";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 // Your own logic for dealing with plaintext password strings; be careful!
 
-export const { handlers, auth } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {},
@@ -14,7 +14,7 @@ export const { handlers, auth } = NextAuth({
         const decoded = await firebaseAuth.verifyIdToken(idToken);
         user = {
           ...decoded,
-          uid: decoded.uid
+          uid: decoded.uid,
         };
         if (!user) {
           throw new Error("User not found.");

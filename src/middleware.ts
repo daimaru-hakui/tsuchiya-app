@@ -11,13 +11,13 @@ export default async function middleware(req: NextRequest) {
     if (decoded?.uid) {
       return null;
     }
-    return NextResponse.redirect(req.url + 'login');
+    return NextResponse.redirect(req.nextUrl.origin + '/login');
   }).catch(e => {
     console.log(e);
-    return NextResponse.redirect(req.url + 'login');
+    return NextResponse.redirect(req.nextUrl.origin + '/login');
   });
 }
 
 export const config = {
-  matcher: ['/'],
+  matcher: ["/","/products/:path*"]
 };
