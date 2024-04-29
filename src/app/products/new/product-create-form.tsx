@@ -65,6 +65,8 @@ export default function ProductCreateForm() {
       setDoc(colRef, {
         productNumber: data.productNumber,
         productName: data.productName,
+        isHem: false,
+        order: 0
       });
       data.skus.forEach(async (sku, idx) => {
         const docRef = doc(collection(db, 'products', colRef.id, 'skus'));
