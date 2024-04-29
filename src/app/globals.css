@@ -58,3 +58,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+#siteCode input[type='number']::-webkit-outer-spin-button,
+#siteCode input[type='number']::-webkit-inner-spin-button,
+#siteCode input[type='number']  {
+  -webkit-appearance: none;
+  -moz-appearance: textfield !important;
+}

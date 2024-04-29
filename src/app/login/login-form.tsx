@@ -22,8 +22,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
-  email: z.string().min(0).max(100),
-  password: z.string(),
+  email: z.string()
+    .email({ message: "emailを入力してください。" })
+    .min(1, { message: "1文字以上入力してください" }).max(100),
+  password: z.string()
+    .min(1, { message: "パスワードを入力してください。" }),
 });
 
 export type FormSchema = z.infer<typeof formSchema>;

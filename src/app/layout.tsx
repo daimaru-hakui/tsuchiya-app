@@ -31,7 +31,7 @@ export default async function RootLayout({
   //   redirect('/login');
   // }
   return (
-    <html lang="ja">
+    <html lang="ja" suppressHydrationWarning={true}>
       <body className={cn(NotoSans.className, "min-h-dvh")}>
         <ThemeProvider
           attribute="class"

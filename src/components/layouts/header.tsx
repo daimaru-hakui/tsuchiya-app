@@ -22,6 +22,9 @@ export default function Header() {
           </Button>
           <div className="flex items-center gap-2">
             <Button size="sm" asChild variant="ghost">
+              <Link href="/orders/new">発注登録</Link>
+            </Button>
+            <Button size="sm" asChild variant="ghost">
               <Link href="/products/new">商品登録</Link>
             </Button>
             <DarkMode />
