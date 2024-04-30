@@ -1,5 +1,6 @@
 import { initializeApp, cert, getApps } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 
 // const serviceAccount = require('../../../serviceAccount.json');
 
@@ -17,3 +18,4 @@ export const firebaseAdmin =
   });
 
 export const auth = getAuth(firebaseAdmin);
+export const db = getFirestore(firebaseAdmin)
