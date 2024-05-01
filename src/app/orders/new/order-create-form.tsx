@@ -1,42 +1,63 @@
 "use client";
+import { startTransition, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import OrderFormItem from "./order-form-item";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase/client";
-import { Unsubscribe, collection, collectionGroup, onSnapshot, orderBy, query } from "firebase/firestore";
-import { Product, Sku } from "@/types";
+import { Unsubscribe, collectionGroup, onSnapshot } from "firebase/firestore";
+import { CreateOrder, CreateOrderSchema, Product, Sku } from "@/types";
+import * as actions from "@/actions";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-export default function OrderCreateForm() {
+interface Props {
+  products: Product[];
+}
+
+export default function OrderCreateForm({ products }: Props) {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
   const [loading, setLoading] = useState(true);
-  const form = useForm();
+  const form = useForm<CreateOrder>({
+    resolver: zodResolver(CreateOrderSchema),
+  });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: CreateOrder) => {
     console.log(data);
+    startTransition(async () => {
+      await actions.createOrder(data);
+    });
   };
 
   useEffect(() => {
-    let unsubSkus: Unsubscribe, unsubProducts: Unsubscribe;
+    let unsub: Unsubscribe;
     const getItems = async () => {
       try {
-        const productsRef = collection(db, 'products');
-        let products: Product[] = [];
-        const productsQuery = query(productsRef, orderBy("order", "asc"));
-        unsubProducts = onSnapshot(productsQuery, (snapshot) => {
-          products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        });
-        const skusRef = collectionGroup(db, 'skus');
-        unsubSkus = onSnapshot(skusRef, (snapshot) => {
-          const skus = snapshot.docs.map((doc) => (
-            { ...doc.data(), id: doc.id } as Sku))
-            .sort((a, b) => a.order < b.order ? -1 : 1);
+        const skusRef = collectionGroup(db, "skus");
+        unsub = onSnapshot(skusRef, (snapshot) => {
+          const skus = snapshot.docs
+            .map((doc) => ({ ...doc.data(), id: doc.id } as Sku))
+            .sort((a, b) => (a.order < b.order ? -1 : 1));
           const filterSkus = products.map((product) => {
-            const parentSkus = skus.filter(sku => sku.parentId === product.id);
-            return parentSkus.map(sku => ({ ...product, ...sku, }));
+            const parentSkus = skus.filter(
+              (sku) => sku.parentId === product.id
+            );
+            return parentSkus.map((sku) => ({ ...product, ...sku }));
           });
           setItems(filterSkus);
         });
@@ -47,18 +68,28 @@ export default function OrderCreateForm() {
       }
     };
     getItems();
+    return () => unsub();
+  }, [products]);
 
-    return () => {
-      unsubProducts();
-      unsubSkus();
-    };
-
-  }, []);
+  const getAddress = async () => {
+    const zipCode = form.getValues("zipCode");
+    const url = "https://zipcloud.ibsnet.co.jp/api/search";
+    const res = await fetch(`${url}?zipcode=${zipCode}`);
+    if (!res.ok) {
+      throw Error("取得に失敗");
+    }
+    const { results } = await res.json();
+    if (results) {
+      const address =
+        results[0]?.address1 + results[0]?.address2 + results[0]?.address3;
+      form.setValue("address", address);
+    } else {
+      form.setValue("address", "");
+    }
+  };
 
   if (loading) {
-    return (
-      <div>...loading</div>
-    );
+    return <div>...loading</div>;
   }
 
   return (
@@ -72,32 +103,39 @@ export default function OrderCreateForm() {
             <FormField
               control={form.control}
               name="section"
+              defaultValue=""
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>所属名</FormLabel>
                   <FormControl>
                     <Input placeholder="派遣社員" {...field} />
                   </FormControl>
-                  <FormDescription>所属名又は派遣社員・JV構成員・協力会社</FormDescription>
+                  <FormDescription>
+                    所属名又は派遣社員・JV構成員・協力会社
+                  </FormDescription>
                   <FormMessage />
-                </FormItem>)}
+                </FormItem>
+              )}
             />
             <div className="flex gap-3">
               <FormField
                 control={form.control}
                 name="employeeCode"
+                defaultValue=""
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem id="siteCode">
                     <FormLabel>社員コード</FormLabel>
                     <FormControl>
-                      <Input placeholder="" {...field} />
+                      <Input type="number" placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>)}
+                  </FormItem>
+                )}
               />
               <FormField
                 control={form.control}
                 name="initial"
+                defaultValue=""
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>イニシャル</FormLabel>
@@ -105,13 +143,15 @@ export default function OrderCreateForm() {
                       <Input placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>)}
+                  </FormItem>
+                )}
               />
             </div>
             <div className="flex gap-3">
               <FormField
                 control={form.control}
                 name="username"
+                defaultValue=""
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>氏名</FormLabel>
@@ -119,11 +159,13 @@ export default function OrderCreateForm() {
                       <Input placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>)}
+                  </FormItem>
+                )}
               />
               <FormField
                 control={form.control}
                 name="position"
+                defaultValue=""
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>役職</FormLabel>
@@ -131,31 +173,45 @@ export default function OrderCreateForm() {
                       <Input placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>)}
+                  </FormItem>
+                )}
               />
             </div>
             <hr />
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              {items.map(((skus, index: number) => (
-                <OrderFormItem key={index} form={form} index={index} skus={skus} />
-              )))}
+              {items.map((skus, index: number) => (
+                <OrderFormItem
+                  key={index}
+                  form={form}
+                  index={index}
+                  skus={skus}
+                />
+              ))}
             </div>
             <hr />
             <FormField
               control={form.control}
               name="siteCode"
+              defaultValue=""
               render={({ field }) => (
                 <FormItem id="siteCode">
                   <FormLabel>工事コード又は組織コード</FormLabel>
                   <FormControl>
-                    <Input style={{ WebkitAppearance: "none" }} type="number" placeholder="" {...field} />
+                    <Input
+                      style={{ WebkitAppearance: "none" }}
+                      type="number"
+                      placeholder=""
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
-                </FormItem>)}
+                </FormItem>
+              )}
             />
             <FormField
               control={form.control}
               name="siteName"
+              defaultValue=""
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>現場名、又は組織名</FormLabel>
@@ -163,26 +219,38 @@ export default function OrderCreateForm() {
                     <Input placeholder="" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>)}
+                </FormItem>
+              )}
             />
             <div className="flex items-end gap-3">
               <FormField
                 control={form.control}
-                name="postCode"
+                name="zipCode"
+                defaultValue=""
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>郵便番号</FormLabel>
-                    <FormControl>
-                      <Input placeholder="" {...field} />
-                    </FormControl>
+                  <FormItem id="siteCode">
+                    <FormLabel>
+                      郵便番号
+                      <span className="text-gray-500 text-xs">
+                        ※ハイフン（ー）なしで入力してください
+                      </span>
+                    </FormLabel>
+                    <div className="flex gap-3">
+                      <FormControl>
+                        <Input type="number" placeholder="" {...field} />
+                      </FormControl>
+                      <Button onClick={getAddress}>検索</Button>
+                    </div>
+
                     <FormMessage />
-                  </FormItem>)}
+                  </FormItem>
+                )}
               />
-              <Button>検索</Button>
             </div>
             <FormField
               control={form.control}
               name="address"
+              defaultValue=""
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>住所</FormLabel>
@@ -190,26 +258,37 @@ export default function OrderCreateForm() {
                     <Input placeholder="" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>)}
+                </FormItem>
+              )}
             />
             <FormField
               control={form.control}
               name="tel"
+              defaultValue=""
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>TEL</FormLabel>
                   <FormControl>
-                    <Input className="w-[200px]" placeholder="" {...field} />
+                    <Input
+                      type="tel"
+                      className="w-[200px]"
+                      placeholder="TEL"
+                      pattern="[\d\-]*"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
-                </FormItem>)}
+                </FormItem>
+              )}
             />
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">登録</Button>
+            <Button type="submit" className="w-full">
+              登録
+            </Button>
           </CardFooter>
         </Card>
       </form>
     </Form>
   );
-};
+}
