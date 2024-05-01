@@ -15,7 +15,7 @@ export default function Header() {
   };
   return (
     <>
-      {pathname !== "/login" && (
+      {pathname !== "/auth/login" && pathname !== "/auth/signup" && (
         <div className="p-3 flex justify-between">
           <Button variant="ghost" asChild>
             <Link href="/">TSUCHIYA APP</Link>

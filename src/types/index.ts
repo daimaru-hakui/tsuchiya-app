@@ -1,4 +1,4 @@
-import {z} from "zod"
+import { z } from "zod";
 export interface Product {
   id: string;
   productNumber: string;
@@ -17,6 +17,20 @@ export interface Sku {
   parentRef: any;
   order: number;
 }
+
+export interface AdminUser {
+  uid: string;
+  email: string | undefined;
+  displayName: string | undefined;
+  role: "admin" | "user" | "member";
+}
+
+export const UpdatedAdminUserSchema = z.object({
+  displayName: z.string(),
+  role: z.enum(["admin", "user", "member"]),
+});
+
+export type UpdatedAdminUser = z.infer<typeof UpdatedAdminUserSchema>;
 
 export const CreateOrderSchema = z.object({
   section: z.string().min(1, { message: "所属名を入力してください。" }),
@@ -40,4 +54,4 @@ export const CreateOrderSchema = z.object({
   tel: z.string(),
 });
 
-export type CreateOrder = z.infer<typeof CreateOrderSchema>
+export type CreateOrder = z.infer<typeof CreateOrderSchema>;

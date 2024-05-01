@@ -1,8 +1,7 @@
-import Image from "next/image";
+import { auth } from "@/auth";
+import { auth as firebaseAuth } from "@/lib/firebase/server";
 
-export default function Home() {
-  return (
-    <main className="flex flex-col items-center justify-between">
-    </main>
-  );
+export default async function Home() {
+
+  return <main className="flex flex-col items-center justify-between"></main>;
 }

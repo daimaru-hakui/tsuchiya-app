@@ -2,7 +2,6 @@ import { auth as firebaseAuth } from "./lib/firebase/server";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { redirect } from "next/navigation";
-// Your own logic for dealing with plaintext password strings; be careful!
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -32,7 +31,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return { ...token, ...user };
     },
     async session({ session, token }) {
-      // session.user.emailVerified = token.emailVerified;
+      session.user.role = token.role
       session.user.uid = token.uid;
       return session;
     },
