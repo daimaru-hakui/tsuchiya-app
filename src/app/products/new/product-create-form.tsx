@@ -10,54 +10,25 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import React, { useState } from "react";
+import React, { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  collection,
-  doc,
-  serverTimestamp,
-  setDoc,
-  writeBatch,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
-const formSchema = z.object({
-  productNumber: z.string().min(1, { message: "入力してください。" }).max(100, {
-    message: "100文字以内で入力してください",
-  }),
-  productName: z.string().min(1, {
-    message: "入力してください。",
-  }),
-  displayName: z.string().min(1, { message: "入力してください。" }),
-  isHem: z.boolean(),
-  gender: z.enum(["other", "man", "woman"]),
-  skus: z.array(
-    z.object({
-      size: z
-        .string({ required_error: "入力してください。" })
-        .min(0, { message: "0文字以上" }),
-      price: z.number({ required_error: "入力してください。" }),
-      stock: z.number({ required_error: "入力してください。" }),
-    })
-  ),
-});
+import { CreateProduct, CreateProductSchema } from "@/types";
+import { createProduct } from "@/actions";
 
 export default function ProductCreateForm() {
-  const [loading, setLoading] = useState(false);
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [isPending, startTransition] = useTransition();
+  const form = useForm<CreateProduct>({
+    resolver: zodResolver(CreateProductSchema),
   });
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -80,48 +51,18 @@ export default function ProductCreateForm() {
     form.reset();
   };
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-    setLoading(true);
-    await createProduct(data);
-  };
-
-  const createProduct = async (data: z.infer<typeof formSchema>) => {
-    try {
-      const batch = writeBatch(db);
-      const colRef = doc(collection(db, "products"));
-      batch.set(colRef, {
-        productNumber: data.productNumber,
-        productName: data.productName,
-        displayName: data.displayName,
-        isHem: data.isHem,
-        gender: data.gender,
-        sortNum: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      data.skus.forEach((sku, idx) => {
-        const docRef = doc(collection(db, "products", colRef.id, "skus"));
-        batch.set(docRef, {
-          id: docRef.id,
-          size: sku.size,
-          price: sku.price,
-          stock: sku.stock,
-          parentId: colRef.id,
-          parentRef: colRef,
-          sortNum: idx + 1,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-      });
-      await batch.commit();
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
+  const onSubmit = async (data: CreateProduct) => {
+    startTransition(async () => {
+      const result = await createProduct(data);
+      if (result) {
+        return;
+      }
       reset();
-      remove()
-    }
+      form.setValue("gender", data.gender, {
+        shouldDirty: true
+      });
+      remove();
+    });
   };
 
   const genders = [
@@ -290,7 +231,7 @@ export default function ProductCreateForm() {
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full">
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               登録
             </Button>
           </CardFooter>

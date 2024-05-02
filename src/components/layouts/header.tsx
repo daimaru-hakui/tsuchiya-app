@@ -20,7 +20,6 @@ export default function Header() {
       if (user) {
         console.log("ログイン中");
       } else {
-        console.log(pathname, user);
         if (pathname !== "/auth/login" && pathname !== "/auth/signup") {
           await signOut();
           router.push("/auth/login");

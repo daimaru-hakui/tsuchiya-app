@@ -7,15 +7,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { CreateOrder, Product, Sku } from "@/types";
 import { UseFormReturn } from "react-hook-form";
 
@@ -29,9 +20,8 @@ export default function OrderFormItem({ form, index, skus }: Props) {
 
   return (
     <div
-      className={`base:col-span-1 ${
-        index + (1 % 2) === 0 ? "md:col-span-7" : "md:col-span-5"
-      }`}
+      className={`base:col-span-1 ${index + (1 % 2) === 0 ? "md:col-span-7" : "md:col-span-5"
+        }`}
     >
       <div className="text-xs font-bold">{skus[0]?.displayName}</div>
       <div className="flex gap-3">
@@ -43,24 +33,12 @@ export default function OrderFormItem({ form, index, skus }: Props) {
             <FormItem>
               <FormLabel>サイズ</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue placeholder={field.value}/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>size</SelectLabel>
-                      {skus.map(({ size, id }) => (
-                        <SelectItem key={size } value={id}>
-                          {size} 
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                <select {...form.register(`products.${index}.id`)} defaultValue={field.value} className="border rounded-md py-2 px-2 w-[90px] h-10">
+                  <option value="">-</option>
+                  {skus.map(({ size, id }) => (
+                    <option key={size} value={id} >{size}</option>
+                  ))}
+                </select>
               </FormControl>
               <FormMessage />
             </FormItem>

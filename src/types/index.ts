@@ -7,9 +7,9 @@ export interface Product {
   sortNum: number;
   isHem: boolean;
   displayName: string;
-  gender:"man" | "woman" | "other",
-  createdAt:any;
-  updatedAt:any;
+  gender: "man" | "woman" | "other",
+  createdAt: any;
+  updatedAt: any;
 }
 
 export interface Sku {
@@ -20,8 +20,8 @@ export interface Sku {
   stock: number;
   parentRef: any;
   sortNum: number;
-  createdAt:Date;
-  updatedAt:Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface AdminUser {
@@ -61,3 +61,25 @@ export const CreateOrderSchema = z.object({
 });
 
 export type CreateOrder = z.infer<typeof CreateOrderSchema>;
+
+export const CreateProductSchema = z.object({
+  productNumber: z.string().min(1, { message: "入力してください。" }).max(100, {
+    message: "100文字以内で入力してください",
+  }),
+  productName: z.string().min(1, {
+    message: "入力してください。",
+  }),
+  displayName: z.string().min(1, { message: "入力してください。" }),
+  isHem: z.boolean(),
+  gender: z.enum(["other", "man", "woman"]),
+  skus: z.array(
+    z.object({
+      size: z
+        .string({ required_error: "入力してください。" }),
+      price: z.number().min(0, { message: "入力してください" }),
+      stock: z.number().min(0, { message: "入力してください" }),
+    })
+  ),
+});
+
+export type CreateProduct = z.infer<typeof CreateProductSchema>;
