@@ -2,21 +2,26 @@ import OrderCreateForm from "./order-create-form";
 import { db } from "@/lib/firebase/server";
 import { Product } from "@/types";
 
-export default async function OrderCreate() {
-  const getProducts = async () => {
-    let products: Product[] = [];
-    try {
-      const productsRef = db.collection("products");
-      const productsSnap = await productsRef.orderBy("order", "asc").get();
-      productsSnap.docs.forEach(async (doc) => {
-        products.push({ id: doc.id, ...doc.data() } as Product);
-      });
-      return products;
-    } catch (e) {
-      console.log(e);
-    }
-  };
+const getProducts = async () => {
+  let products: Product[] = [];
+  try {
+    const productsRef = db.collection("products");
+    const productsSnap = await productsRef.orderBy("sortNum", "asc").get();
+    productsSnap.docs.forEach(async (doc) => {
+      products.push({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: "",
+        updatedAt: "",
+      } as Product);
+    });
+    return products;
+  } catch (e) {
+    console.log(e);
+  }
+};
 
+export default async function OrderCreate() {
   const products = await getProducts();
 
   if (!products) return;

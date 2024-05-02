@@ -1,11 +1,15 @@
-import {z} from "zod"
+import { Timestamp } from "firebase/firestore";
+import { z } from "zod";
 export interface Product {
   id: string;
   productNumber: string;
   productName: string;
-  order: number;
+  sortNum: number;
   isHem: boolean;
   displayName: string;
+  gender:"man" | "woman" | "other",
+  createdAt:any;
+  updatedAt:any;
 }
 
 export interface Sku {
@@ -15,8 +19,24 @@ export interface Sku {
   price: number;
   stock: number;
   parentRef: any;
-  order: number;
+  sortNum: number;
+  createdAt:Date;
+  updatedAt:Date;
 }
+
+export interface AdminUser {
+  uid: string;
+  email: string | undefined;
+  displayName: string | undefined;
+  role: "admin" | "user" | "member";
+}
+
+export const UpdatedAdminUserSchema = z.object({
+  displayName: z.string(),
+  role: z.enum(["admin", "user", "member"]),
+});
+
+export type UpdatedAdminUser = z.infer<typeof UpdatedAdminUserSchema>;
 
 export const CreateOrderSchema = z.object({
   section: z.string().min(1, { message: "所属名を入力してください。" }),
@@ -40,4 +60,4 @@ export const CreateOrderSchema = z.object({
   tel: z.string(),
 });
 
-export type CreateOrder = z.infer<typeof CreateOrderSchema>
+export type CreateOrder = z.infer<typeof CreateOrderSchema>;

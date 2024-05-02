@@ -26,6 +26,7 @@ interface Props {
 }
 
 export default function OrderFormItem({ form, index, skus }: Props) {
+
   return (
     <div
       className={`base:col-span-1 ${
@@ -36,7 +37,7 @@ export default function OrderFormItem({ form, index, skus }: Props) {
       <div className="flex gap-3">
         <FormField
           control={form.control}
-          defaultValue=""
+          defaultValue={""}
           name={`products.${index}.id`}
           render={({ field }) => (
             <FormItem>
@@ -47,14 +48,14 @@ export default function OrderFormItem({ form, index, skus }: Props) {
                   defaultValue={field.value}
                 >
                   <SelectTrigger className="w-[100px]">
-                    <SelectValue placeholder="サイズ" />
+                    <SelectValue placeholder={field.value}/>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>size</SelectLabel>
                       {skus.map(({ size, id }) => (
-                        <SelectItem key={size} value={id}>
-                          {size}
+                        <SelectItem key={size } value={id}>
+                          {size} 
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -78,6 +79,7 @@ export default function OrderFormItem({ form, index, skus }: Props) {
                   type="number"
                   placeholder="数量"
                   className="w-[80px]"
+                  min={0}
                   {...field}
                   onChange={(event) => field.onChange(+event.target.value)}
                 />
@@ -86,7 +88,7 @@ export default function OrderFormItem({ form, index, skus }: Props) {
             </FormItem>
           )}
         />
-        {skus[0].isHem && (
+        {skus[0]?.isHem && (
           <FormField
             control={form.control}
             defaultValue={skus[0].isHem ? 0 : undefined}
@@ -100,6 +102,7 @@ export default function OrderFormItem({ form, index, skus }: Props) {
                     type="number"
                     placeholder="裾上げ"
                     className="w-[80px]"
+                    min={0}
                     {...field}
                     onChange={(event) => field.onChange(+event.target.value)}
                   />
