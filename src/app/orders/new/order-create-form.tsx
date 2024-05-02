@@ -21,10 +21,12 @@ import { useForm } from "react-hook-form";
 import OrderFormItem from "./order-form-item";
 import { Input } from "@/components/ui/input";
 import { db } from "@/lib/firebase/client";
-import { Unsubscribe, collectionGroup, onSnapshot } from "firebase/firestore";
+import { Unsubscribe, collectionGroup, onSnapshot,limit } from "firebase/firestore";
 import { CreateOrder, CreateOrderSchema, Product, Sku } from "@/types";
 import * as actions from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface Props {
   products: Product[];
@@ -33,6 +35,9 @@ interface Props {
 export default function OrderCreateForm({ products }: Props) {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
   const [loading, setLoading] = useState(true);
+  const [gender, setGender] = useState("man");
+  const [count,setCount] = useState(0)
+
   const form = useForm<CreateOrder>({
     resolver: zodResolver(CreateOrderSchema),
   });
@@ -52,8 +57,12 @@ export default function OrderCreateForm({ products }: Props) {
         unsub = onSnapshot(skusRef, (snapshot) => {
           const skus = snapshot.docs
             .map((doc) => ({ ...doc.data(), id: doc.id } as Sku))
-            .sort((a, b) => (a.order < b.order ? -1 : 1));
-          const filterSkus = products.map((product) => {
+            .sort((a, b) => (a.sortNum < b.sortNum ? -1 : 1))
+            
+          const filterProducts = products.filter(
+            (product) => product.gender === "other" || product.gender === gender
+          );
+          const filterSkus = filterProducts.map((product) => {
             const parentSkus = skus.filter(
               (sku) => sku.parentId === product.id
             );
@@ -69,7 +78,7 @@ export default function OrderCreateForm({ products }: Props) {
     };
     getItems();
     return () => unsub();
-  }, [products]);
+  }, [products, gender]);
 
   const getAddress = async () => {
     const zipCode = form.getValues("zipCode");
@@ -88,6 +97,22 @@ export default function OrderCreateForm({ products }: Props) {
     }
   };
 
+  const genders = [
+    {
+      value: "man",
+      title: "男性用",
+    },
+    {
+      value: "woman",
+      title: "女性用",
+    },
+  ];
+
+  const handleGenderChange = (e: string) => {
+    setCount(prev=> prev + 100)
+    setGender(e);
+  };
+
   if (loading) {
     return <div>...loading</div>;
   }
@@ -99,7 +124,7 @@ export default function OrderCreateForm({ products }: Props) {
           <CardHeader>
             <CardTitle>商品発注</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-3">
+          <CardContent className="flex flex-col gap-4">
             <FormField
               control={form.control}
               name="section"
@@ -177,8 +202,23 @@ export default function OrderCreateForm({ products }: Props) {
                 )}
               />
             </div>
-            <hr />
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <RadioGroup
+              onValueChange={handleGenderChange}
+              defaultValue={gender}
+              className="flex flex-col space-y-1"
+            >
+              <Label>性別</Label>
+              <div className="flex space-x-2">
+                {genders.map(({ value, title }) => (
+                  <div key={value} className="flex items-center space-x-2">
+                    <RadioGroupItem value={value} id={value} />
+                    <Label htmlFor={value}>{title}</Label>
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
+            <hr className="mt-3" />
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
               {items.map((skus, index: number) => (
                 <OrderFormItem
                   key={index}

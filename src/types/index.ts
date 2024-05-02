@@ -1,11 +1,15 @@
+import { Timestamp } from "firebase/firestore";
 import { z } from "zod";
 export interface Product {
   id: string;
   productNumber: string;
   productName: string;
-  order: number;
+  sortNum: number;
   isHem: boolean;
   displayName: string;
+  gender:"man" | "woman" | "other",
+  createdAt:any;
+  updatedAt:any;
 }
 
 export interface Sku {
@@ -15,7 +19,9 @@ export interface Sku {
   price: number;
   stock: number;
   parentRef: any;
-  order: number;
+  sortNum: number;
+  createdAt:Date;
+  updatedAt:Date;
 }
 
 export interface AdminUser {

@@ -21,10 +21,17 @@ import React, { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { collection, doc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  serverTimestamp,
+  setDoc,
+  writeBatch,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const formSchema = z.object({
   productNumber: z.string().min(1, { message: "入力してください。" }).max(100, {
@@ -35,6 +42,7 @@ const formSchema = z.object({
   }),
   displayName: z.string().min(1, { message: "入力してください。" }),
   isHem: z.boolean(),
+  gender: z.enum(["other", "man", "woman"]),
   skus: z.array(
     z.object({
       size: z
@@ -51,7 +59,7 @@ export default function ProductCreateForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  const { fields, append, prepend, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "skus",
   });
@@ -80,33 +88,56 @@ export default function ProductCreateForm() {
 
   const createProduct = async (data: z.infer<typeof formSchema>) => {
     try {
+      const batch = writeBatch(db);
       const colRef = doc(collection(db, "products"));
-      setDoc(colRef, {
+      batch.set(colRef, {
         productNumber: data.productNumber,
         productName: data.productName,
         displayName: data.displayName,
         isHem: data.isHem,
-        order: 0,
+        gender: data.gender,
+        sortNum: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
-      data.skus.forEach(async (sku, idx) => {
+      data.skus.forEach((sku, idx) => {
         const docRef = doc(collection(db, "products", colRef.id, "skus"));
-        await setDoc(docRef, {
+        batch.set(docRef, {
           id: docRef.id,
           size: sku.size,
           price: sku.price,
           stock: sku.stock,
           parentId: colRef.id,
           parentRef: colRef,
-          order: idx + 1,
+          sortNum: idx + 1,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
       });
+      await batch.commit();
     } catch (e) {
       console.log(e);
     } finally {
       setLoading(false);
       reset();
+      remove()
     }
   };
+
+  const genders = [
+    {
+      value: "other",
+      title: "男女兼用",
+    },
+    {
+      value: "man",
+      title: "男性用",
+    },
+    {
+      value: "woman",
+      title: "女性用",
+    },
+  ];
 
   return (
     <Form {...form}>
@@ -179,6 +210,36 @@ export default function ProductCreateForm() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>区分</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex flex-col space-y-1"
+                    >
+                      {genders.map(({ value, title }) => (
+                        <FormItem
+                          key={value}
+                          className="flex items-center space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <RadioGroupItem value={value} />
+                          </FormControl>
+                          <FormLabel className="font-normal">{title}</FormLabel>
+                        </FormItem>
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {fields.map((field, index) => (
               <FormItem key={field.id}>
                 <div className="flex items-end gap-3">
