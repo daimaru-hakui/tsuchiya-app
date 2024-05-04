@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { Noto_Sans } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/auth";
-import Header from "@/components/layouts/header";
+import Header from "@/components/layouts/header/header";
 import Footer from "@/components/layouts/footer";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { NextAuthProvider } from "@/lib/providers/next-auth-provider";
+import MainMenu from "@/components/layouts/sidebar/main-menu";
 
 const NotoSans = Noto_Sans({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -32,7 +33,7 @@ export default async function RootLayout({
   // }
   return (
     <html lang="ja" suppressHydrationWarning={true}>
-      <body className={cn(NotoSans.className, "min-h-dvh")}>
+      <body className={cn(NotoSans.className, "grid grid-cols-1 md:grid-cols-[250px_1fr] min-h-dvh")}>
         <NextAuthProvider>
           <ThemeProvider
             attribute="class"
@@ -40,9 +41,12 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Header />
-            {children}
-            <Footer />
+            <MainMenu />
+            <div className="md:overflow-auto pb-2 px-4 h-screen">
+              <Header />
+              {children}
+            </div>
+            {/* <Footer /> */}
           </ThemeProvider>
         </NextAuthProvider>
       </body>

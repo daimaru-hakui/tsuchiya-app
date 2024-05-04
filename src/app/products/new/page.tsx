@@ -3,7 +3,7 @@ import ProductCreateForm from "./product-create-form";
 
 export default function ProductCreatePage() {
   return (
-    <div className="w-full flex items-center justify-center">
+    <div className="w-full flex items-center justify-center py-4">
       <ProductCreateForm />
     </div>
   );

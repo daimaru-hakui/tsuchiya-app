@@ -27,7 +27,7 @@ export default async function OrderCreate() {
   if (!products) return;
 
   return (
-    <div className="w-full flex items-center justify-center mb-6">
+    <div className="w-full flex items-center justify-center my-4">
       <OrderCreateForm products={products} />
     </div>
   );

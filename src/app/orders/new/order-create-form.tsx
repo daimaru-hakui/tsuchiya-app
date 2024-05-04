@@ -46,7 +46,7 @@ export default function OrderCreateForm({ products }: Props) {
   const onSubmit = (data: CreateOrder) => {
     startTransition(async () => {
       console.log(data);
-      // await actions.createOrder(data);
+      await actions.createOrder(data);
     });
   };
 
@@ -86,9 +86,14 @@ export default function OrderCreateForm({ products }: Props) {
     const url = "https://zipcloud.ibsnet.co.jp/api/search";
     const res = await fetch(`${url}?zipcode=${zipCode}`);
     if (!res.ok) {
-      throw Error("取得に失敗");
+      throw Error("取得に失敗しました");
     }
     const { results } = await res.json();
+    return results;
+  };
+
+  const handleFetchAdress = async () => {
+    const results = await getAddress();
     if (results) {
       const address =
         results[0]?.address1 + results[0]?.address2 + results[0]?.address3;
@@ -280,7 +285,7 @@ export default function OrderCreateForm({ products }: Props) {
                       <FormControl>
                         <Input type="number" placeholder="" {...field} />
                       </FormControl>
-                      <Button onClick={getAddress}>検索</Button>
+                      <Button type="button" key="address" onClick={handleFetchAdress}>検索</Button>
                     </div>
 
                     <FormMessage />
