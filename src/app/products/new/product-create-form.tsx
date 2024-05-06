@@ -96,7 +96,10 @@ export default function ProductCreateForm() {
                 <FormItem>
                   <FormLabel>品番</FormLabel>
                   <FormControl>
-                    <Input placeholder="品番" {...field} />
+                    <Input
+                      autoComplete="off"
+                      placeholder="品番" {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,7 +114,10 @@ export default function ProductCreateForm() {
                 <FormItem>
                   <FormLabel>商品名</FormLabel>
                   <FormControl>
-                    <Input placeholder="商品名" {...field} />
+                    <Input
+                      autoComplete="off"
+                      placeholder="商品名" {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -126,7 +132,10 @@ export default function ProductCreateForm() {
                 <FormItem>
                   <FormLabel>表示名</FormLabel>
                   <FormControl>
-                    <Input placeholder="表示名" {...field} />
+                    <Input
+                      autoComplete="off"
+                      placeholder="表示名" {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -187,6 +196,7 @@ export default function ProductCreateForm() {
                   <div>
                     {index === 0 && <FormLabel>サイズ</FormLabel>}
                     <Input
+                      autoComplete="off"
                       placeholder="size"
                       {...form.register(`skus.${index}.size`, {
                         required: true,

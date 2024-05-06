@@ -16,6 +16,9 @@ export default function MainMenu() {
         <MenuItem href="/products/new" >
           商品登録
         </MenuItem>
+        <MenuItem href="/orders" >
+          発注一覧
+        </MenuItem>
         <MenuItem href="/orders/new" >
           発注登録
         </MenuItem>
