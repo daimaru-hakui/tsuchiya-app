@@ -3,7 +3,6 @@ import { db } from "@/lib/firebase/server";
 import { Product } from "@/types";
 
 const getProducts = async () => {
-  // let products: Product[] = [];
   try {
     const productsRef = db.collection("products");
     const productsSnap = await productsRef.orderBy("sortNum", "asc").get();
@@ -18,9 +17,9 @@ const getProducts = async () => {
 };
 
 export default async function OrderCreate() {
-  const products = await getProducts();
+  // const products = await getProducts();
 
-  if (!products) return;
+  // if (!products) return;
 
   return (
     <div className="">
