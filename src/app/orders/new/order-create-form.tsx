@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import OrderFormItem from "./order-form-item";
 import { Input } from "@/components/ui/input";
 import { db } from "@/lib/firebase/client";
-import { Unsubscribe, collectionGroup, onSnapshot, limit } from "firebase/firestore";
+import { Unsubscribe, collectionGroup, onSnapshot, limit, collection, query, orderBy } from "firebase/firestore";
 import { CreateOrder, CreateOrderSchema, Product, Sku } from "@/types";
 import * as actions from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,11 +29,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
-interface Props {
-  products: Product[];
-}
-
-export default function OrderCreateForm({ products }: Props) {
+export default function OrderCreateForm() {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
   const [loading, setLoading] = useState(true);
   const [gender, setGender] = useState("man");
@@ -51,11 +47,18 @@ export default function OrderCreateForm({ products }: Props) {
   };
 
   useEffect(() => {
-    let unsub: Unsubscribe;
+    let unsubSkus: Unsubscribe, unsubProducts: Unsubscribe;
     const getItems = async () => {
       try {
+        let products: Product[] = [];
+        const productsRef = collection(db, "products");
+        const q = query(productsRef, orderBy("sortNum", "asc"));
+        unsubProducts = onSnapshot(q, (snapshot) => {
+          products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        });
+
         const skusRef = collectionGroup(db, "skus");
-        unsub = onSnapshot(skusRef, (snapshot) => {
+        unsubSkus = onSnapshot(skusRef, (snapshot) => {
           const skus = snapshot.docs
             .map((doc) => ({ ...doc.data(), id: doc.id } as Sku))
             .sort((a, b) => (a.sortNum < b.sortNum ? -1 : 1));
@@ -78,8 +81,11 @@ export default function OrderCreateForm({ products }: Props) {
       }
     };
     getItems();
-    return () => unsub();
-  }, [products, gender]);
+    return () => {
+      unsubSkus();
+      unsubProducts();
+    };
+  }, [gender]);
 
   const getAddress = async () => {
     const zipCode = form.getValues("zipCode");

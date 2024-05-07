@@ -24,7 +24,7 @@ export default async function OrderCreate() {
 
   return (
     <div className="">
-      <OrderCreateForm products={products} />
+      <OrderCreateForm />
     </div>
   );
 }
