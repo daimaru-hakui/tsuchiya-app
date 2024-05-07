@@ -2,7 +2,7 @@ import { decode } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export default async function middleware(req: NextRequest) {
-  const token = req.cookies.get("authjs.session-token")?.value;
+  const token = req.cookies.get("__Secure-authjs.session-token")?.value;
   return decode({
     token,
     salt: "authjs.session-token" as string,
