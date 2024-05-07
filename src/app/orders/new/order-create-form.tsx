@@ -56,7 +56,7 @@ export default function OrderCreateForm() {
           { id: doc.id, ...doc.data() } as Product)
         );
 
-        const skusRef = collectionGroup(db, "skus");
+        const skusRef = query(collectionGroup(db, "skus"));
         const skusSnap = await getDocs(skusRef);
 
         const skus = skusSnap.docs
