@@ -16,17 +16,22 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import React, { useTransition } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CreateProduct, CreateProductSchema } from "@/types";
+import { CreateProduct, CreateProductSchema, Product } from "@/types";
 import { createProduct } from "@/actions";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase/client";
 
 export default function ProductCreateForm() {
   const [isPending, startTransition] = useTransition();
+
+  const [products, setProducts] = useState<Product[]>([]);
+
   const form = useForm<CreateProduct>({
     resolver: zodResolver(CreateProductSchema),
   });
@@ -79,6 +84,19 @@ export default function ProductCreateForm() {
       title: "女性用",
     },
   ];
+
+  useEffect(() => {
+    const getProducts = async () => {
+      const productsRef = collection(db, "products");
+      const snapShot = await getDocs(productsRef);
+      setProducts(snapShot.docs.map((doc) => (
+        { id: doc.id, ...doc.data() } as Product
+      )));
+    };
+    getProducts();
+  }, []);
+
+  console.log(products);
 
   return (
     <Form {...form}>
