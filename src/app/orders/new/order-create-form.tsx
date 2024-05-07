@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import OrderFormItem from "./order-form-item";
 import { db } from "@/lib/firebase/client";
-import { Unsubscribe, collectionGroup, onSnapshot, limit, collection, query, orderBy } from "firebase/firestore";
+import { Unsubscribe, collectionGroup, onSnapshot, limit, collection, query, orderBy, getDocs } from "firebase/firestore";
 import { CreateOrder, CreateOrderSchema, Product, Sku } from "@/types";
 import * as actions from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,33 +47,32 @@ export default function OrderCreateForm() {
   };
 
   useEffect(() => {
-    let unsubSkus: Unsubscribe, unsubProducts: Unsubscribe;
     const getItems = async () => {
       try {
-        let products: Product[] = [];
         const productsRef = collection(db, "products");
         const q = query(productsRef, orderBy("sortNum", "asc"));
-        unsubProducts = onSnapshot(q, (snapshot) => {
-          products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        });
+        const productsSnap = await getDocs(q);
+        const products = productsSnap.docs.map((doc) => (
+          { id: doc.id, ...doc.data() } as Product)
+        );
 
         const skusRef = collectionGroup(db, "skus");
-        unsubSkus = onSnapshot(skusRef, (snapshot) => {
-          const skus = snapshot.docs
-            .map((doc) => ({ ...doc.data(), id: doc.id } as Sku))
-            .sort((a, b) => (a.sortNum < b.sortNum ? -1 : 1));
+        const skusSnap = await getDocs(skusRef);
 
-          const filterProducts = products.filter(
-            (product) => product.gender === "other" || product.gender === gender
+        const skus = skusSnap.docs
+          .map((doc) => ({ ...doc.data(), id: doc.id } as Sku))
+          .sort((a, b) => (a.sortNum < b.sortNum ? -1 : 1));
+
+        const filterProducts = products.filter(
+          (product) => product.gender === "other" || product.gender === gender
+        );
+        const filterSkus = filterProducts.map((product) => {
+          const parentSkus = skus.filter(
+            (sku) => sku.parentId === product.id
           );
-          const filterSkus = filterProducts.map((product) => {
-            const parentSkus = skus.filter(
-              (sku) => sku.parentId === product.id
-            );
-            return parentSkus.map((sku) => ({ ...product, ...sku }));
-          });
-          setItems(filterSkus);
+          return parentSkus.map((sku) => ({ ...product, ...sku }));
         });
+        setItems(filterSkus);
       } catch (e) {
         console.log(e);
       } finally {
@@ -81,11 +80,10 @@ export default function OrderCreateForm() {
       }
     };
     getItems();
-    return () => {
-      unsubSkus();
-      unsubProducts();
-    };
+
   }, [gender]);
+
+  console.log(items);
 
   const getAddress = async () => {
     const zipCode = form.getValues("zipCode");
