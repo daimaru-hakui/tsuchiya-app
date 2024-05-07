@@ -4,7 +4,8 @@ import * as nextauth from "next-auth/react";
 import {cookies} from "next/headers"
 
 export default async function middleware(req: NextRequest) {
-  const token = cookies().get("authjs.session-token")?.value
+  const token = cookies().get("__Secure-authjs.session-token")?.value
+  console.log(token)
   return decode({
     token,
     salt: "__Secure-authjs.session-token" as string,
