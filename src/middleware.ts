@@ -1,14 +1,16 @@
 import { decode } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
-import * as nextauth from "next-auth/react";
-import {cookies} from "next/headers"
+import { cookies } from "next/headers";
 
 export default async function middleware(req: NextRequest) {
-  const token = cookies().get("__Secure-authjs.session-token")?.value
-  console.log(token)
+  const token = process.env.NODE_ENV === "development" ? cookies().get("authjs.session-token")?.value : cookies().get("__Secure-authjs.session-token")?.value;
+
+  const salt = process.env.NODE_ENV === "development" ?
+    "authjs.session-token" : "__Secure-authjs.session-token";
+
   return decode({
     token,
-    salt: "__Secure-authjs.session-token" as string,
+    salt: salt as string,
     secret: process.env.AUTH_SECRET as string,
   })
     .then((decoded) => {
@@ -24,5 +26,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/products/:path*", "/dashboard/:path*"],
+  matcher: ["/", "/products/:path*", "/dashboard/:path*", "/orders/:path*"],
 };

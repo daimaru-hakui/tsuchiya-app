@@ -3,18 +3,14 @@ import { db } from "@/lib/firebase/server";
 import { Product } from "@/types";
 
 const getProducts = async () => {
-  let products: Product[] = [];
+  // let products: Product[] = [];
   try {
     const productsRef = db.collection("products");
     const productsSnap = await productsRef.orderBy("sortNum", "asc").get();
-    productsSnap.docs.forEach(async (doc) => {
-      products.push({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: "",
-        updatedAt: "",
-      } as Product);
-    });
+    const products = productsSnap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    } as Product));
     return products;
   } catch (e) {
     console.log(e);
