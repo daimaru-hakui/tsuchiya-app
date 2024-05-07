@@ -9,6 +9,7 @@ export default async function middleware(req: NextRequest) {
     secret: process.env.AUTH_SECRET as string,
   })
     .then((decoded) => {
+      console.log(decoded)
       if (decoded?.uid) {
         return null;
       }
@@ -21,5 +22,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/products/:path*", "/orders/:path*", "/dashboard/:path*"],
+  matcher: ["/", "/products/:path*", "/dashboard/:path*"],
 };
