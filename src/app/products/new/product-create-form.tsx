@@ -22,15 +22,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CreateProduct, CreateProductSchema, Product } from "@/types";
+import { CreateProduct, CreateProductSchema, Product, Sku } from "@/types";
 import { createProduct } from "@/actions";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, collectionGroup, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 
 export default function ProductCreateForm() {
   const [isPending, startTransition] = useTransition();
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [skus, setSkus] = useState<Sku[]>([]);
 
   const form = useForm<CreateProduct>({
     resolver: zodResolver(CreateProductSchema),
@@ -92,11 +93,17 @@ export default function ProductCreateForm() {
       setProducts(snapShot.docs.map((doc) => (
         { id: doc.id, ...doc.data() } as Product
       )));
+      const skusRef = collectionGroup(db, "skus");
+      const skusSnap = await getDocs(skusRef);
+      setSkus(skusSnap.docs.map(doc => (
+        { id: doc.id, ...doc.data() } as Sku
+      )));
     };
     getProducts();
   }, []);
 
   console.log(products);
+  console.log(skus);
 
   return (
     <Form {...form}>
