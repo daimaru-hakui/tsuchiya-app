@@ -1,15 +1,17 @@
 import { decode } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import * as nextauth from "next-auth/react";
+import {cookies} from "next/headers"
 
 export default async function middleware(req: NextRequest) {
-  const token = req.cookies.get("__Secure-authjs.session-token")?.value;
+  // const token =  req.cookies.get("authjs.session-token")?.value
+  const token = cookies().get("authjs.session-token")?.value
   return decode({
     token,
     salt: "authjs.session-token" as string,
     secret: process.env.AUTH_SECRET as string,
   })
     .then((decoded) => {
-      console.log(decoded)
       if (decoded?.uid) {
         return null;
       }
