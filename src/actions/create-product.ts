@@ -2,10 +2,12 @@
 
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
+import paths from "@/paths";
 import { CreateProduct, CreateProductSchema } from "@/types";
 import { redirect } from "next/navigation";
 
-export async function createProduct(data: CreateProduct): Promise<{ message: string | undefined; }> {
+export async function createProduct(data: CreateProduct):
+  Promise<{ message: string | undefined; }> {
 
   const result = CreateProductSchema.safeParse({
     productNumber: data.productNumber,
@@ -19,7 +21,7 @@ export async function createProduct(data: CreateProduct): Promise<{ message: str
   if (!result.success) {
     console.log(result.error);
     return {
-      message: "error"
+      message: "バリデーション エラー"
     };
   }
 
@@ -27,7 +29,7 @@ export async function createProduct(data: CreateProduct): Promise<{ message: str
   if (!session) {
     console.log("no session");
     return {
-      message: "error"
+      message: "認証エラー"
     };
   }
 
@@ -50,7 +52,8 @@ export async function createProduct(data: CreateProduct): Promise<{ message: str
       batch.set(docRef, {
         id: docRef.id,
         size: sku.size,
-        price: sku.price,
+        salePrice: sku.salePrice,
+        costPrice: sku.costPrice,
         stock: sku.stock,
         parentId: productRef.id,
         parentRef: productRef,
@@ -66,5 +69,5 @@ export async function createProduct(data: CreateProduct): Promise<{ message: str
       message: "error"
     };
   }
-  redirect("/products/new");
+  redirect(paths.productNew());
 }

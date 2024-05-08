@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,160 +14,187 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { Sku } from "@/types";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { Sku, UpdateSku, UpdateSkuSchema } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as actions from "@/actions";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   sku: Sku;
 }
 
 export default function ProductEdit({ sku }: Props) {
-  const form = useForm();
+  const [open, setOpen] = useState(false);
+  const [isloading, startTransaction] = useTransition();
+  const form = useForm<UpdateSku>({
+    resolver: zodResolver(UpdateSkuSchema)
+  });
+
+  const onSubmit = (data: UpdateSku) => {
+    startTransaction(async () => {
+      await actions.updateSku(data, sku.parentId, sku.id);
+      setOpen(false);
+    });
+  };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="xs">詳細</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[650px]" onBlur={() => form.reset()}>
+      <DialogContent className="max-w-[650px]" >
         <Form {...form}>
-          <form>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>編集</DialogTitle>
-              <DialogDescription>
-                <div className="mt-6">
-                  <FormField
-                    defaultValue={sku.size}
-                    control={form.control}
-                    name="size"
-                    render={({ field }) => (
-                      <FormItem className="text-left">
-                        <FormLabel>サイズ</FormLabel>
-                        <FormControl>
-                          <Input
-                            disabled={true}
-                            className="w-[100px]"
-                            autoComplete="off"
-                            placeholder="size"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex flex-col md:flex-row gap-3 mt-6">
-                  <FormField
-                    defaultValue={sku.salePrice}
-                    control={form.control}
-                    name="salePrice"
-                    render={({ field }) => (
-                      <FormItem className="text-left">
-                        <FormLabel>売価</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            autoComplete="off"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    defaultValue={sku.costPrice}
-                    control={form.control}
-                    name="costPrice"
-                    render={({ field }) => (
-                      <FormItem className="text-left">
-                        <FormLabel>原価</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            autoComplete="off"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem className="text-left">
-                        <FormLabel>価格</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            autoComplete="off"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    defaultValue={sku.stock}
-                    control={form.control}
-                    name="stock"
-                    render={({ field }) => (
-                      <FormItem className="text-left">
-                        <FormLabel>在庫</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            autoComplete="off"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    defaultValue={sku.sortNum}
-                    control={form.control}
-                    name="sortNum"
-                    render={({ field }) => (
-                      <FormItem className="text-left">
-                        <FormLabel>順番</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            autoComplete="off"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </DialogDescription>
+              <DialogTitle className="mb-6">編集</DialogTitle>
+              <div className="">
+                <FormField
+                  defaultValue={sku.size}
+                  control={form.control}
+                  name="size"
+                  render={({ field }) => (
+                    <FormItem className="text-left">
+                      <FormLabel>サイズ</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={true}
+                          className="w-[100px]"
+                          autoComplete="off"
+                          placeholder="size"
+                          {...field}
+                          onChange={(event) => field.onChange(+event.target.value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col md:flex-row gap-3 mt-6">
+                <FormField
+                  defaultValue={sku.salePrice || 0}
+                  control={form.control}
+                  name="salePrice"
+                  render={({ field }) => (
+                    <FormItem className="text-left">
+                      <FormLabel>売価</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          autoComplete="off"
+                          {...field}
+                          onChange={(event) => field.onChange(+event.target.value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  defaultValue={sku.costPrice || 0}
+                  control={form.control}
+                  name="costPrice"
+                  render={({ field }) => (
+                    <FormItem className="text-left">
+                      <FormLabel>原価</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          autoComplete="off"
+                          {...field}
+                          onChange={(event) => field.onChange(+event.target.value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  defaultValue={sku.stock || 0}
+                  control={form.control}
+                  name="stock"
+                  render={({ field }) => (
+                    <FormItem className="text-left">
+                      <FormLabel>在庫</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          autoComplete="off"
+                          {...field}
+                          onChange={(event) => field.onChange(+event.target.value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  defaultValue={sku.orderQuantity || 0}
+                  control={form.control}
+                  name="orderQuantity"
+                  render={({ field }) => (
+                    <FormItem className="text-left">
+                      <FormLabel>受注数量</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          autoComplete="off"
+                          {...field}
+                          onChange={(event) => field.onChange(+event.target.value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  defaultValue={sku.sortNum || 0}
+                  control={form.control}
+                  name="sortNum"
+                  render={({ field }) => (
+                    <FormItem className="text-left">
+                      <FormLabel>順番</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          autoComplete="off"
+                          {...field}
+                          onChange={(event) => field.onChange(+event.target.value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </DialogHeader>
-            <DialogFooter className="mt-6 sm:justify-end">
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  閉じる
-                </Button>
-              </DialogClose>
+            <DialogFooter className="mt-6 sm:justify-end gap-1">
+              <Button
+                key='close'
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  form.reset();
+                  setOpen(false);
+                }}>
+                閉じる
+              </Button>
+              <Button disabled={isloading} type="submit">
+                {isloading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                更新
+              </Button>
             </DialogFooter>
           </form>
         </Form>

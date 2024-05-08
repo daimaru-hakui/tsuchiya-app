@@ -24,14 +24,9 @@ import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreateProduct, CreateProductSchema, Product, Sku } from "@/types";
 import { createProduct } from "@/actions";
-import { collection, collectionGroup, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
 
 export default function ProductCreateForm() {
   const [isPending, startTransition] = useTransition();
-
-  const [products, setProducts] = useState<Product[]>([]);
-  const [skus, setSkus] = useState<Sku[]>([]);
 
   const form = useForm<CreateProduct>({
     resolver: zodResolver(CreateProductSchema),
@@ -44,7 +39,8 @@ export default function ProductCreateForm() {
   const addSize = () => {
     append({
       size: "",
-      price: 0,
+      salePrice: 0,
+      costPrice: 0,
       stock: 0,
     });
   };
@@ -86,29 +82,11 @@ export default function ProductCreateForm() {
     },
   ];
 
-  useEffect(() => {
-    const getProducts = async () => {
-      const productsRef = collection(db, "products");
-      const snapShot = await getDocs(productsRef);
-      setProducts(snapShot.docs.map((doc) => (
-        { id: doc.id, ...doc.data() } as Product
-      )));
-      const skusRef = collectionGroup(db, "skus");
-      const skusSnap = await getDocs(skusRef);
-      setSkus(skusSnap.docs.map(doc => (
-        { id: doc.id, ...doc.data() } as Sku
-      )));
-    };
-    getProducts();
-  }, []);
-
-  console.log(products);
-  console.log(skus);
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <Card className="w-[400px]">
+        <Card className="w-[600px]">
           <CardHeader>
             <CardTitle>商品登録</CardTitle>
           </CardHeader>
@@ -217,8 +195,8 @@ export default function ProductCreateForm() {
 
             {fields.map((field, index) => (
               <FormItem key={field.id}>
-                <div className="flex items-end gap-3">
-                  <div>
+                <div className="flex items-end gap-2 mt-3">
+                  <div className="flex flex-col gap-2">
                     {index === 0 && <FormLabel>サイズ</FormLabel>}
                     <Input
                       autoComplete="off"
@@ -228,18 +206,29 @@ export default function ProductCreateForm() {
                       })}
                     />
                   </div>
-                  <div>
-                    {index === 0 && <FormLabel>価格</FormLabel>}
+                  <div className="flex flex-col gap-2">
+                    {index === 0 && <FormLabel>販売価格</FormLabel>}
                     <Input
                       type="number"
-                      placeholder="price"
-                      {...form.register(`skus.${index}.price`, {
+                      placeholder="販売価格"
+                      {...form.register(`skus.${index}.salePrice`, {
                         required: true,
                         valueAsNumber: true,
                       })}
                     />
                   </div>
-                  <div>
+                  <div className="flex flex-col gap-2">
+                    {index === 0 && <FormLabel>仕入価格</FormLabel>}
+                    <Input
+                      type="number"
+                      placeholder="仕入価格"
+                      {...form.register(`skus.${index}.costPrice`, {
+                        required: true,
+                        valueAsNumber: true,
+                      })}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
                     {index === 0 && <FormLabel>在庫</FormLabel>}
                     <Input
                       type="number"

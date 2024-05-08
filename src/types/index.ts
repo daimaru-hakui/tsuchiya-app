@@ -17,9 +17,10 @@ export interface Sku {
   parentId: string;
   size: string;
   price: number;
-  salePrice:number;
-  costPrice:number;
+  salePrice: number;
+  costPrice: number;
   stock: number;
+  orderQuantity: number;
   parentRef: any;
   sortNum: number;
   createdAt: Date;
@@ -78,10 +79,22 @@ export const CreateProductSchema = z.object({
     z.object({
       size: z
         .string({ required_error: "入力してください。" }),
-      price: z.number().min(0, { message: "入力してください" }),
+      salePrice: z.number().min(0),
+      costPrice: z.number().min(0),
       stock: z.number().min(0, { message: "入力してください" }),
     })
   ),
 });
 
 export type CreateProduct = z.infer<typeof CreateProductSchema>;
+
+export const UpdateSkuSchema = z.object({
+  size: z.string().min(1, { message: "入力してください。" }),
+  salePrice: z.number(),
+  costPrice: z.number(),
+  stock: z.number(),
+  orderQuantity: z.number(),
+  sortNum: z.number()
+});
+
+export type UpdateSku = z.infer<typeof UpdateSkuSchema>;

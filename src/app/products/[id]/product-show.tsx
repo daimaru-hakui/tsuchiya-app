@@ -36,7 +36,7 @@ export default function ProductShow({ id }: Props) {
   }, [id]);
 
   return (
-    <Card className="w-full md:w-[550px]">
+    <Card className="w-full md:w-[750px]">
       <CardHeader>
         <div className="flex justify-between mb-4">
           <ArrowLeft className="cursor-pointer" onClick={handlePageBack} />

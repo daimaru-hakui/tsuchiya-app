@@ -47,7 +47,8 @@ export default function ProductShowTable({ id }: Props) {
       <TableHeader>
         <TableRow>
           <TableHead className="">サイズ</TableHead>
-          <TableHead>価格</TableHead>
+          <TableHead>販売価格</TableHead>
+          <TableHead>仕入価格</TableHead>
           <TableHead>在庫</TableHead>
           <TableHead>受注数量</TableHead>
           <TableHead>順番</TableHead>
@@ -58,9 +59,10 @@ export default function ProductShowTable({ id }: Props) {
         {skus.map((sku) => (
           <TableRow key={sku.id}>
             <TableCell className="font-medium">{sku.size}</TableCell>
-            <TableCell>{sku.price.toLocaleString()}</TableCell>
+            <TableCell className="text-right">{sku.salePrice.toLocaleString()}</TableCell>
+            <TableCell className="text-right">{sku.costPrice.toLocaleString()}</TableCell>
             <TableCell className="text-right">{sku.stock}</TableCell>
-            <TableCell className="text-right">1</TableCell>
+            <TableCell className="text-right">{sku.orderQuantity}</TableCell>
             <TableCell className="text-right">{sku.sortNum}</TableCell>
             <TableCell className="text-right">
               <ProductEdit sku={sku} />
