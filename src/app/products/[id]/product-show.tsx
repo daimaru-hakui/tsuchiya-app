@@ -35,10 +35,8 @@ export default function ProductShow({ id }: Props) {
     };
   }, [id]);
 
-  console.log(product);
-
   return (
-    <Card className="w-full md:w-[450px]">
+    <Card className="w-full md:w-[550px]">
       <CardHeader>
         <div className="flex justify-between mb-4">
           <ArrowLeft className="cursor-pointer" onClick={handlePageBack} />

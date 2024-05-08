@@ -17,6 +17,8 @@ export interface Sku {
   parentId: string;
   size: string;
   price: number;
+  salePrice:number;
+  costPrice:number;
   stock: number;
   parentRef: any;
   sortNum: number;
