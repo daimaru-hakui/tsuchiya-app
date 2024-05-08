@@ -13,6 +13,9 @@ export default function MainMenu() {
         <MenuItem href="/dashboard" >
           ダッシュボード
         </MenuItem>
+        <MenuItem href="/products" >
+          商品一覧
+        </MenuItem>
         <MenuItem href="/products/new" >
           商品登録
         </MenuItem>

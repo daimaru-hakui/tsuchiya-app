@@ -1,7 +1,10 @@
-import React from 'react'
+import React from "react";
+import ProductList from "./product-list";
 
 export default function ProductsPage() {
   return (
-    <div>ProductsPage</div>
-  )
+    <div className="w-full flex items-center justify-center py-4">
+      <ProductList />
+    </div>
+  );
 }

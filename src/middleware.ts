@@ -3,10 +3,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export default async function middleware(req: NextRequest) {
-  const token = process.env.NODE_ENV === "development" ? cookies().get("authjs.session-token")?.value : cookies().get("__Secure-authjs.session-token")?.value;
+  const token =
+    process.env.NODE_ENV === "development"
+      ? cookies().get("authjs.session-token")?.value
+      : cookies().get("__Secure-authjs.session-token")?.value;
 
-  const salt = process.env.NODE_ENV === "development" ?
-    "authjs.session-token" : "__Secure-authjs.session-token";
+  const salt =
+    process.env.NODE_ENV === "development"
+      ? "authjs.session-token"
+      : "__Secure-authjs.session-token";
 
   return decode({
     token,
@@ -26,5 +31,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/products/:path*", "/dashboard/:path*", "/orders/:path*"],
+  matcher: ["/", "/products/:path*", "/dashboard/:path*", "/orders/:path*","/admin/:path*"],
 };
