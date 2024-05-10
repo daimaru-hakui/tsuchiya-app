@@ -1,4 +1,3 @@
-import { Timestamp } from "firebase/firestore";
 import { z } from "zod";
 export interface Product {
   id: string;
@@ -7,12 +6,47 @@ export interface Product {
   sortNum: number;
   isHem: boolean;
   displayName: string;
-  gender: "man" | "woman" | "other",
+  gender: "man" | "woman" | "other";
   createdAt: any;
   updatedAt: any;
 }
 
 export interface Sku {
+  id: string;
+  productNumber: string;
+  productName: string;
+  isHem: boolean;
+  displayName: string;
+  gender: "man" | "woman" | "other";
+  parentId: string;
+  size: string;
+  price: number;
+  salePrice: number;
+  costPrice: number;
+  stock: number;
+  orderQuantity: number;
+  parentRef: any;
+  sortNum: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Order {
+  id: string;
+  serialNumber: number;
+  section: string;
+  employeeCode: string;
+  initial: string;
+  username: string;
+  position: string;
+  siteCode: string;
+  siteName: string;
+  zipCode: string;
+  address: string;
+  tel: string;
+}
+
+export interface OrderDetail {
   id: string;
   parentId: string;
   size: string;
@@ -23,6 +57,7 @@ export interface Sku {
   orderQuantity: number;
   parentRef: any;
   sortNum: number;
+  quantity:number
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,8 +112,7 @@ export const CreateProductSchema = z.object({
   gender: z.enum(["other", "man", "woman"]),
   skus: z.array(
     z.object({
-      size: z
-        .string({ required_error: "入力してください。" }),
+      size: z.string({ required_error: "入力してください。" }),
       salePrice: z.number().min(0),
       costPrice: z.number().min(0),
       stock: z.number().min(0, { message: "入力してください" }),
@@ -94,7 +128,7 @@ export const UpdateSkuSchema = z.object({
   costPrice: z.number(),
   stock: z.number(),
   orderQuantity: z.number(),
-  sortNum: z.number()
+  sortNum: z.number(),
 });
 
 export type UpdateSku = z.infer<typeof UpdateSkuSchema>;

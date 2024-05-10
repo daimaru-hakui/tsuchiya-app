@@ -29,7 +29,7 @@ export default function ProductShowTable({ id }: Props) {
     const unsub = onSnapshot(q, {
       next: (snapshot) => {
         const result = snapshot.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() } as Sku)
+          (doc) => ({ ...doc.data(), id: doc.id } as Sku)
         );
         setSkus(result);
       },
@@ -59,8 +59,12 @@ export default function ProductShowTable({ id }: Props) {
         {skus.map((sku) => (
           <TableRow key={sku.id}>
             <TableCell className="font-medium">{sku.size}</TableCell>
-            <TableCell className="text-right">{sku.salePrice.toLocaleString()}</TableCell>
-            <TableCell className="text-right">{sku.costPrice.toLocaleString()}</TableCell>
+            <TableCell className="text-right">
+              {sku?.salePrice?.toLocaleString()}
+            </TableCell>
+            <TableCell className="text-right">
+              {sku?.costPrice?.toLocaleString()}
+            </TableCell>
             <TableCell className="text-right">{sku.stock}</TableCell>
             <TableCell className="text-right">{sku.orderQuantity}</TableCell>
             <TableCell className="text-right">{sku.sortNum}</TableCell>

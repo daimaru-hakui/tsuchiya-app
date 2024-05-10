@@ -58,6 +58,12 @@ export async function createProduct(data: CreateProduct):
         parentId: productRef.id,
         parentRef: productRef,
         sortNum: idx + 1,
+
+        productNumber: result.data.productNumber,
+        productName: result.data.productName,
+        displayName: result.data.displayName,
+        isHem: result.data.isHem,
+        gender: result.data.gender,
         // createdAt: serverTimestamp(),
         // updatedAt: serverTimestamp(),
       });

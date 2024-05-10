@@ -22,7 +22,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import OrderFormItem from "./order-form-item";
 import { db } from "@/lib/firebase/client";
-import { Unsubscribe, collectionGroup, onSnapshot, limit, collection, query, orderBy, getDocs } from "firebase/firestore";
+import {
+  Unsubscribe,
+  collectionGroup,
+  onSnapshot,
+  limit,
+  collection,
+  query,
+  orderBy,
+  getDocs,
+  where,
+  getDoc,
+} from "firebase/firestore";
 import { CreateOrder, CreateOrderSchema, Product, Sku } from "@/types";
 import * as actions from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,8 +63,8 @@ export default function OrderCreateForm() {
         const productsRef = collection(db, "products");
         const q = query(productsRef, orderBy("sortNum", "asc"));
         const productsSnap = await getDocs(q);
-        const products = productsSnap.docs.map((doc) => (
-          { id: doc.id, ...doc.data() } as Product)
+        const products = productsSnap.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() } as Product)
         );
 
         const skusRef = collectionGroup(db, "skus");
@@ -67,9 +78,7 @@ export default function OrderCreateForm() {
           (product) => product.gender === "other" || product.gender === gender
         );
         const filterSkus = filterProducts.map((product) => {
-          const parentSkus = skus.filter(
-            (sku) => sku.parentId === product.id
-          );
+          const parentSkus = skus.filter((sku) => sku.parentId === product.id);
           return parentSkus.map((sku) => ({ ...product, ...sku }));
         });
         setItems(filterSkus);
@@ -80,10 +89,7 @@ export default function OrderCreateForm() {
       }
     };
     getItems();
-
   }, [gender]);
-
-  console.log(items);
 
   const getAddress = async () => {
     const zipCode = form.getValues("zipCode");
@@ -289,7 +295,13 @@ export default function OrderCreateForm() {
                       <FormControl>
                         <Input type="number" placeholder="" {...field} />
                       </FormControl>
-                      <Button type="button" key="address" onClick={handleFetchAdress}>検索</Button>
+                      <Button
+                        type="button"
+                        key="address"
+                        onClick={handleFetchAdress}
+                      >
+                        検索
+                      </Button>
                     </div>
 
                     <FormMessage />
@@ -333,13 +345,13 @@ export default function OrderCreateForm() {
             />
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">
+            <Button disabled={isPending} type="submit" className="w-full">
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               登録
             </Button>
           </CardFooter>
         </Card>
       </form>
-    </Form >
+    </Form>
   );
 }
