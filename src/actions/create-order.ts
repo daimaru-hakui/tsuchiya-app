@@ -1,7 +1,8 @@
 "use server";
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import { CreateOrder, CreateOrderSchema } from "@/types";
+import { CreateOrder, CreateOrderSchema, Sku } from "@/types";
+import { format } from "date-fns";
 
 export async function createOrder(
   data: CreateOrder
@@ -30,19 +31,44 @@ export async function createOrder(
     return "error";
   }
 
+  let products: (Sku & {
+    id: string;
+    quantity: number;
+    hem?: number;
+  })[] = [];
+
+  const filterProducts = result.data.products.filter(
+    (product) => product.id && product.quantity >= 0
+  );
+
+  for (const product of  result.data.products) {
+    const docSnap = await db
+      .collectionGroup("skus")
+      .where("id", "==", product.id)
+      .orderBy("id", "asc")
+      .orderBy("sortNum", "asc")
+      .get();
+    const data = { ...docSnap.docs[0]?.data(), ...product } as Sku & {
+      id: string;
+      quantity: number;
+      hem?: number;
+    };
+    products.push(data);
+  }
+
+  console.log(products)
+
   const serialRef = db.collection("serialNumbers").doc("orderNumber");
   const orderRef = db.collection("orders").doc();
   await db.runTransaction(async (transaction) => {
-
     const [serialDoc, ordersDocs] = await Promise.all([
       serialRef.get(),
-      orderRef.get()
+      orderRef.get(),
     ]);
 
     const newCount = serialDoc.data()?.count + 1;
-    console.log(newCount);
     transaction.update(serialRef, {
-      count: newCount
+      count: newCount,
     });
 
     transaction.set(orderRef, {
@@ -58,12 +84,22 @@ export async function createOrder(
       zipCode: result.data.zipCode,
       address: result.data.address,
       tel: result.data.tel,
-      createdAt: ""
+      // createdAt: serverTimestamp(),
     });
 
-    for (const product of result.data.products) {
-      transaction.set(orderRef.collection('orderDetails').doc(), {
-        id: product.id
+    for (const product of products) {
+      transaction.set(orderRef.collection("orderDetails").doc(), {
+        orderId: orderRef.id,
+        serialNumber: newCount,
+        skuId: product.id,
+        productNumber: product.productNumber || "",
+        productName: product.productName || "",
+        salePrice: product.salePrice || 0,
+        costPrice: product.costPrice || 0,
+        size: product.size || "",
+        orderQuantity: product.quantity,
+        createdAt: format(new Date(), "yyyy-MM-dd"),
+        updatedAt: format(new Date(), "yyyy-MM-dd"),
       });
     }
   });

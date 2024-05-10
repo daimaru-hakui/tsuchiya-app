@@ -38,6 +38,7 @@ export default function ProductEdit({ sku }: Props) {
   });
 
   const onSubmit = (data: UpdateSku) => {
+    console.log(sku.id)
     startTransaction(async () => {
       await actions.updateSku(data, sku.parentId, sku.id);
       setOpen(false);

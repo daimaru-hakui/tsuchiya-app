@@ -1,8 +1,7 @@
-import React from 'react';
-import OrderList from './order-list';
+import React from "react";
+import OrderList from "./order-list";
 
-export default function OrdersPage() {
-  return (
-    <OrderList />
-  );
+export default async function OrdersPage() {
+
+  return <OrderList />;
 }
