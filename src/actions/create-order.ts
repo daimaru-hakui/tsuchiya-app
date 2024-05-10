@@ -1,7 +1,7 @@
 "use server";
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import { CreateOrder, CreateOrderSchema, Sku } from "@/types";
+import { CreateOrder, CreateOrderSchema, OrderDetail } from "@/types";
 import { format } from "date-fns";
 
 export async function createOrder(
@@ -13,7 +13,7 @@ export async function createOrder(
     initial: data.initial,
     username: data.username,
     position: data.position,
-    products: data.products,
+    skus: data.skus,
     siteCode: data.siteCode,
     siteName: data.siteName,
     zipCode: data.zipCode,
@@ -26,45 +26,49 @@ export async function createOrder(
   }
 
   const session = await auth();
-
   if (!session) {
     return "error";
   }
 
-  let products: (Sku & {
-    id: string;
-    quantity: number;
-    hem?: number;
-  })[] = [];
-
-  const filterProducts = result.data.products.filter(
-    (product) => product.id && product.quantity >= 0
+  const filterSkus = result.data.skus.filter(
+    product => product.id && product.quantity >= 0
   );
-
-  for (const product of  result.data.products) {
-    const docSnap = await db
-      .collectionGroup("skus")
-      .where("id", "==", product.id)
-      .orderBy("id", "asc")
-      .orderBy("sortNum", "asc")
-      .get();
-    const data = { ...docSnap.docs[0]?.data(), ...product } as Sku & {
-      id: string;
-      quantity: number;
-      hem?: number;
-    };
-    products.push(data);
-  }
-
-  console.log(products)
 
   const serialRef = db.collection("serialNumbers").doc("orderNumber");
   const orderRef = db.collection("orders").doc();
+
   await db.runTransaction(async (transaction) => {
-    const [serialDoc, ordersDocs] = await Promise.all([
+    const [serialDoc, orderDoc] = await Promise.all([
       serialRef.get(),
       orderRef.get(),
     ]);
+
+    let details: OrderDetail[] = [];
+    let skuItems = [];
+    for (const sku of filterSkus) {
+      const collRef = db
+        .collectionGroup("skus")
+        .where("id", "==", sku.id)
+        .orderBy("id", "asc")
+        .orderBy("sortNum", "asc");
+
+      const snapShot = await transaction.get(collRef);
+      const skuDoc = snapShot.docs[0].data();
+      const skuRef = db.collection("products").doc(skuDoc.parentId).collection("skus").doc(sku.id);
+      const data = { ...snapShot.docs[0]?.data(), ...sku, skuRef } as OrderDetail;
+      skuItems.push({
+        ref: skuRef,
+        doc: skuDoc,
+        sku
+      });
+      details.push(data);
+    }
+
+    for (const { ref, doc, sku } of skuItems) {
+      transaction.update(ref, {
+        orderQuantity: await doc.orderQuantity + sku.quantity
+      });
+    }
 
     const newCount = serialDoc.data()?.count + 1;
     transaction.update(serialRef, {
@@ -84,24 +88,29 @@ export async function createOrder(
       zipCode: result.data.zipCode,
       address: result.data.address,
       tel: result.data.tel,
-      // createdAt: serverTimestamp(),
+      createdAt: format(new Date(), "yyyy-MM-dd"),
     });
 
-    for (const product of products) {
+    for (const detail of details) {
       transaction.set(orderRef.collection("orderDetails").doc(), {
         orderId: orderRef.id,
         serialNumber: newCount,
-        skuId: product.id,
-        productNumber: product.productNumber || "",
-        productName: product.productName || "",
-        salePrice: product.salePrice || 0,
-        costPrice: product.costPrice || 0,
-        size: product.size || "",
-        orderQuantity: product.quantity,
+        skuId: detail.id,
+        skuRef: detail.skuRef,
+        productNumber: detail.productNumber,
+        productName: detail.productName,
+        salePrice: detail.salePrice || 0,
+        costPrice: detail.costPrice || 0,
+        size: detail.size,
+        orderQuantity: detail.quantity,
+        quantity: detail.quantity,
+        hem: detail.hem || null,
         createdAt: format(new Date(), "yyyy-MM-dd"),
         updatedAt: format(new Date(), "yyyy-MM-dd"),
       });
     }
+  }).catch((e) => {
+    console.error(e);
   });
 
   return;

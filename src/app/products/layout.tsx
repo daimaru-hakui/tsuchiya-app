@@ -1,10 +1,10 @@
 export default function ProductsLayout({ children }: {
-    children: React.
-    ReactNode;
-  }) {
-    return (
-      <div className="w-full flex items-center justify-center my-4">
-        {children}
-      </div>
-    );
-  }
+  children: React.
+  ReactNode;
+}) {
+  return (
+    <div className="w-full flex items-center justify-center my-4">
+      {children}
+    </div>
+  );
+}

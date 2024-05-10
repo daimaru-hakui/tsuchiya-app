@@ -49,15 +49,20 @@ export interface Order {
 export interface OrderDetail {
   id: string;
   parentId: string;
+  skuId: string;
+  skuRef: FirebaseFirestore.DocumentReference;
+  productNumber: string;
+  productName: string;
   size: string;
   price: number;
   salePrice: number;
   costPrice: number;
   stock: number;
   orderQuantity: number;
+  quantity: number;
+  hem?: number | null;
   parentRef: any;
   sortNum: number;
-  quantity:number
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,7 +89,7 @@ export const CreateOrderSchema = z.object({
   initial: z.string(),
   username: z.string(),
   position: z.string(),
-  products: z
+  skus: z
     .object({
       id: z.string(),
       quantity: z.number(),
