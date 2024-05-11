@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -58,11 +57,13 @@ export default function OrderList() {
               <TableHead>イニシャル</TableHead>
               <TableHead>氏名</TableHead>
               <TableHead>役職</TableHead>
+              <TableHead>社名</TableHead>
               <TableHead>工事コード</TableHead>
               <TableHead>現場名 又は組織名</TableHead>
               <TableHead>郵便番号</TableHead>
               <TableHead>住所</TableHead>
               <TableHead>電話番号</TableHead>
+              <TableHead>備考</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -79,11 +80,13 @@ export default function OrderList() {
                 <TableCell>{order.initial}</TableCell>
                 <TableCell>{order.username}</TableCell>
                 <TableCell>{order.position}</TableCell>
+                <TableCell>{order.companyName && " あり"}</TableCell>
                 <TableCell>{order.siteCode}</TableCell>
                 <TableCell>{order.siteName}</TableCell>
                 <TableCell>{order.zipCode}</TableCell>
                 <TableCell>{order.address}</TableCell>
                 <TableCell>{order.tel}</TableCell>
+                <TableCell>{order.memo}</TableCell>
               </TableRow>
             ))}
           </TableBody>

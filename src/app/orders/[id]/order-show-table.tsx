@@ -1,27 +1,13 @@
 "use client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { OrderDetail } from "@/types";
+import { useEffect } from "react";
 
-export default function OrderShowTable() {
-  const data = [
-    {
-      id: 1,
-      productNumber: '123-45',
-      productName: "夏用上着",
-      size: "S",
-      quantity: 4,
-      hem: 8,
-      memo: ""
-    },
-    {
-      id: 2,
-      productNumber: '123-45',
-      productName: "夏用上着",
-      size: "S",
-      quantity: 4,
-      hem: 8,
-      memo: ""
-    }
-  ];
+interface Props {
+  orderDetails: OrderDetail[];
+}
+
+export default function OrderShowTable({ orderDetails }: Props) {
 
   return (
     <Table className="min-w-[600px]">
@@ -36,14 +22,13 @@ export default function OrderShowTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.map(item => (
+        {orderDetails.map(item => (
           <TableRow key={item.id}>
             <TableCell>{item.productNumber}</TableCell>
             <TableCell >{item.productName}</TableCell>
             <TableCell className="text-center">{item.size}</TableCell>
             <TableCell className="text-right">{item.quantity}</TableCell>
             <TableCell className="text-right">{item?.hem}</TableCell>
-            <TableCell>{item.memo}</TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -23,39 +23,44 @@ import { Label } from "@/components/ui/label";
 import OrderFormItem from "./order-form-item";
 import { db } from "@/lib/firebase/client";
 import {
-  Unsubscribe,
   collectionGroup,
-  onSnapshot,
-  limit,
   collection,
   query,
   orderBy,
   getDocs,
-  where,
-  getDoc,
 } from "firebase/firestore";
 import { CreateOrder, CreateOrderSchema, Product, Sku } from "@/types";
 import * as actions from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { ToastContainer, toast } from 'react-toastify';
 
 export default function OrderCreateForm() {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
+  const [skuCart, setSkuCart] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
+  const notify = () => toast("Wow so easy !");
+
 
   const form = useForm<CreateOrder>({
     resolver: zodResolver(CreateOrderSchema),
   });
 
   const onSubmit = (data: CreateOrder) => {
+    const result = confirm("登録して宜しいでしょうか");
+    if (!result) return;
     startTransition(async () => {
-      console.log(data);
+      // console.log(data);
       await actions.createOrder(data);
     });
   };
+
+  const isCompanyName = form.watch("companyName", true);
 
   useEffect(() => {
     const getItems = async () => {
@@ -126,7 +131,19 @@ export default function OrderCreateForm() {
 
   const handleGenderChange = (e: string) => {
     setGender(e);
+    const data = form.getValues();
     form.reset();
+    form.setValue("section", data.section);
+    form.setValue("employeeCode", data.employeeCode);
+    form.setValue("initial", data.initial);
+    form.setValue("username", data.username);
+    form.setValue("position", data.position);
+    form.setValue("siteCode", data.siteCode);
+    form.setValue("siteName", data.siteName);
+    form.setValue("zipCode", data.zipCode);
+    form.setValue("address", data.address);
+    form.setValue("tel", data.tel);
+    form.setValue("memo", data.memo);
   };
 
   if (loading) {
@@ -173,7 +190,7 @@ export default function OrderCreateForm() {
                 </FormItem>
               )}
             />
-            <div className="flex gap-3">
+            <div className="flex flex-col md:flex-row gap-3">
               <FormField
                 control={form.control}
                 name="employeeCode"
@@ -203,7 +220,7 @@ export default function OrderCreateForm() {
                 )}
               />
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col md:flex-row gap-3">
               <FormField
                 control={form.control}
                 name="username"
@@ -228,6 +245,29 @@ export default function OrderCreateForm() {
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div>
+              <FormField
+                control={form.control}
+                name="companyName"
+                defaultValue={true}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col justify-start">
+                    <FormLabel>社名</FormLabel>
+                    <div className="flex items-center gap-3">
+                      <Switch
+                        id="companyName"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <Label htmlFor="companyName">
+                        {isCompanyName ? "マーク有" : " TSUCHUYAマークなし"}
+                      </Label>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -336,6 +376,24 @@ export default function OrderCreateForm() {
                       className="w-[200px]"
                       placeholder="TEL"
                       pattern="[\d\-]*"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="memo"
+              defaultValue=""
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>備考</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder=""
+                      className="resize-none"
                       {...field}
                     />
                   </FormControl>

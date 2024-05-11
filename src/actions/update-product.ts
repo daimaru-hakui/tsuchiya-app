@@ -1,3 +1,3 @@
-export async function updateProsuct(data: any) {
+export async function updateProduct(data: any) {
 
 }

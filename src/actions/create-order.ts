@@ -2,7 +2,7 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { CreateOrder, CreateOrderSchema, OrderDetail } from "@/types";
-import { format } from "date-fns";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function createOrder(
   data: CreateOrder
@@ -12,6 +12,7 @@ export async function createOrder(
     employeeCode: data.employeeCode,
     initial: data.initial,
     username: data.username,
+    companyName: data.companyName,
     position: data.position,
     skus: data.skus,
     siteCode: data.siteCode,
@@ -19,14 +20,17 @@ export async function createOrder(
     zipCode: data.zipCode,
     address: data.address,
     tel: data.tel,
+    nemo: data.memo || ""
   });
 
   if (!result.success) {
+    console.log(result.error.formErrors);
     return "error";
   }
 
   const session = await auth();
   if (!session) {
+    console.log("no session");
     return "error";
   }
 
@@ -88,7 +92,10 @@ export async function createOrder(
       zipCode: result.data.zipCode,
       address: result.data.address,
       tel: result.data.tel,
-      createdAt: format(new Date(), "yyyy-MM-dd"),
+      memo: result.data.memo || "",
+      status: "pending",
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp()
     });
 
     for (const detail of details) {
@@ -105,8 +112,8 @@ export async function createOrder(
         orderQuantity: detail.quantity,
         quantity: detail.quantity,
         hem: detail.hem || null,
-        createdAt: format(new Date(), "yyyy-MM-dd"),
-        updatedAt: format(new Date(), "yyyy-MM-dd"),
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp()
       });
     }
   }).catch((e) => {

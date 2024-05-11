@@ -38,12 +38,15 @@ export interface Order {
   employeeCode: string;
   initial: string;
   username: string;
+  companyName: boolean;
   position: string;
   siteCode: string;
   siteName: string;
   zipCode: string;
   address: string;
   tel: string;
+  status: "pending";
+  memo: string;
 }
 
 export interface OrderDetail {
@@ -88,6 +91,7 @@ export const CreateOrderSchema = z.object({
     .min(1, { message: "社員コードを入力してください。" }),
   initial: z.string(),
   username: z.string(),
+  companyName: z.boolean(),
   position: z.string(),
   skus: z
     .object({
@@ -101,6 +105,7 @@ export const CreateOrderSchema = z.object({
   zipCode: z.string(),
   address: z.string(),
   tel: z.string(),
+  memo: z.string().optional(),
 });
 
 export type CreateOrder = z.infer<typeof CreateOrderSchema>;

@@ -1,7 +1,15 @@
 import OrderShow from "./order-show";
 
-export default function OrderShowPage() {
+interface Props {
+  params: {
+    id: string;
+  };
+}
+
+export default function OrderShowPage({ params }: Props) {
+  const id = params.id;
+
   return (
-    <OrderShow />
+    <OrderShow id={id} />
   );
 }
