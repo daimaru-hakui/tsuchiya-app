@@ -76,9 +76,6 @@ export default function OrderList() {
                   <Button size="xs" asChild>
                     <Link href={`/orders/${order.id}`}>詳細</Link>
                   </Button>
-                  <Button size="xs" asChild>
-                    <Link href={`/orders/shipping/${order.id}`}>出荷処理</Link>
-                  </Button>
                 </TableCell>
                 <TableCell>{order.serialNumber}</TableCell>
                 <TableCell>{order.section}</TableCell>

@@ -72,6 +72,15 @@ export interface OrderDetail {
   updatedAt: Date;
 }
 
+export interface CreateShipping {
+  skus: {
+    id: string;
+    quantity: number;
+    shippingQuantity: number;
+    remainingQuantity: number;
+  }[];
+}
+
 export interface AdminUser {
   uid: string;
   email: string | undefined;

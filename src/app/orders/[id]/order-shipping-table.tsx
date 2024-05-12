@@ -9,15 +9,15 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { OrderDetail } from "@/types";
-import { FieldValues, UseFormReturn, useForm } from "react-hook-form";
+import { OrderDetail, CreateShipping } from "@/types";
+import { FieldValues, UseFormReturn } from "react-hook-form";
 
 interface Props {
   orderDetails: OrderDetail[];
-  form: UseFormReturn<FieldValues, any, undefined>;
+  form: UseFormReturn<CreateShipping, any, undefined>;
 }
 
-export default function OrderShippingShowTable({ orderDetails, form }: Props) {
+export default function OrderShippingTable({ orderDetails, form }: Props) {
 
   return (
     <Table className="min-w-[800px]">
@@ -34,7 +34,7 @@ export default function OrderShippingShowTable({ orderDetails, form }: Props) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {orderDetails.map((item, idx) => (
+        {orderDetails?.map((item, idx) => (
           <TableRow key={item.id}>
             <TableCell>{item.productNumber}</TableCell>
             <TableCell >{item.productName}</TableCell>
@@ -47,9 +47,14 @@ export default function OrderShippingShowTable({ orderDetails, form }: Props) {
                 {...form.register(`skus.${idx}.id`)}
                 defaultValue={item.id}
               />
+              <input
+                className="hidden"
+                {...form.register(`skus.${idx}.quantity`)}
+                defaultValue={item.quantity}
+              />
               <FormField
                 control={form.control}
-                name={`skus.${idx}.quantity`}
+                name={`skus.${idx}.shippingQuantity`}
                 defaultValue={item.quantity}
                 render={({ field }) => (
                   <FormItem>
