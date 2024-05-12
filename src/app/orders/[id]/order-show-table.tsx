@@ -1,7 +1,13 @@
 "use client";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 import { OrderDetail } from "@/types";
-import { useEffect } from "react";
 
 interface Props {
   orderDetails: OrderDetail[];
@@ -17,7 +23,7 @@ export default function OrderShowTable({ orderDetails }: Props) {
           <TableHead>品名</TableHead>
           <TableHead className="text-center w-[80px]">サイズ</TableHead>
           <TableHead className="text-center w-[80px]">数量</TableHead>
-          <TableHead className="text-center w-[80px]">裾上げ</TableHead>
+          <TableHead className="text-center w-[80px]">股下</TableHead>
           <TableHead >備考</TableHead>
         </TableRow>
       </TableHeader>
@@ -28,7 +34,8 @@ export default function OrderShowTable({ orderDetails }: Props) {
             <TableCell >{item.productName}</TableCell>
             <TableCell className="text-center">{item.size}</TableCell>
             <TableCell className="text-right">{item.quantity}</TableCell>
-            <TableCell className="text-right">{item?.hem}</TableCell>
+            <TableCell className="text-right">{item?.inseam && `${item.inseam}cm`}</TableCell>
+            <TableCell className="text-right">{item?.memo}</TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -1,21 +1,31 @@
 "use client";
-import OrderShowTable from "./order-show-table";
 import { useEffect, useState } from "react";
 import { collection, doc, limit, onSnapshot, orderBy, query, startAfter } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { Order, OrderDetail } from "@/types";
-import OrderShowCard from "../order-show-card";
+import OrderShowCard from "../../order-show-card";
+import OrderShowTable from "../../[id]/order-show-table";
+import OrderShippingShowTable from "./order-shipping-show-table";
+import { Form } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import Loading from "@/app/loading";
 
 interface Props {
   id: string;
 }
 
-export default function OrderShow({ id }: Props) {
+export default function OrderShippingShow({ id }: Props) {
   const [order, setOrder] = useState<Order>();
   const [orderDetails, setOrderDetails] = useState<OrderDetail[]>([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
+  const form = useForm();
+
+  const onSubmit = (data: any) => {
+    console.log(data);
+  };
 
   useEffect(() => {
     const orderRef = doc(db, "orders", id);
@@ -80,8 +90,13 @@ export default function OrderShow({ id }: Props) {
   if (!order) return <Loading />;
 
   return (
-    <OrderShowCard title="詳細" order={order} nextPage={nextPage} prevPage={prevPage}>
-      <OrderShowTable orderDetails={orderDetails} />
-    </OrderShowCard>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <OrderShowCard title="出荷処理" order={order} nextPage={nextPage} prevPage={prevPage}>
+          <OrderShippingShowTable orderDetails={orderDetails} form={form} />
+          <Button type="submit">送信</Button>
+        </OrderShowCard>
+      </form>
+    </Form>
   );
 }

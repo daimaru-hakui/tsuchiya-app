@@ -37,15 +37,13 @@ import { useForm } from "react-hook-form";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ToastContainer, toast } from 'react-toastify';
+import Loading from "@/app/loading";
 
 export default function OrderCreateForm() {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
-  const [skuCart, setSkuCart] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
-  const notify = () => toast("Wow so easy !");
-
 
   const form = useForm<CreateOrder>({
     resolver: zodResolver(CreateOrderSchema),
@@ -146,9 +144,7 @@ export default function OrderCreateForm() {
     form.setValue("memo", data.memo);
   };
 
-  if (loading) {
-    return <div>...loading</div>;
-  }
+  if (loading) return <Loading />;
 
   return (
     <Form {...form}>

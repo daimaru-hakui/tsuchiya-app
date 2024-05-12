@@ -68,19 +68,19 @@ export default function OrderFormItem({ form, index, skus }: Props) {
             </FormItem>
           )}
         />
-        {skus[0]?.isHem && (
+        {skus[0]?.isInseam && (
           <FormField
             control={form.control}
-            defaultValue={skus[0].isHem ? 0 : undefined}
+            defaultValue={skus[0].isInseam ? 0 : undefined}
             rules={{ required: true }}
-            name={`skus.${index}.hem`}
+            name={`skus.${index}.inseam`}
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>裾上げ</FormLabel>
+                <FormLabel>股下</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="裾上げ"
+                    placeholder="股下"
                     className="w-[80px]"
                     min={0}
                     {...field}

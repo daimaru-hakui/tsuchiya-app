@@ -1,10 +1,9 @@
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -15,19 +14,22 @@ import { Product } from "@/types";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Loading from "../loading";
 
 export default function ProductList() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>();
 
   useEffect(() => {
     const productsRef = collection(db, "products");
-    const q = query(productsRef,orderBy("sortNum","asc"))
+    const q = query(productsRef, orderBy("sortNum", "asc"));
     onSnapshot(q, (snapshot) => {
-        setProducts(snapshot.docs.map(doc=>({
-            id:doc.id, ...doc.data()
-        } as Product)))
+      setProducts(snapshot.docs.map(doc => ({
+        id: doc.id, ...doc.data()
+      } as Product)));
     });
   }, []);
+
+  if (!products) return <Loading />;
 
   return (
     <Card className="w-full overflow-auto">
@@ -63,7 +65,7 @@ export default function ProductList() {
                 <TableCell>{product.productNumber}</TableCell>
                 <TableCell>{product.productName}</TableCell>
                 <TableCell>{product.gender}</TableCell>
-                <TableCell>{product.isHem && "あり"}</TableCell>
+                <TableCell>{product.isInseam && "あり"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

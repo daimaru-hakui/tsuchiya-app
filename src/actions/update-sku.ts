@@ -10,7 +10,7 @@ export async function updateSku(
   data: UpdateSku,
   productId: string,
   skuId: string
-): Promise<{ message: string | undefined }> {
+): Promise<{ message: string | undefined; }> {
   const result = UpdateSkuSchema.safeParse({
     size: data.size,
     salePrice: data.salePrice,
@@ -38,8 +38,8 @@ export async function updateSku(
   const productDoc = await db.collection("products").doc(productId).get();
   const product = productDoc.data();
 
-  console.log(product)
-  console.log(skuId)
+  console.log(product);
+  console.log(skuId);
 
   try {
     const skuRef = db

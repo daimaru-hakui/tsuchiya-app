@@ -1,10 +1,11 @@
 import { z } from "zod";
+
 export interface Product {
   id: string;
   productNumber: string;
   productName: string;
   sortNum: number;
-  isHem: boolean;
+  isInseam: boolean;
   displayName: string;
   gender: "man" | "woman" | "other";
   createdAt: any;
@@ -15,7 +16,7 @@ export interface Sku {
   id: string;
   productNumber: string;
   productName: string;
-  isHem: boolean;
+  isInseam: boolean;
   displayName: string;
   gender: "man" | "woman" | "other";
   parentId: string;
@@ -63,7 +64,8 @@ export interface OrderDetail {
   stock: number;
   orderQuantity: number;
   quantity: number;
-  hem?: number | null;
+  inseam?: number | null;
+  memo?: string;
   parentRef: any;
   sortNum: number;
   createdAt: Date;
@@ -97,7 +99,7 @@ export const CreateOrderSchema = z.object({
     .object({
       id: z.string(),
       quantity: z.number(),
-      hem: z.number().optional(),
+      inseam: z.number().optional(),
     })
     .array(),
   siteCode: z.string(),
@@ -118,7 +120,7 @@ export const CreateProductSchema = z.object({
     message: "入力してください。",
   }),
   displayName: z.string().min(1, { message: "入力してください。" }),
-  isHem: z.boolean(),
+  isInseam: z.boolean(),
   gender: z.enum(["other", "man", "woman"]),
   skus: z.array(
     z.object({
@@ -131,6 +133,20 @@ export const CreateProductSchema = z.object({
 });
 
 export type CreateProduct = z.infer<typeof CreateProductSchema>;
+
+export const UpdateProductSchema = z.object({
+  productNumber: z.string().min(1, { message: "入力してください。" }).max(100, {
+    message: "100文字以内で入力してください",
+  }),
+  productName: z.string().min(1, {
+    message: "入力してください。",
+  }),
+  displayName: z.string().min(1, { message: "入力してください。" }),
+  isInseam: z.boolean(),
+  gender: z.enum(["other", "man", "woman"]),
+});
+
+export type UpdateProduct = z.infer<typeof UpdateProductSchema>;
 
 export const UpdateSkuSchema = z.object({
   size: z.string().min(1, { message: "入力してください。" }),

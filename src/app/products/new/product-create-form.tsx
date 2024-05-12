@@ -84,9 +84,9 @@ export default function ProductCreateForm() {
 
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <Card className="w-[600px]">
+    <Card className="w-full md:w-[600px]">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <CardHeader>
             <CardTitle>商品登録</CardTitle>
           </CardHeader>
@@ -146,7 +146,7 @@ export default function ProductCreateForm() {
             />
             <FormField
               control={form.control}
-              name="isHem"
+              name="isInseam"
               defaultValue={false}
               render={({ field }) => (
                 <FormItem className="flex items-end flex-row gap-3">
@@ -259,8 +259,8 @@ export default function ProductCreateForm() {
               登録
             </Button>
           </CardFooter>
-        </Card>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </Card>
   );
 }

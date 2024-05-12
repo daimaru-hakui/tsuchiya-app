@@ -1,11 +1,8 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -14,7 +11,7 @@ import { db } from "@/lib/firebase/client";
 import { Sku } from "@/types";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import ProductEdit from "./product-edit";
+import ProductSkuEdit from "./product-sku-edit";
 
 interface Props {
   id: string;
@@ -43,7 +40,7 @@ export default function ProductShowTable({ id }: Props) {
   }, [id]);
 
   return (
-    <Table>
+    <Table className="min-w-[600px]">
       <TableHeader>
         <TableRow>
           <TableHead className="">サイズ</TableHead>
@@ -69,7 +66,7 @@ export default function ProductShowTable({ id }: Props) {
             <TableCell className="text-right">{sku.orderQuantity}</TableCell>
             <TableCell className="text-right">{sku.sortNum}</TableCell>
             <TableCell className="text-right">
-              <ProductEdit sku={sku} />
+              <ProductSkuEdit sku={sku} />
             </TableCell>
           </TableRow>
         ))}

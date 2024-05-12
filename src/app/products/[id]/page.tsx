@@ -9,7 +9,7 @@ interface Props {
 
 export default function ProductShowPage({ params }: Props) {
   return (
-    <div>
+    <div className="w-full flex items-center justify-center py-4">
       <ProductShow id={params.id} />
     </div>
   );

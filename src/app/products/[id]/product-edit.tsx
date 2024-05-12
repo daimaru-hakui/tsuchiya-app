@@ -3,9 +3,7 @@ import React, { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -20,166 +18,159 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { Sku, UpdateSku, UpdateSkuSchema } from "@/types";
+import { useForm } from "react-hook-form";
+import { Product, UpdateProduct, UpdateProductSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as actions from "@/actions";
 import { Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface Props {
-  sku: Sku;
+  product: Product;
 }
 
-export default function ProductEdit({ sku }: Props) {
+export default function ProductEdit({ product }: Props) {
   const [open, setOpen] = useState(false);
   const [isloading, startTransaction] = useTransition();
-  const form = useForm<UpdateSku>({
-    resolver: zodResolver(UpdateSkuSchema)
+  const form = useForm<UpdateProduct>({
+    resolver: zodResolver(UpdateProductSchema)
   });
 
-  const onSubmit = (data: UpdateSku) => {
-    console.log(sku.id)
+  const onSubmit = (data: UpdateProduct) => {
     startTransaction(async () => {
-      await actions.updateSku(data, sku.parentId, sku.id);
+      await actions.updateProduct(data, product.id);
       setOpen(false);
     });
   };
 
+  const genders = [
+    {
+      value: "other",
+      title: "男女兼用",
+    },
+    {
+      value: "man",
+      title: "男性用",
+    },
+    {
+      value: "woman",
+      title: "女性用",
+    },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="xs">詳細</Button>
+        <Button size="xs">編集</Button>
       </DialogTrigger>
       <DialogContent className="max-w-[650px]" >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <DialogHeader>
+            <DialogHeader className="text-left">
               <DialogTitle className="mb-6">編集</DialogTitle>
-              <div className="">
-                <FormField
-                  defaultValue={sku.size}
-                  control={form.control}
-                  name="size"
-                  render={({ field }) => (
-                    <FormItem className="text-left">
-                      <FormLabel>サイズ</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={true}
-                          className="w-[100px]"
-                          autoComplete="off"
-                          placeholder="size"
-                          {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="flex flex-col md:flex-row gap-3 mt-6">
-                <FormField
-                  defaultValue={sku.salePrice || 0}
-                  control={form.control}
-                  name="salePrice"
-                  render={({ field }) => (
-                    <FormItem className="text-left">
-                      <FormLabel>売価</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          autoComplete="off"
-                          {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  defaultValue={sku.costPrice || 0}
-                  control={form.control}
-                  name="costPrice"
-                  render={({ field }) => (
-                    <FormItem className="text-left">
-                      <FormLabel>原価</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          autoComplete="off"
-                          {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  defaultValue={sku.stock || 0}
-                  control={form.control}
-                  name="stock"
-                  render={({ field }) => (
-                    <FormItem className="text-left">
-                      <FormLabel>在庫</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          autoComplete="off"
-                          {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  defaultValue={sku.orderQuantity || 0}
-                  control={form.control}
-                  name="orderQuantity"
-                  render={({ field }) => (
-                    <FormItem className="text-left">
-                      <FormLabel>受注数量</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          autoComplete="off"
-                          {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  defaultValue={sku.sortNum || 0}
-                  control={form.control}
-                  name="sortNum"
-                  render={({ field }) => (
-                    <FormItem className="text-left">
-                      <FormLabel>順番</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          autoComplete="off"
-                          {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                defaultValue={product.productNumber}
+                name="productNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>品番</FormLabel>
+                    <FormControl>
+                      <Input
+                        autoComplete="off"
+                        placeholder="品番" {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                defaultValue={product.productName}
+                rules={{ required: true }}
+                name="productName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>商品名</FormLabel>
+                    <FormControl>
+                      <Input
+                        autoComplete="off"
+                        placeholder="商品名" {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                defaultValue={product.displayName || ""}
+                rules={{ required: true }}
+                name="displayName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>表示名</FormLabel>
+                    <FormControl>
+                      <Input
+                        autoComplete="off"
+                        placeholder="表示名" {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isInseam"
+                defaultValue={product.isInseam || false}
+                render={({ field }) => (
+                  <FormItem className="flex items-end flex-row gap-3">
+                    <div className="">
+                      <FormLabel className="text-base mt-2">裾上げ</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={(e) => field.onChange(e.valueOf())}
+                        aria-readonly
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="gender"
+                defaultValue={product.gender}
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>区分</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={product.gender}
+                        className="flex flex-col space-y-1"
+                      >
+                        {genders.map(({ value, title }) => (
+                          <FormItem
+                            key={value}
+                            className="flex items-center space-x-3 space-y-0"
+                          >
+                            <FormControl>
+                              <RadioGroupItem value={value} />
+                            </FormControl>
+                            <FormLabel className="font-normal">{title}</FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </DialogHeader>
             <DialogFooter className="mt-6 sm:justify-end gap-1">
               <Button

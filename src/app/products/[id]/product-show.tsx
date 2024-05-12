@@ -7,6 +7,8 @@ import { db } from "@/lib/firebase/client";
 import { Product } from "@/types";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import ProductEdit from "./product-edit";
+import Loading from "../../loading";
 
 interface Props {
   id: string;
@@ -24,7 +26,7 @@ export default function ProductShow({ id }: Props) {
     const productRef = doc(db, "products", id);
     const unsub = onSnapshot(productRef, {
       next: (snapshot) => {
-        setProduct(snapshot.data() as Product);
+        setProduct({ ...snapshot.data(), id } as Product);
       },
       error: (e) => {
         console.log(e);
@@ -34,6 +36,8 @@ export default function ProductShow({ id }: Props) {
       unsub();
     };
   }, [id]);
+
+  if (!product) return <Loading />;
 
   return (
     <Card className="w-full md:w-[750px]">
@@ -62,6 +66,7 @@ export default function ProductShow({ id }: Props) {
             <div>{product?.productName}</div>
           </div>
         </div>
+        <ProductEdit product={product} />
         <div className="mt-3">
           <ProductShowTable id={id} />
         </div>

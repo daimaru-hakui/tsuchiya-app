@@ -36,7 +36,7 @@ export async function createOrder(
 
   const filterSkus = result.data.skus.filter(
     product => product.id && product.quantity >= 0
-  );
+  ).map((sku, idx) => ({ ...sku, sortNum: idx + 1 }));
 
   const serialRef = db.collection("serialNumbers").doc("orderNumber");
   const orderRef = db.collection("orders").doc();
@@ -111,7 +111,8 @@ export async function createOrder(
         size: detail.size,
         orderQuantity: detail.quantity,
         quantity: detail.quantity,
-        hem: detail.hem || null,
+        inseam: detail.inseam || null,
+        sortNum: detail.sortNum,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp()
       });

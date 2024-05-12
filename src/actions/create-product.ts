@@ -13,7 +13,7 @@ export async function createProduct(data: CreateProduct):
     productNumber: data.productNumber,
     productName: data.productName,
     displayName: data.displayName,
-    isHem: data.isHem,
+    isInseam: data.isInseam,
     gender: data.gender,
     skus: data.skus
   });
@@ -41,7 +41,7 @@ export async function createProduct(data: CreateProduct):
       productNumber: result.data.productNumber,
       productName: result.data.productName,
       displayName: result.data.displayName,
-      isHem: result.data.isHem,
+      isInseam: result.data.isInseam,
       gender: result.data.gender,
       sortNum: 0,
       // createdAt: serverTimestamp(),
@@ -62,7 +62,7 @@ export async function createProduct(data: CreateProduct):
         productNumber: result.data.productNumber,
         productName: result.data.productName,
         displayName: result.data.displayName,
-        isHem: result.data.isHem,
+        isInseam: result.data.isInseam,
         gender: result.data.gender,
         // createdAt: serverTimestamp(),
         // updatedAt: serverTimestamp(),

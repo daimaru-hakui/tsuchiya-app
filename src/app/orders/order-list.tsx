@@ -14,9 +14,10 @@ import { Order } from "@/types";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Loading from "../loading";
 
 export default function OrderList() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Order[]>();
 
   useEffect(() => {
     const ordersRef = collection(db, "orders");
@@ -35,6 +36,8 @@ export default function OrderList() {
     });
     return () => unsub();
   }, []);
+
+  if (!orders) return <Loading />;
 
   return (
     <Card className="w-full overflow-auto">
@@ -72,6 +75,9 @@ export default function OrderList() {
                 <TableCell>
                   <Button size="xs" asChild>
                     <Link href={`/orders/${order.id}`}>詳細</Link>
+                  </Button>
+                  <Button size="xs" asChild>
+                    <Link href={`/orders/shipping/${order.id}`}>出荷処理</Link>
                   </Button>
                 </TableCell>
                 <TableCell>{order.serialNumber}</TableCell>
