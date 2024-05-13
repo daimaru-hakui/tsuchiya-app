@@ -1,33 +1,23 @@
 import { toast } from "@/components/ui/use-toast";
 import { db } from "@/lib/firebase/client";
-import { CreateOrder, CreateOrderSchema, OrderDetail } from "@/types";
+import { CreateShipping, CreateShippingShema, OrderDetail, ShippingDetail, Sku } from "@/types";
 import { format } from "date-fns";
-import {
-  collection,
-  collectionGroup,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  runTransaction,
-  serverTimestamp,
-  where,
-} from "firebase/firestore";
+import { DocumentData, DocumentReference, collection, collectionGroup, doc, getDoc, getDocs, orderBy, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 
-export function useOrder() {
+export function useShipping() {
   const session = useSession();
 
-  const createOrder = async (data: CreateOrder) => {
-    const result = CreateOrderSchema.safeParse({
+  const createShipping = async (data: CreateShipping, orderId: string) => {
+    const result = CreateShippingShema.safeParse({
+      orderId: orderId,
       section: data.section,
       employeeCode: data.employeeCode,
       initial: data.initial,
       username: data.username,
       companyName: data.companyName,
       position: data.position,
-      skus: data.skus,
+      details: data.details,
       siteCode: data.siteCode,
       siteName: data.siteName,
       zipCode: data.zipCode,
@@ -36,8 +26,9 @@ export function useOrder() {
       nemo: data.memo || "",
     });
 
-    const serialRef = doc(db, "serialNumbers", "orderNumber");
-    const orderRef = doc(collection(db, "orders"));
+    const serialRef = doc(db, "serialNumbers", "shippingNumber");
+    const shippingRef = doc(collection(db, "shippings"));
+    const orderRef = doc(db, "orders", orderId);
 
     await runTransaction(db, async (transaction) => {
       if (!result.success) {
@@ -47,27 +38,43 @@ export function useOrder() {
         throw new Error("session error ログインしてください");
       }
 
-      const filterSkus = result.data.skus
-        .filter((sku) => sku.id && sku.quantity > 0)
-        .map((sku, idx) => ({ ...sku, sortNum: idx + 1 }));
+      const filterDetails = result.data.details
+        .filter((sku) => sku.id && sku.shippingQuantity > 0);
 
-      if (filterSkus.length === 0) {
+      if (filterDetails.length === 0) {
         throw new Error("数量を入力してください");
       }
 
-      const [serialDoc, orderDoc] = await Promise.all([
+      const [serialDoc, shippingDoc] = await Promise.all([
         getDoc(serialRef),
-        getDoc(orderRef),
+        getDoc(shippingRef),
       ]);
 
-      let details: OrderDetail[] = [];
+      let details: (ShippingDetail & { shippingNumber: number; })[] = [];
+      let orderDetails: (
+        OrderDetail
+        & { orderDetailRef: DocumentReference<DocumentData, DocumentData>; }
+        & { remainingQuantity: number; }
+      )[] = [];
       let skuItems = [];
 
-      for (const sku of filterSkus) {
-        const collRef = collectionGroup(db, "skus");
+      for (const detail of filterDetails) {
+        const orderDetailRef = doc(orderRef, "orderDetails", detail.id);
+        const orderDetailDoc = await transaction.get(orderDetailRef);
+
+        orderDetails.push({
+          ...orderDetailDoc.data(),
+          orderDetailRef: orderDetailRef,
+          remainingQuantity: detail.remainingQuantity,
+        } as OrderDetail & {
+          remainingQuantity: number;
+          orderDetailRef: DocumentReference<DocumentData, DocumentData>;
+        });
+
+        const skusRef = collectionGroup(db, "skus");
         const q = query(
-          collRef,
-          where("id", "==", sku.id),
+          skusRef,
+          where("id", "==", detail.skuId),
           orderBy("id", "asc"),
           orderBy("sortNum", "asc")
         );
@@ -75,27 +82,19 @@ export function useOrder() {
         const skusSnap = await getDocs(q);
         const skuRef = skusSnap.docs[0].ref;
         const skuDoc = await transaction.get(skuRef);
-        // const productId = snapShot.ref.parent.parent?.id;
 
         const data = {
           ...skuDoc.data(),
-          ...sku,
           skuRef,
-        } as OrderDetail;
+        } as ShippingDetail & { shippingNumber: number; };
 
         skuItems.push({
-          ref: skuRef,
-          doc: { ...skuDoc.data() },
-          sku,
+          skuRef,
+          doc: { ...skuDoc.data() as Sku },
+          detail,
         });
 
         details.push(data);
-      }
-
-      for (const { ref, doc, sku } of skuItems) {
-        transaction.update(ref, {
-          orderQuantity: (await doc.orderQuantity) + sku.quantity,
-        });
       }
 
       const newCount = serialDoc.data()?.count + 1;
@@ -103,15 +102,31 @@ export function useOrder() {
         count: newCount,
       });
 
-      transaction.set(orderRef, {
-        id: orderRef.id,
+      for (const { skuRef, doc, detail } of skuItems) {
+        if (doc.stock < detail.shippingQuantity) {
+          throw new Error("在庫がありません");
+        }
+        transaction.update(skuRef, {
+          orderQuantity: doc.orderQuantity - detail.shippingQuantity,
+          stock: doc.stock - detail.shippingQuantity
+        });
+      }
+
+      for (const { orderDetailRef, remainingQuantity } of orderDetails) {
+        transaction.update(orderDetailRef, {
+          quantity: remainingQuantity
+        });
+      }
+
+      transaction.set(shippingRef, {
+        id: shippingRef.id,
         serialNumber: newCount,
         section: result.data.section,
         employeeCode: result.data.employeeCode,
         initial: result.data.initial,
         username: result.data.username,
-        position: result.data.position,
         companyName: result.data.companyName,
+        position: result.data.position,
         siteCode: result.data.siteCode,
         siteName: result.data.siteName,
         zipCode: result.data.zipCode,
@@ -124,9 +139,11 @@ export function useOrder() {
       });
 
       for (const detail of details) {
-        transaction.set(doc(collection(orderRef, "orderDetails")), {
-          orderId: orderRef.id,
+        transaction.set(doc(collection(shippingRef, "shippingDetails")), {
+          orderId: orderId,
           orderRef: orderRef,
+          shippingId: shippingRef.id,
+          shippingRef: shippingRef,
           serialNumber: newCount,
           skuId: detail.id,
           skuRef: detail.skuRef,
@@ -135,8 +152,7 @@ export function useOrder() {
           salePrice: detail.salePrice || 0,
           costPrice: detail.costPrice || 0,
           size: detail.size,
-          orderQuantity: detail.quantity,
-          quantity: detail.quantity,
+          quantity: detail.shippingNumber || 0,
           inseam: detail.inseam || null,
           sortNum: detail.sortNum,
           createdAt: serverTimestamp(),
@@ -160,6 +176,6 @@ export function useOrder() {
   };
 
   return {
-    createOrder,
+    createShipping
   };
 }

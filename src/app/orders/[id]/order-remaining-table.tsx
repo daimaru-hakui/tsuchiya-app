@@ -30,25 +30,27 @@ export default function OrderRemainingTable({ orderDetails, form }: Props) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {orderDetails?.map((item, idx) => (
-          <TableRow key={item.id}>
-            <TableCell>{item.productNumber}</TableCell>
-            <TableCell >{item.productName}</TableCell>
-            <TableCell className="text-center">{item.size}</TableCell>
+        {orderDetails?.map((detail, idx) => (
+          <TableRow key={detail.id}>
+            <TableCell>{detail.productNumber}</TableCell>
+            <TableCell >{detail.productName}</TableCell>
+            <TableCell className="text-center">{detail.size}</TableCell>
             <TableCell className="w-[120px]">
               <input
                 className="hidden"
-                {...form.register(`skus.${idx}.id`)}
-                defaultValue={item.id}
+                {...form.register(`details.${idx}.id`)}
+                defaultValue={detail.id}
               />
               <FormField
                 control={form.control}
-                name={`skus.${idx}.remainingQuantity`}
-                defaultValue={item.orderQuantity || 0}
+                name={`details.${idx}.remainingQuantity`}
+                defaultValue={detail.orderQuantity || 0}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input type="number" max={item.orderQuantity} placeholder="" {...field} />
+                      <Input type="number" max={detail.orderQuantity} placeholder="" {...field} onChange={(event) =>
+                        field.onChange(+event.target.value)
+                      } />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

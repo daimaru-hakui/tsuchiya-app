@@ -15,8 +15,9 @@ import OrderShippingTable from "./order-shipping-table";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Order, OrderDetail, CreateShipping } from "@/types";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import OrderRemainingTable from "./order-remaining-table";
+import { useShipping } from "@/hooks/useShipping";
 
 interface Props {
   order: Order;
@@ -26,20 +27,27 @@ interface Props {
 export default function OrderShippingModal({ order, orderDetails }: Props) {
   const form = useForm<CreateShipping>();
   const [page, setPage] = useState(1);
+  const [isPending, startTransition] = useTransition();
+  const { createShipping } = useShipping();
 
   const onSubmit = (data: CreateShipping) => {
+    startTransition(async () => {
+      const a = { ...order, ...orderDetails, ...data };
+      console.log(a);
+      await createShipping(a, order.id);
+    });
     console.log(data);
   };
 
   const handleRemainingOrderChange = () => {
-    const skus = form.getValues("skus");
-    console.log(skus);
-    skus.forEach((sku, idx: number) => {
-      form.setValue(`skus.${idx}`, {
-        id: sku.id,
-        quantity: sku.quantity,
-        shippingQuantity: sku.shippingQuantity,
-        remainingQuantity: Number(sku.quantity) - Number(sku.shippingQuantity)
+    const details = form.getValues("details");
+    details.forEach((detail, idx: number) => {
+      form.setValue(`details.${idx}`, {
+        id: detail.id,
+        skuId: detail.skuId,
+        quantity: detail.quantity,
+        shippingQuantity: detail.shippingQuantity,
+        remainingQuantity: Number(detail.quantity) - Number(detail.shippingQuantity)
       });
     });
   };

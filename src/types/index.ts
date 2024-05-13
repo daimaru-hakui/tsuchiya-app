@@ -49,6 +49,7 @@ export interface Order {
   tel: string;
   status: "pending";
   memo: string;
+  userId: string;
 }
 
 export interface OrderDetail {
@@ -68,20 +69,84 @@ export interface OrderDetail {
   quantity: number;
   inseam?: number | null;
   memo?: string;
-  parentRef: any;
   sortNum: number;
   createdAt: any;
   updatedAt: any;
 }
 
-export interface CreateShipping {
-  skus: {
-    id: string;
-    quantity: number;
-    shippingQuantity: number;
-    remainingQuantity: number;
-  }[];
+export type Shipping = {
+  id: string;
+  orderId: string;
+  orderRef: DocumentReference<DocumentData, DocumentData>;
+  serialNumber: number;
+  section: string;
+  employeeCode: string;
+  initial: string;
+  username: string;
+  companyName: boolean;
+  position: string;
+  siteCode: string;
+  siteName: string;
+  zipCode: string;
+  address: string;
+  tel: string;
+  status: "pending";
+  memo: string;
+  userId: string;
+  createdAt: any;
+  updatedAt: any;
+};
+
+export interface ShippingDetail {
+  id: string;
+  shippingId: string;
+  shippingRef: DocumentReference<DocumentData, DocumentData>;
+  orderDetailId: string;
+  orderDetailRef: DocumentReference<DocumentData, DocumentData>;
+  skuId: string;
+  skuRef: DocumentReference<DocumentData, DocumentData>;
+  productNumber: string;
+  productName: string;
+  size: string;
+  price: number;
+  salePrice: number;
+  costPrice: number;
+  quantity: number;
+  inseam?: number | null;
+  memo?: string;
+  sortNum: number;
+  createdAt: any;
+  updatedAt: any;
 }
+
+export const CreateShippingShema = z.object({
+  orderId: z.string(),
+  section: z.string(),
+  employeeCode: z
+    .string(),
+  initial: z.string(),
+  username: z.string(),
+  companyName: z.boolean(),
+  position: z.string(),
+  details: z
+    .object({
+      id: z.string(),
+      skuId: z.string(),
+      quantity: z.number(),
+      inseam: z.number().optional(),
+      shippingQuantity: z.number(),
+      remainingQuantity: z.number()
+    })
+    .array(),
+  siteCode: z.string(),
+  siteName: z.string(),
+  zipCode: z.string(),
+  address: z.string(),
+  tel: z.string(),
+  memo: z.string().optional(),
+});
+
+export type CreateShipping = z.infer<typeof CreateShippingShema>;
 
 export interface AdminUser {
   uid: string;
@@ -169,3 +234,5 @@ export const UpdateSkuSchema = z.object({
 });
 
 export type UpdateSku = z.infer<typeof UpdateSkuSchema>;
+
+

@@ -10,7 +10,7 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { OrderDetail, CreateShipping } from "@/types";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 
 interface Props {
   orderDetails: OrderDetail[];
@@ -34,40 +34,48 @@ export default function OrderShippingTable({ orderDetails, form }: Props) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {orderDetails?.map((item, idx) => (
-          <TableRow key={item.id}>
-            <TableCell>{item.productNumber}</TableCell>
-            <TableCell >{item.productName}</TableCell>
-            <TableCell className="text-center">{item.size}</TableCell>
-            <TableCell className="text-right">{item.orderQuantity}</TableCell>
-            <TableCell className="text-right">{item.quantity}</TableCell>
+        {orderDetails?.map((detail, idx) => (
+          <TableRow key={detail.id}>
+            <TableCell>{detail.productNumber}</TableCell>
+            <TableCell >{detail.productName}</TableCell>
+            <TableCell className="text-center">{detail.size}</TableCell>
+            <TableCell className="text-right">{detail.orderQuantity}</TableCell>
+            <TableCell className="text-right">{detail.quantity}</TableCell>
             <TableCell className="w-[120px]">
               <input
                 className="hidden"
-                {...form.register(`skus.${idx}.id`)}
-                defaultValue={item.id}
+                {...form.register(`details.${idx}.id`)}
+                defaultValue={detail.id}
               />
               <input
                 className="hidden"
-                {...form.register(`skus.${idx}.quantity`)}
-                defaultValue={item.quantity}
+                {...form.register(`details.${idx}.skuId`)}
+                defaultValue={detail.skuId}
+              />
+              <input
+                type="number"
+                className="hidden"
+                {...form.register(`details.${idx}.quantity`, { valueAsNumber: true })}
+                defaultValue={Number(detail.quantity)}
               />
               <FormField
                 control={form.control}
-                name={`skus.${idx}.shippingQuantity`}
-                defaultValue={item.quantity}
+                name={`details.${idx}.shippingQuantity`}
+                defaultValue={Number(detail.quantity)}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input type="number" max={item.orderQuantity} placeholder="" {...field} />
+                      <Input type="number" max={detail.quantity} placeholder="" {...field} onChange={(event) =>
+                        field.onChange(+event.target.value)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </TableCell>
-            <TableCell className="text-right">{item?.memo}</TableCell>
-            <TableCell className="text-right">{item?.inseam && `${item.inseam}cm`}</TableCell>
+            <TableCell className="text-right">{detail?.memo}</TableCell>
+            <TableCell className="text-right">{detail?.inseam && `${detail.inseam}cm`}</TableCell>
           </TableRow>
         ))}
       </TableBody>

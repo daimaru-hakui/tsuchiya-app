@@ -53,6 +53,7 @@ export default function OrderCreateForm() {
     const result = confirm("登録して宜しいでしょうか");
     if (!result) return;
     startTransition(async () => {
+      // console.log(data);
       await createOrder(data);
     });
   };
