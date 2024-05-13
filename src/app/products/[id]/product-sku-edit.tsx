@@ -28,9 +28,10 @@ import { Loader2 } from "lucide-react";
 
 interface Props {
   sku: Sku;
+  updateSku:any
 }
 
-export default function ProductSkuEdit({ sku }: Props) {
+export default function ProductSkuEdit({ sku,updateSku }: Props) {
   const [open, setOpen] = useState(false);
   const [isloading, startTransaction] = useTransition();
   const form = useForm<UpdateSku>({
@@ -40,7 +41,8 @@ export default function ProductSkuEdit({ sku }: Props) {
   const onSubmit = (data: UpdateSku) => {
     console.log(sku.id);
     startTransaction(async () => {
-      await actions.updateSku(data, sku.parentId, sku.id);
+      await updateSku(data, sku.parentId, sku.id);
+      // await actions.updateSku(data, sku.parentId, sku.id);
       setOpen(false);
     });
   };

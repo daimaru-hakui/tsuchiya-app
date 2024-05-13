@@ -12,9 +12,10 @@ import Loading from "../../loading";
 
 interface Props {
   id: string;
+  updateSku:any
 }
 
-export default function ProductShow({ id }: Props) {
+export default function ProductShow({ id ,updateSku}: Props) {
   const [product, setProduct] = useState<Product>();
   const router = useRouter();
 
@@ -68,7 +69,7 @@ export default function ProductShow({ id }: Props) {
         </div>
         <ProductEdit product={product} />
         <div className="mt-3">
-          <ProductShowTable id={id} />
+          <ProductShowTable id={id} updateSku={updateSku}/>
         </div>
       </CardContent>
     </Card>
