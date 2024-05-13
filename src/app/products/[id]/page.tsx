@@ -7,10 +7,11 @@ interface Props {
   };
 }
 
-export default function ProductShowPage({ params }: Props) {
+export default async function ProductShowPage({ params }: Props) {
+  
   return (
     <div className="w-full flex items-center justify-center py-4">
-      <ProductShow id={params.id} />
+      <ProductShow id={params.id}  />
     </div>
   );
 }

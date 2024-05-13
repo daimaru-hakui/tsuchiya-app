@@ -16,6 +16,9 @@ const paths = {
   },
   orderShow(id: string) {
     return `/orders/${id}`;
+  },
+  adminAll() {
+    return `/admin`
   }
 };
 

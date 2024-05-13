@@ -9,6 +9,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ProductEdit from "./product-edit";
 import Loading from "../../loading";
+import { Toaster } from "@/components/ui/toaster";
 
 interface Props {
   id: string;
@@ -54,10 +55,6 @@ export default function ProductShow({ id }: Props) {
       <CardContent>
         <div className="flex flex-col gap-1">
           <div className="flex gap-3 text-sm">
-            <div>表示名</div>
-            <div>{product?.displayName}</div>
-          </div>
-          <div className="flex gap-3 text-sm">
             <div>品　番</div>
             <div>{product?.productNumber}</div>
           </div>
@@ -65,8 +62,14 @@ export default function ProductShow({ id }: Props) {
             <div>品　名</div>
             <div>{product?.productName}</div>
           </div>
+          <div className="flex gap-3 text-sm">
+            <div>表示名</div>
+            <div>{product?.displayName}</div>
+          </div>
         </div>
-        <ProductEdit product={product} />
+        <div className="mt-3">
+          <ProductEdit product={product} />
+        </div>
         <div className="mt-3">
           <ProductShowTable id={id} />
         </div>

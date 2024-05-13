@@ -30,20 +30,20 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { CreateOrder, CreateOrderSchema, Product, Sku } from "@/types";
-import * as actions from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { ToastContainer, toast } from 'react-toastify';
 import Loading from "@/app/loading";
+import { useOrder } from "@/hooks/useOrder";
 
 export default function OrderCreateForm() {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
   const [loading, setLoading] = useState(true);
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
+  const { createOrder } = useOrder();
 
   const form = useForm<CreateOrder>({
     resolver: zodResolver(CreateOrderSchema),
@@ -53,8 +53,7 @@ export default function OrderCreateForm() {
     const result = confirm("登録して宜しいでしょうか");
     if (!result) return;
     startTransition(async () => {
-      // console.log(data);
-      await actions.createOrder(data);
+      await createOrder(data);
     });
   };
 
