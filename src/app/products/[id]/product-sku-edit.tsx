@@ -3,9 +3,7 @@ import React, { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -23,8 +21,8 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { Sku, UpdateSku, UpdateSkuSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as actions from "@/actions";
 import { Loader2 } from "lucide-react";
+import { useProduct } from "@/hooks/useProduct";
 
 interface Props {
   sku: Sku;
@@ -33,15 +31,16 @@ interface Props {
 export default function ProductSkuEdit({ sku }: Props) {
   const [open, setOpen] = useState(false);
   const [isloading, startTransaction] = useTransition();
+  const { updateSku } = useProduct();
+
   const form = useForm<UpdateSku>({
-    resolver: zodResolver(UpdateSkuSchema)
+    resolver: zodResolver(UpdateSkuSchema),
   });
 
   const onSubmit = (data: UpdateSku) => {
     console.log(sku.id);
     startTransaction(async () => {
-      await actions.updateSku(data, sku.parentId, sku.id);
-      // await actions.updateSku(data, sku.parentId, sku.id);
+      await updateSku(data, sku.parentId, sku.id);
       setOpen(false);
     });
   };
@@ -51,7 +50,7 @@ export default function ProductSkuEdit({ sku }: Props) {
       <DialogTrigger asChild>
         <Button size="xs">編集</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[650px]" >
+      <DialogContent className="max-w-[650px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
@@ -71,7 +70,9 @@ export default function ProductSkuEdit({ sku }: Props) {
                           autoComplete="off"
                           placeholder="size"
                           {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
+                          onChange={(event) =>
+                            field.onChange(+event.target.value)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -93,7 +94,9 @@ export default function ProductSkuEdit({ sku }: Props) {
                           min={0}
                           autoComplete="off"
                           {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
+                          onChange={(event) =>
+                            field.onChange(+event.target.value)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -113,7 +116,9 @@ export default function ProductSkuEdit({ sku }: Props) {
                           min={0}
                           autoComplete="off"
                           {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
+                          onChange={(event) =>
+                            field.onChange(+event.target.value)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -133,7 +138,9 @@ export default function ProductSkuEdit({ sku }: Props) {
                           min={0}
                           autoComplete="off"
                           {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
+                          onChange={(event) =>
+                            field.onChange(+event.target.value)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -153,7 +160,9 @@ export default function ProductSkuEdit({ sku }: Props) {
                           min={0}
                           autoComplete="off"
                           {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
+                          onChange={(event) =>
+                            field.onChange(+event.target.value)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -173,7 +182,9 @@ export default function ProductSkuEdit({ sku }: Props) {
                           min={0}
                           autoComplete="off"
                           {...field}
-                          onChange={(event) => field.onChange(+event.target.value)}
+                          onChange={(event) =>
+                            field.onChange(+event.target.value)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -184,13 +195,14 @@ export default function ProductSkuEdit({ sku }: Props) {
             </DialogHeader>
             <DialogFooter className="mt-6 sm:justify-end gap-1">
               <Button
-                key='close'
+                key="close"
                 type="button"
                 variant="secondary"
                 onClick={() => {
                   form.reset();
                   setOpen(false);
-                }}>
+                }}
+              >
                 閉じる
               </Button>
               <Button disabled={isloading} type="submit">

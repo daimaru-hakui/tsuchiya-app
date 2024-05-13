@@ -12,13 +12,11 @@ import Loading from "../../loading";
 
 interface Props {
   id: string;
-  productServer: any;
 }
 
-export default function ProductShow({ id, productServer }: Props) {
+export default function ProductShow({ id  }: Props) {
   const [product, setProduct] = useState<Product>();
   const router = useRouter();
-  console.log("product",productServer)
 
   const handlePageBack = () => {
     router.back();

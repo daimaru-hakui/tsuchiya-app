@@ -9,15 +9,10 @@ interface Props {
 }
 
 export default async function ProductShowPage({ params }: Props) {
-  const snapShot = await db.collection("products").doc(params.id).get();
-  let product = JSON.stringify(snapShot.data());
-  product = JSON.parse(product) 
-  if(!product) return
-  console.log(product);
 
   return (
     <div className="w-full flex items-center justify-center py-4">
-      <ProductShow id={params.id} productServer={product} />
+      <ProductShow id={params.id}  />
     </div>
   );
 }
