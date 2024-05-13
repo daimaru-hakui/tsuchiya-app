@@ -59,7 +59,7 @@ export async function createOrder(
       const snapShot = await transaction.get(collRef);
       const skuDoc = snapShot.docs[0].data();
       const skuRef = db.collection("products").doc(skuDoc.parentId).collection("skus").doc(sku.id);
-      const data = { ...snapShot.docs[0]?.data(), ...sku, skuRef } as OrderDetail;
+      const data = { ...snapShot.docs[0]?.data(), ...sku, skuRef } as any;
       skuItems.push({
         ref: skuRef,
         doc: skuDoc,

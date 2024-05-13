@@ -2,7 +2,9 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -27,32 +29,39 @@ import {
 } from "@/components/ui/select";
 import { AdminUser, UpdatedAdminUser, UpdatedAdminUserSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import * as actions from "@/actions";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   user: AdminUser;
 }
 
 export default function AdminEditModal({ user }: Props) {
+  const [isPending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
   const form = useForm<UpdatedAdminUser>({
     resolver: zodResolver(UpdatedAdminUserSchema),
   });
 
   const onSubmit = (data: UpdatedAdminUser) => {
-    console.log(data);
+    startTransition(async () => {
+      await actions.updateRole(data, user);
+      setOpen(false);
+    });
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="xs">編集</Button>
       </DialogTrigger>
       <DialogContent className="w-[400px]">
-        <DialogHeader>
-          <DialogTitle>編集</DialogTitle>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>編集</DialogTitle>
               <div className="flex flex-col gap-6 mt-6">
                 <div>Email: {user.email}</div>
                 <FormField
@@ -63,7 +72,7 @@ export default function AdminEditModal({ user }: Props) {
                     <FormItem className="">
                       <FormLabel>表示名</FormLabel>
                       <FormControl>
-                        <Input placeholder="" {...field} />
+                        <Input autoComplete="off" placeholder="" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -82,7 +91,7 @@ export default function AdminEditModal({ user }: Props) {
                           defaultValue={field.value}
                         >
                           <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select a fruit" />
+                            <SelectValue placeholder="role" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
@@ -98,13 +107,26 @@ export default function AdminEditModal({ user }: Props) {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">
-                  更新
-                </Button>
               </div>
-            </form>
-          </Form>
-        </DialogHeader>
+            </DialogHeader>
+            <DialogFooter className="mt-6 sm:justify-start">
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => form.reset()}
+                >
+                  閉じる
+                </Button>
+              </DialogClose>
+              <Button disabled={isPending} type="submit" className="w-full">
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                更新
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

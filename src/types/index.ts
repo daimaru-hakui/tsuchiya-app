@@ -1,3 +1,4 @@
+import { DocumentData, DocumentReference } from "firebase/firestore";
 import { z } from "zod";
 
 export interface Product {
@@ -52,9 +53,10 @@ export interface Order {
 
 export interface OrderDetail {
   id: string;
-  parentId: string;
+  orderId: string;
+  orderRef: DocumentReference<DocumentData, DocumentData>;
   skuId: string;
-  skuRef: FirebaseFirestore.DocumentReference;
+  skuRef: DocumentReference<DocumentData, DocumentData>;
   productNumber: string;
   productName: string;
   size: string;
@@ -68,8 +70,8 @@ export interface OrderDetail {
   memo?: string;
   parentRef: any;
   sortNum: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: any;
+  updatedAt: any;
 }
 
 export interface CreateShipping {

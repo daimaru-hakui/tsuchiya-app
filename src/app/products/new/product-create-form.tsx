@@ -16,17 +16,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import React, { useEffect, useState, useTransition } from "react";
+import React, { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CreateProduct, CreateProductSchema, Product, Sku } from "@/types";
-import { createProduct } from "@/actions";
+import { CreateProduct, CreateProductSchema } from "@/types";
+// import { createProduct } from "@/actions";
+import { useProduct } from "@/hooks/useProduct";
 
 export default function ProductCreateForm() {
   const [isPending, startTransition] = useTransition();
+  const { createProduct } = useProduct();
 
   const form = useForm<CreateProduct>({
     resolver: zodResolver(CreateProductSchema),
@@ -56,14 +58,13 @@ export default function ProductCreateForm() {
   const onSubmit = async (data: CreateProduct) => {
     startTransition(async () => {
       const result = await createProduct(data);
-      if (result) {
-        return;
+      if (result !== "error") {
+        reset();
+        form.setValue("gender", data.gender, {
+          shouldDirty: true,
+        });
+        remove();
       }
-      reset();
-      form.setValue("gender", data.gender, {
-        shouldDirty: true
-      });
-      remove();
     });
   };
 
@@ -82,7 +83,6 @@ export default function ProductCreateForm() {
     },
   ];
 
-
   return (
     <Card className="w-full md:w-[600px]">
       <Form {...form}>
@@ -99,10 +99,7 @@ export default function ProductCreateForm() {
                 <FormItem>
                   <FormLabel>品番</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      placeholder="品番" {...field}
-                    />
+                    <Input autoComplete="off" placeholder="品番" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -117,10 +114,7 @@ export default function ProductCreateForm() {
                 <FormItem>
                   <FormLabel>商品名</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      placeholder="商品名" {...field}
-                    />
+                    <Input autoComplete="off" placeholder="商品名" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -135,10 +129,7 @@ export default function ProductCreateForm() {
                 <FormItem>
                   <FormLabel>表示名</FormLabel>
                   <FormControl>
-                    <Input
-                      autoComplete="off"
-                      placeholder="表示名" {...field}
-                    />
+                    <Input autoComplete="off" placeholder="表示名" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
