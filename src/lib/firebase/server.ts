@@ -17,5 +17,5 @@ export const firebaseAdmin =
     ),
   });
 
-export const auth = getAuth(firebaseAdmin);
-export const db = getFirestore(firebaseAdmin)
+export const auth = getAuth();
+export const db = getFirestore()

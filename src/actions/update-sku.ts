@@ -11,6 +11,7 @@ export async function updateSku(
   productId: string,
   skuId: string
 ): Promise<{ message: string | undefined; }> {
+  console.log(data)
   const result = UpdateSkuSchema.safeParse({
     size: data.size,
     salePrice: data.salePrice,
