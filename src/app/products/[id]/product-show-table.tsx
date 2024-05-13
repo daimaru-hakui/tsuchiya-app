@@ -15,10 +15,9 @@ import ProductSkuEdit from "./product-sku-edit";
 
 interface Props {
   id: string;
-  updateSku:any
 }
 
-export default function ProductShowTable({ id ,updateSku}: Props) {
+export default function ProductShowTable({ id }: Props) {
   const [skus, setSkus] = useState<Sku[]>([]);
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export default function ProductShowTable({ id ,updateSku}: Props) {
             <TableCell className="text-right">{sku.orderQuantity}</TableCell>
             <TableCell className="text-right">{sku.sortNum}</TableCell>
             <TableCell className="text-right">
-              <ProductSkuEdit sku={sku} updateSku={updateSku}/>
+              <ProductSkuEdit sku={sku} />
             </TableCell>
           </TableRow>
         ))}
