@@ -36,10 +36,12 @@ export function useOrder() {
       nemo: data.memo || "",
     });
 
-    const serialRef = doc(db, "serialNumbers", "orderNumber");
-    const orderRef = doc(collection(db, "orders"));
-
     await runTransaction(db, async (transaction) => {
+      const serialRef = doc(db, "serialNumbers", "orderNumber");
+      const orderRef = doc(collection(db, "orders"));
+
+      const serialDoc = await transaction.get(serialRef);
+
       if (!result.success) {
         throw new Error([result.error.formErrors.fieldErrors].join(","));
       }
@@ -54,11 +56,6 @@ export function useOrder() {
       if (filterSkus.length === 0) {
         throw new Error("数量を入力してください");
       }
-
-      const [serialDoc, orderDoc] = await Promise.all([
-        getDoc(serialRef),
-        getDoc(orderRef),
-      ]);
 
       let details: OrderDetail[] = [];
       let skuItems = [];
@@ -98,7 +95,7 @@ export function useOrder() {
         });
       }
 
-      const newCount = serialDoc.data()?.count + 1;
+      const newCount = (await serialDoc.data()?.count) + 1;
       transaction.update(serialRef, {
         count: newCount,
       });
@@ -119,6 +116,7 @@ export function useOrder() {
         tel: result.data.tel,
         memo: result.data.memo || "",
         status: "pending",
+        uid: session.data?.user.uid,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
@@ -139,6 +137,7 @@ export function useOrder() {
           quantity: detail.quantity,
           inseam: detail.inseam || null,
           sortNum: detail.sortNum,
+          uid: session.data?.user.uid,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });

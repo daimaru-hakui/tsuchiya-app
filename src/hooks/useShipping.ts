@@ -1,8 +1,28 @@
 import { toast } from "@/components/ui/use-toast";
 import { db } from "@/lib/firebase/client";
-import { CreateShipping, CreateShippingShema, OrderDetail, ShippingDetail, Sku } from "@/types";
+import {
+  CreateShipping,
+  CreateShippingShema,
+  OrderDetail,
+  ShippingDetail,
+  Sku,
+} from "@/types";
 import { format } from "date-fns";
-import { DocumentData, DocumentReference, collection, collectionGroup, doc, getDoc, getDocs, orderBy, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
+import {
+  DocumentData,
+  DocumentReference,
+  collection,
+  collectionGroup,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  runTransaction,
+  serverTimestamp,
+  where,
+} from "firebase/firestore";
 import { useSession } from "next-auth/react";
 
 export function useShipping() {
@@ -38,24 +58,21 @@ export function useShipping() {
         throw new Error("session error ログインしてください");
       }
 
-      const filterDetails = result.data.details
-        .filter((sku) => sku.id && sku.shippingQuantity > 0);
+      const filterDetails = result.data.details.filter(
+        (sku) => sku.id && sku.shippingQuantity > 0
+      );
 
       if (filterDetails.length === 0) {
         throw new Error("数量を入力してください");
       }
 
-      const [serialDoc, shippingDoc] = await Promise.all([
-        getDoc(serialRef),
-        getDoc(shippingRef),
-      ]);
+      
+      const serialDoc = await transaction.get(serialRef);
 
-      let details: (ShippingDetail & { shippingNumber: number; })[] = [];
-      let orderDetails: (
-        OrderDetail
-        & { orderDetailRef: DocumentReference<DocumentData, DocumentData>; }
-        & { remainingQuantity: number; }
-      )[] = [];
+      let details: (ShippingDetail & { shippingNumber: number })[] = [];
+      let orderDetails: (OrderDetail & {
+        orderDetailRef: DocumentReference<DocumentData, DocumentData>;
+      } & { remainingQuantity: number })[] = [];
       let skuItems = [];
 
       for (const detail of filterDetails) {
@@ -86,17 +103,16 @@ export function useShipping() {
         const data = {
           ...skuDoc.data(),
           skuRef,
-        } as ShippingDetail & { shippingNumber: number; };
+        } as ShippingDetail & { shippingNumber: number };
 
         skuItems.push({
           skuRef,
-          doc: { ...skuDoc.data() as Sku },
+          doc: { ...(skuDoc.data() as Sku) },
           detail,
         });
 
         details.push(data);
       }
-
       const newCount = serialDoc.data()?.count + 1;
       transaction.update(serialRef, {
         count: newCount,
@@ -108,13 +124,13 @@ export function useShipping() {
         }
         transaction.update(skuRef, {
           orderQuantity: doc.orderQuantity - detail.shippingQuantity,
-          stock: doc.stock - detail.shippingQuantity
+          stock: doc.stock - detail.shippingQuantity,
         });
       }
 
       for (const { orderDetailRef, remainingQuantity } of orderDetails) {
         transaction.update(orderDetailRef, {
-          quantity: remainingQuantity
+          quantity: remainingQuantity,
         });
       }
 
@@ -165,17 +181,26 @@ export function useShipping() {
         description: format(new Date(), "PPpp"),
       });
     }).catch((e: any) => {
-      console.log(e.message);
+      if (e instanceof (FirebaseError)) {
+        console.error(e.message);
+        toast({
+          title: e.message,
+          variant: "destructive",
+          description: format(new Date(), "PPpp"),
+        });
+        return
+      }
+      console.error(e.message);
       toast({
         title: e.message,
         variant: "destructive",
         description: format(new Date(), "PPpp"),
       });
-      return "error";
+      return
     });
   };
 
   return {
-    createShipping
+    createShipping,
   };
 }

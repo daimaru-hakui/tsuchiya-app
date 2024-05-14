@@ -11,10 +11,15 @@ import {
 import { format } from "date-fns";
 import {
   collection,
+  collectionGroup,
   doc,
   getDoc,
+  getDocs,
+  orderBy,
+  query,
   serverTimestamp,
   updateDoc,
+  where,
   writeBatch,
 } from "firebase/firestore";
 import { useSession } from "next-auth/react";
@@ -28,6 +33,7 @@ export function useProduct() {
       productName: data.productName,
       displayName: data.displayName,
       isInseam: data.isInseam,
+      isMark:data.isMark,
       gender: data.gender,
       skus: data.skus,
     });
@@ -74,7 +80,7 @@ export function useProduct() {
         });
       });
       await batch.commit();
-      console.log("成功")
+      console.log("成功");
       toast({
         title: "登録しました",
         variant: "success",
@@ -87,7 +93,7 @@ export function useProduct() {
         variant: "destructive",
         description: format(new Date(), "PPpp"),
       });
-      return "error"
+      return "error";
     }
   };
 
@@ -97,6 +103,7 @@ export function useProduct() {
       productName: data.productName,
       displayName: data.displayName,
       isInseam: data.isInseam,
+      isMark: data.isMark,
       gender: data.gender,
     });
 
@@ -108,9 +115,24 @@ export function useProduct() {
         throw new Error("session error ログインしてください");
       }
       const productRef = doc(db, "products", productId);
-      updateDoc(productRef, {
+      await updateDoc(productRef, {
         ...result.data,
       });
+
+      const skusRef = collectionGroup(db, "skus");
+      const q = query(skusRef,orderBy("sortNum","asc"), where("parentId", "==", productId));
+      const snapshot = await getDocs(q);
+      for (const doc of snapshot.docs) {
+        await updateDoc(doc.ref, {
+          productNumber: data.productNumber,
+          productName: data.productName,
+          displayName: data.displayName,
+          isInseam: data.isInseam,
+          isMark: data.isMark,
+          gender: data.gender,
+        });
+      }
+
       toast({
         title: "更新しました",
         variant: "success",
