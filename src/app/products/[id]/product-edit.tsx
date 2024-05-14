@@ -150,6 +150,25 @@ export default function ProductEdit({ product }: Props) {
                 />
                 <FormField
                   control={form.control}
+                  name="isMark"
+                  defaultValue={product.isMark || false}
+                  render={({ field }) => (
+                    <FormItem className="flex items-end flex-row gap-3">
+                      <div className="">
+                        <FormLabel className="text-base mt-2">刺繍</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={(e) => field.onChange(e.valueOf())}
+                          aria-readonly
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="gender"
                   defaultValue={product.gender}
                   render={({ field }) => (

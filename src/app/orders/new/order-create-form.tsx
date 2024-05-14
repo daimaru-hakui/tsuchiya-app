@@ -85,8 +85,8 @@ export default function OrderCreateForm() {
           return parentSkus.map((sku) => ({ ...product, ...sku }));
         });
         setItems(filterSkus);
-      } catch (e) {
-        console.log(e);
+      } catch (e:any) {
+        console.log(e.message);
       } finally {
         setLoading(false);
       }

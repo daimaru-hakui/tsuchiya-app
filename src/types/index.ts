@@ -7,6 +7,7 @@ export interface Product {
   productName: string;
   sortNum: number;
   isInseam: boolean;
+  isMark: boolean;
   displayName: string;
   gender: "man" | "woman" | "other";
   createdAt: any;
@@ -18,6 +19,7 @@ export interface Sku {
   productNumber: string;
   productName: string;
   isInseam: boolean;
+  isMark: boolean;
   displayName: string;
   gender: "man" | "woman" | "other";
   parentId: string;
@@ -49,7 +51,9 @@ export interface Order {
   tel: string;
   status: "pending";
   memo: string;
-  userId: string;
+  uid: string;
+  createdAt: any;
+  updatedAt: any;
 }
 
 export interface OrderDetail {
@@ -70,6 +74,7 @@ export interface OrderDetail {
   inseam?: number | null;
   memo?: string;
   sortNum: number;
+  uid:string;
   createdAt: any;
   updatedAt: any;
 }
@@ -122,8 +127,7 @@ export interface ShippingDetail {
 export const CreateShippingShema = z.object({
   orderId: z.string(),
   section: z.string(),
-  employeeCode: z
-    .string(),
+  employeeCode: z.string(),
   initial: z.string(),
   username: z.string(),
   companyName: z.boolean(),
@@ -135,7 +139,7 @@ export const CreateShippingShema = z.object({
       quantity: z.number(),
       inseam: z.number().optional(),
       shippingQuantity: z.number(),
-      remainingQuantity: z.number()
+      remainingQuantity: z.number(),
     })
     .array(),
   siteCode: z.string(),
@@ -197,6 +201,7 @@ export const CreateProductSchema = z.object({
   }),
   displayName: z.string().min(1, { message: "入力してください。" }),
   isInseam: z.boolean(),
+  isMark: z.boolean(),
   gender: z.enum(["other", "man", "woman"]),
   skus: z.array(
     z.object({
@@ -219,6 +224,7 @@ export const UpdateProductSchema = z.object({
   }),
   displayName: z.string().min(1, { message: "入力してください。" }),
   isInseam: z.boolean(),
+  isMark: z.boolean(),
   gender: z.enum(["other", "man", "woman"]),
 });
 
@@ -234,5 +240,3 @@ export const UpdateSkuSchema = z.object({
 });
 
 export type UpdateSku = z.infer<typeof UpdateSkuSchema>;
-
-

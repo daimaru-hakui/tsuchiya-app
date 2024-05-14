@@ -50,6 +50,7 @@ export default function ProductList() {
               <TableHead>品番</TableHead>
               <TableHead>品名</TableHead>
               <TableHead>性別</TableHead>
+              <TableHead>刺繍</TableHead>
               <TableHead>裾上げ</TableHead>
             </TableRow>
           </TableHeader>
@@ -65,6 +66,7 @@ export default function ProductList() {
                 <TableCell>{product.productNumber}</TableCell>
                 <TableCell>{product.productName}</TableCell>
                 <TableCell>{product.gender}</TableCell>
+                <TableCell>{product.isMark && "あり"}</TableCell>
                 <TableCell>{product.isInseam && "あり"}</TableCell>
               </TableRow>
             ))}
