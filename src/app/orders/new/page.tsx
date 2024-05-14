@@ -5,8 +5,10 @@ import { Product, Sku } from "@/types";
 export default async function OrderCreate() {
 
   const productsDoc = await db.collection("products").orderBy("sortNum", "asc").get();
-  const products = productsDoc.docs
+  const dataProduct = productsDoc.docs
     .map(doc => ({ ...doc.data(), id: doc.id } as Product));
+  const jsonProduct = JSON.stringify(dataProduct);
+  const products = JSON.parse(jsonProduct);
 
   const skuDocs = await db.collectionGroup("skus").get();
   const data = skuDocs.docs.map(doc => ({ ...doc.data() } as Sku));
