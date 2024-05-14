@@ -6,7 +6,7 @@ import { FieldValue } from "firebase-admin/firestore";
 
 export async function createOrder(
   data: CreateOrder
-): Promise<string | undefined> {
+): Promise<{ status: string; message: string; }> {
   const result = CreateOrderSchema.safeParse({
     section: data.section,
     employeeCode: data.employeeCode,
@@ -24,28 +24,38 @@ export async function createOrder(
   });
 
   if (!result.success) {
-    console.log(result.error.formErrors);
-    return "error";
+    console.log(result.error.flatten().formErrors.join(','));
+    return {
+      status: "error",
+      message: result.error.flatten().formErrors.join(',')
+    };
   }
 
   const session = await auth();
   if (!session) {
     console.log("no session");
-    return "error";
+    return {
+      status: "error",
+      message: "認証してください"
+    };
   }
 
   const filterSkus = result.data.skus.filter(
     product => product.id && product.quantity >= 0
   ).map((sku, idx) => ({ ...sku, sortNum: idx + 1 }));
 
+  if (filterSkus.length === 0) {
+    return {
+      status: "error",
+      message: "数量を入力してください"
+    };
+  }
+
   const serialRef = db.collection("serialNumbers").doc("orderNumber");
   const orderRef = db.collection("orders").doc();
 
   await db.runTransaction(async (transaction) => {
-    const [serialDoc, orderDoc] = await Promise.all([
-      serialRef.get(),
-      orderRef.get(),
-    ]);
+    const serialDoc = await transaction.get(serialRef);
 
     let details: OrderDetail[] = [];
     let skuItems = [];
@@ -87,6 +97,7 @@ export async function createOrder(
       initial: result.data.initial,
       username: result.data.username,
       position: result.data.position,
+      companyName: result.data.companyName,
       siteCode: result.data.siteCode,
       siteName: result.data.siteName,
       zipCode: result.data.zipCode,
@@ -94,6 +105,7 @@ export async function createOrder(
       tel: result.data.tel,
       memo: result.data.memo || "",
       status: "pending",
+      uid: session.user.uid,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp()
     });
@@ -101,6 +113,7 @@ export async function createOrder(
     for (const detail of details) {
       transaction.set(orderRef.collection("orderDetails").doc(), {
         orderId: orderRef.id,
+        orderRef: orderRef,
         serialNumber: newCount,
         skuId: detail.id,
         skuRef: detail.skuRef,
@@ -113,13 +126,28 @@ export async function createOrder(
         quantity: detail.quantity,
         inseam: detail.inseam || null,
         sortNum: detail.sortNum,
+        uid: session.user.uid,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp()
       });
     }
-  }).catch((e) => {
-    console.error(e);
+  }
+  ).catch((e: unknown) => {
+    if (e instanceof Error) {
+      console.error(e.message);
+      return {
+        status: "error",
+        message: e.message
+      };
+    } else {
+      return {
+        status: "error",
+        message: "登録が失敗しました"
+      };
+    }
   });
-
-  return;
+  return {
+    status: "success",
+    message: "登録しました"
+  };
 }

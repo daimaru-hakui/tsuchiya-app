@@ -37,13 +37,23 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/app/loading";
 import { useOrder } from "@/hooks/useOrder";
+import * as actions from "@/actions";
+import { toast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
 
-export default function OrderCreateForm() {
+interface Props {
+  products: Product[];
+  skus: Sku[];
+}
+
+export default function OrderCreateForm({ products, skus }: Props) {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
   const [loading, setLoading] = useState(true);
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
-  const { createOrder } = useOrder();
+  // const { createOrder } = useOrder();
+  console.log(products);
+  console.log(skus);
 
   const form = useForm<CreateOrder>({
     resolver: zodResolver(CreateOrderSchema),
@@ -53,8 +63,20 @@ export default function OrderCreateForm() {
     const result = confirm("登録して宜しいでしょうか");
     if (!result) return;
     startTransition(async () => {
-      // console.log(data);
-      await createOrder(data);
+      const result = await actions.createOrder(data);
+      if (result.status === "success") {
+        toast({
+          title: "登録しました",
+          variant: "success",
+          description: format(new Date(), "PPpp"),
+        });
+      } else if (result.status === "error") {
+        toast({
+          title: result?.message,
+          variant: "destructive",
+          description: format(new Date(), "PPpp"),
+        });
+      }
     });
   };
 
@@ -85,7 +107,7 @@ export default function OrderCreateForm() {
           return parentSkus.map((sku) => ({ ...product, ...sku }));
         });
         setItems(filterSkus);
-      } catch (e:any) {
+      } catch (e: any) {
         console.log(e.message);
       } finally {
         setLoading(false);
