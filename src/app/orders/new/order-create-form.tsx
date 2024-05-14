@@ -51,9 +51,6 @@ export default function OrderCreateForm({ products, skus }: Props) {
   const [loading, setLoading] = useState(true);
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
-  // const { createOrder } = useOrder();
-  console.log(products);
-  console.log(skus);
 
   const form = useForm<CreateOrder>({
     resolver: zodResolver(CreateOrderSchema),
@@ -85,20 +82,6 @@ export default function OrderCreateForm({ products, skus }: Props) {
   useEffect(() => {
     const getItems = async () => {
       try {
-        const productsRef = collection(db, "products");
-        const q = query(productsRef, orderBy("sortNum", "asc"));
-        const productsSnap = await getDocs(q);
-        const products = productsSnap.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() } as Product)
-        );
-
-        const skusRef = collectionGroup(db, "skus");
-        const skusSnap = await getDocs(skusRef);
-
-        const skus = skusSnap.docs
-          .map((doc) => ({ ...doc.data(), id: doc.id } as Sku))
-          .sort((a, b) => (a.sortNum < b.sortNum ? -1 : 1));
-
         const filterProducts = products.filter(
           (product) => product.gender === "other" || product.gender === gender
         );
@@ -114,7 +97,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
       }
     };
     getItems();
-  }, [gender]);
+  }, [gender, products, skus]);
 
   const getAddress = async () => {
     const zipCode = form.getValues("zipCode");

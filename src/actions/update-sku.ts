@@ -1,17 +1,14 @@
 "use server";
-
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import paths from "@/paths";
 import { UpdateSku, UpdateSkuSchema } from "@/types";
-import { redirect } from "next/navigation";
 
 export async function updateSku(
   data: UpdateSku,
   productId: string,
   skuId: string
-): Promise<{ message: string | undefined; }> {
-  console.log(data)
+): Promise<{ status: string, message: string; }> {
+
   const result = UpdateSkuSchema.safeParse({
     size: data.size,
     salePrice: data.salePrice,
@@ -22,9 +19,10 @@ export async function updateSku(
   });
 
   if (!result.success) {
-    console.log(result.error.formErrors.fieldErrors);
+    console.log(result.error.flatten().formErrors.join(','));
     return {
-      message: "zod error",
+      status: "error",
+      message: result.error.flatten().formErrors.join(',')
     };
   }
 
@@ -32,15 +30,13 @@ export async function updateSku(
   if (!session) {
     console.log("no session");
     return {
-      message: "session error",
+      status: "error",
+      message: "認証エラー"
     };
   }
 
   const productDoc = await db.collection("products").doc(productId).get();
   const product = productDoc.data();
-
-  console.log(product);
-  console.log(skuId);
 
   try {
     const skuRef = db
@@ -58,11 +54,22 @@ export async function updateSku(
       orderQuantity: result.data.orderQuantity,
       sortNum: result.data.sortNum,
     });
-  } catch (e: any) {
-    console.error(e);
-    return {
-      message: e.message,
-    };
-  }
-  redirect(paths.productShow(productId));
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error(e.message);
+      return {
+        status: "error",
+        message: e.message
+      };
+    } else {
+      return {
+        status: "error",
+        message: "更新が失敗しました"
+      };
+    }
+  };
+  return {
+    status: "success",
+    message: "更新しました"
+  };
 }

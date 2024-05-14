@@ -36,7 +36,7 @@ export async function createOrder(
     console.log("no session");
     return {
       status: "error",
-      message: "認証してください"
+      message: "認証エラー"
     };
   }
 
@@ -131,8 +131,7 @@ export async function createOrder(
         updatedAt: FieldValue.serverTimestamp()
       });
     }
-  }
-  ).catch((e: unknown) => {
+  }).catch((e: unknown) => {
     if (e instanceof Error) {
       console.error(e.message);
       return {
