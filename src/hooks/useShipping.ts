@@ -15,7 +15,6 @@ import {
   collection,
   collectionGroup,
   doc,
-  getDoc,
   getDocs,
   orderBy,
   query,
@@ -66,13 +65,13 @@ export function useShipping() {
         throw new Error("数量を入力してください");
       }
 
-      
+
       const serialDoc = await transaction.get(serialRef);
 
-      let details: (ShippingDetail & { shippingNumber: number })[] = [];
+      let details: (ShippingDetail & { shippingNumber: number; })[] = [];
       let orderDetails: (OrderDetail & {
         orderDetailRef: DocumentReference<DocumentData, DocumentData>;
-      } & { remainingQuantity: number })[] = [];
+      } & { remainingQuantity: number; })[] = [];
       let skuItems = [];
 
       for (const detail of filterDetails) {
@@ -103,7 +102,7 @@ export function useShipping() {
         const data = {
           ...skuDoc.data(),
           skuRef,
-        } as ShippingDetail & { shippingNumber: number };
+        } as ShippingDetail & { shippingNumber: number; };
 
         skuItems.push({
           skuRef,
@@ -113,6 +112,7 @@ export function useShipping() {
 
         details.push(data);
       }
+
       const newCount = serialDoc.data()?.count + 1;
       transaction.update(serialRef, {
         count: newCount,
@@ -188,7 +188,7 @@ export function useShipping() {
           variant: "destructive",
           description: format(new Date(), "PPpp"),
         });
-        return
+        return;
       }
       console.error(e.message);
       toast({
@@ -196,7 +196,7 @@ export function useShipping() {
         variant: "destructive",
         description: format(new Date(), "PPpp"),
       });
-      return
+      return;
     });
   };
 

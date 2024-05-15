@@ -24,11 +24,11 @@ import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreateProduct, CreateProductSchema } from "@/types";
 import * as actions from "@/actions";
-import { toast } from "@/components/ui/use-toast";
-import { format } from "date-fns";
+import { useToast } from "@/hooks/useToast";
 
 export default function ProductCreateForm() {
   const [isPending, startTransition] = useTransition();
+  const toast = useToast();
 
   const form = useForm<CreateProduct>({
     resolver: zodResolver(CreateProductSchema),
@@ -57,26 +57,11 @@ export default function ProductCreateForm() {
 
   const onSubmit = async (data: CreateProduct) => {
     startTransition(async () => {
+      const setValue = form.setValue("gender", data.gender, {
+        shouldDirty: true,
+      });
       const result = await actions.createProduct(data);
-      if (result.status === "success") {
-        toast({
-          title: "登録しました",
-          variant: "success",
-          description: format(new Date(), "PPpp"),
-        });
-
-        reset();
-        form.setValue("gender", data.gender, {
-          shouldDirty: true,
-        });
-        remove();
-      } else if (result.status === "error") {
-        toast({
-          title: result.message,
-          variant: "destructive",
-          description: format(new Date(), "PPpp"),
-        });
-      }
+      toast(result, { reset, remove, setValue });
     });
   };
 
@@ -285,4 +270,4 @@ export default function ProductCreateForm() {
       </Form>
     </Card>
   );
-}
+};

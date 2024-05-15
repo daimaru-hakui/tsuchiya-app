@@ -22,10 +22,8 @@ import { useForm } from "react-hook-form";
 import { Sku, UpdateSku, UpdateSkuSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useProduct } from "@/hooks/useProduct";
 import * as actions from "@/actions";
-import { toast } from "@/components/ui/use-toast";
-import { format } from "date-fns";
+import { useToast } from "@/hooks/useToast";
 
 interface Props {
   sku: Sku;
@@ -34,29 +32,16 @@ interface Props {
 export default function ProductSkuEdit({ sku }: Props) {
   const [open, setOpen] = useState(false);
   const [isloading, startTransaction] = useTransition();
+  const toast = useToast();
 
   const form = useForm<UpdateSku>({
     resolver: zodResolver(UpdateSkuSchema),
   });
 
   const onSubmit = (data: UpdateSku) => {
-    console.log(sku.id);
     startTransaction(async () => {
       const result = await actions.updateSku(data, sku.parentId, sku.id);
-      if (result.status === "success") {
-        toast({
-          title: "登録しました",
-          variant: "success",
-          description: format(new Date(), "PPpp"),
-        });
-        setOpen(false);
-      } else if (result.status === "error") {
-        toast({
-          title: result?.message,
-          variant: "destructive",
-          description: format(new Date(), "PPpp"),
-        });
-      }
+      toast(result, { setOpen });
     });
   };
 
@@ -230,4 +215,4 @@ export default function ProductSkuEdit({ sku }: Props) {
       </DialogContent>
     </Dialog>
   );
-}
+};

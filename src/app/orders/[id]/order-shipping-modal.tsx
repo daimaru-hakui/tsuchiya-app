@@ -17,7 +17,8 @@ import { useForm } from "react-hook-form";
 import { Order, OrderDetail, CreateShipping } from "@/types";
 import { useState, useTransition } from "react";
 import OrderRemainingTable from "./order-remaining-table";
-import { useShipping } from "@/hooks/useShipping";
+import * as actions from "@/actions";
+import { useToast } from "@/hooks/useToast";
 
 interface Props {
   order: Order;
@@ -28,15 +29,18 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
   const form = useForm<CreateShipping>();
   const [page, setPage] = useState(1);
   const [isPending, startTransition] = useTransition();
-  const { createShipping } = useShipping();
+  const toast = useToast();
 
   const onSubmit = (data: CreateShipping) => {
     startTransition(async () => {
-      const a = { ...order, ...orderDetails, ...data };
-      console.log(a);
-      await createShipping(a, order.id);
+      const d = { ...order, ...data, createdAt: "", updatedAt: "" };
+      const result = await actions.createShipping(d, order.id);
+      toast(result, { reset });
     });
-    console.log(data);
+  };
+
+  const reset = () => {
+    form.reset();
   };
 
   const handleRemainingOrderChange = () => {

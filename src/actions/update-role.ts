@@ -32,7 +32,7 @@ export async function updateRole(
   if (session.user.email !== "mukai@daimaru-hakui.co.jp") {
     return {
       status: "error",
-      message: "no admin"
+      message: "認証エラー"
     };
   }
 
@@ -45,10 +45,6 @@ export async function updateRole(
     await firebaseAuth.updateUser(user.uid, {
       displayName: result.data.displayName,
     });
-    return {
-      status: "success",
-      message: "更新しました"
-    };
   } catch (e: any) {
     console.log(e);
     return {
@@ -56,5 +52,9 @@ export async function updateRole(
       message: e.message,
     };
   }
+  return {
+    status: "success",
+    message: "更新しました"
+  };
 
 }

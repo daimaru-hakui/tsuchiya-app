@@ -35,11 +35,8 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import Loading from "@/app/loading";
-import { useOrder } from "@/hooks/useOrder";
 import * as actions from "@/actions";
-import { toast } from "@/components/ui/use-toast";
-import { format } from "date-fns";
+import { useToast } from "@/hooks/useToast";
 
 interface Props {
   products: Product[];
@@ -50,6 +47,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
+  const toast = useToast();
 
   const form = useForm<CreateOrder>({
     resolver: zodResolver(CreateOrderSchema),
@@ -60,19 +58,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
     if (!result) return;
     startTransition(async () => {
       const result = await actions.createOrder(data);
-      if (result.status === "success") {
-        toast({
-          title: result.message,
-          variant: "success",
-          description: format(new Date(), "PPpp"),
-        });
-      } else if (result.status === "error") {
-        toast({
-          title: result?.message,
-          variant: "destructive",
-          description: format(new Date(), "PPpp"),
-        });
-      }
+      toast(result);
     });
   };
 
@@ -91,7 +77,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
         setItems(filterSkus);
       } catch (e: any) {
         console.log(e.message);
-      } 
+      }
     };
     getItems();
   }, [gender, products, skus]);

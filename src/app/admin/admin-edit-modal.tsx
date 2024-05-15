@@ -33,6 +33,7 @@ import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as actions from "@/actions";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/useToast";
 
 interface Props {
   user: AdminUser;
@@ -41,14 +42,16 @@ interface Props {
 export default function AdminEditModal({ user }: Props) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const toast = useToast();
+
   const form = useForm<UpdatedAdminUser>({
     resolver: zodResolver(UpdatedAdminUserSchema),
   });
 
   const onSubmit = (data: UpdatedAdminUser) => {
     startTransition(async () => {
-      await actions.updateRole(data, user);
-      setOpen(false);
+      const result = await actions.updateRole(data, user);
+      toast(result, { setOpen });
     });
   };
 
