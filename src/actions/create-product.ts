@@ -1,19 +1,18 @@
 "use server";
-
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import paths from "@/paths";
 import { CreateProduct, CreateProductSchema } from "@/types";
-import { redirect } from "next/navigation";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function createProduct(data: CreateProduct):
-  Promise<{ message: string | undefined; }> {
+  Promise<{ status: string, message: string; }> {
 
   const result = CreateProductSchema.safeParse({
     productNumber: data.productNumber,
     productName: data.productName,
     displayName: data.displayName,
     isInseam: data.isInseam,
+    isMark: data.isMark,
     gender: data.gender,
     skus: data.skus
   });
@@ -21,6 +20,7 @@ export async function createProduct(data: CreateProduct):
   if (!result.success) {
     console.log(result.error);
     return {
+      status: "error",
       message: "バリデーション エラー"
     };
   }
@@ -29,6 +29,7 @@ export async function createProduct(data: CreateProduct):
   if (!session) {
     console.log("no session");
     return {
+      status: "error",
       message: "認証エラー"
     };
   }
@@ -42,13 +43,15 @@ export async function createProduct(data: CreateProduct):
       productName: result.data.productName,
       displayName: result.data.displayName,
       isInseam: result.data.isInseam,
+      isMark: result.data.isMark,
       gender: result.data.gender,
       sortNum: 0,
-      // createdAt: serverTimestamp(),
-      // updatedAt: serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
     data.skus.forEach((sku, idx) => {
-      const docRef = db.collection("products").doc(productRef.id).collection("skus").doc();
+      const docRef = db.collection("products")
+        .doc(productRef.id).collection("skus").doc();
       batch.set(docRef, {
         id: docRef.id,
         size: sku.size,
@@ -63,17 +66,29 @@ export async function createProduct(data: CreateProduct):
         productName: result.data.productName,
         displayName: result.data.displayName,
         isInseam: result.data.isInseam,
+        isMark: result.data.isMark,
         gender: result.data.gender,
-        // createdAt: serverTimestamp(),
-        // updatedAt: serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
     });
     await batch.commit();
-  } catch (e) {
-    console.log(e);
-    return {
-      message: "error"
-    };
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.log(e.message);
+      return {
+        status: "error",
+        message: e.message
+      };
+    } else {
+      return {
+        status: "error",
+        message: "登録が失敗しました"
+      };
+    }
   }
-  redirect(paths.productNew());
+  return {
+    status: "success",
+    message: "登録しました"
+  };
 }

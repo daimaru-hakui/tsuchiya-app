@@ -51,6 +51,7 @@ export interface Order {
   tel: string;
   status: "pending";
   memo: string;
+  applicant: string;
   uid: string;
   createdAt: any;
   updatedAt: any;
@@ -74,7 +75,7 @@ export interface OrderDetail {
   inseam?: number | null;
   memo?: string;
   sortNum: number;
-  uid:string;
+  uid: string;
   createdAt: any;
   updatedAt: any;
 }
@@ -187,6 +188,7 @@ export const CreateOrderSchema = z.object({
   zipCode: z.string(),
   address: z.string(),
   tel: z.string(),
+  applicant: z.string(),
   memo: z.string().optional(),
 });
 

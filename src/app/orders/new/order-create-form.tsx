@@ -37,13 +37,19 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import Loading from "@/app/loading";
 import { useOrder } from "@/hooks/useOrder";
+import * as actions from "@/actions";
+import { toast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
 
-export default function OrderCreateForm() {
+interface Props {
+  products: Product[];
+  skus: Sku[];
+}
+
+export default function OrderCreateForm({ products, skus }: Props) {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
-  const [loading, setLoading] = useState(true);
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
-  const { createOrder } = useOrder();
 
   const form = useForm<CreateOrder>({
     resolver: zodResolver(CreateOrderSchema),
@@ -53,46 +59,46 @@ export default function OrderCreateForm() {
     const result = confirm("登録して宜しいでしょうか");
     if (!result) return;
     startTransition(async () => {
-      // console.log(data);
-      await createOrder(data);
+      const result = await actions.createOrder(data);
+      if (result.status === "success") {
+        toast({
+          title: result.message,
+          variant: "success",
+          description: format(new Date(), "PPpp"),
+        });
+      } else if (result.status === "error") {
+        toast({
+          title: result?.message,
+          variant: "destructive",
+          description: format(new Date(), "PPpp"),
+        });
+      }
     });
   };
 
   const isCompanyName = form.watch("companyName", true);
+  console.log(skus);
 
   useEffect(() => {
     const getItems = async () => {
       try {
-        const productsRef = collection(db, "products");
-        const q = query(productsRef, orderBy("sortNum", "asc"));
-        const productsSnap = await getDocs(q);
-        const products = productsSnap.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() } as Product)
-        );
-
-        const skusRef = collectionGroup(db, "skus");
-        const skusSnap = await getDocs(skusRef);
-
-        const skus = skusSnap.docs
-          .map((doc) => ({ ...doc.data(), id: doc.id } as Sku))
-          .sort((a, b) => (a.sortNum < b.sortNum ? -1 : 1));
-
         const filterProducts = products.filter(
           (product) => product.gender === "other" || product.gender === gender
         );
         const filterSkus = filterProducts.map((product) => {
           const parentSkus = skus.filter((sku) => sku.parentId === product.id);
-          return parentSkus.map((sku) => ({ ...product, ...sku }));
+          return parentSkus
+            .map((sku) => ({ ...product, ...sku }))
+            .sort((a, b) => (a.sortNum - b.sortNum ? -1 : 1));
         });
         setItems(filterSkus);
-      } catch (e:any) {
+      } catch (e: any) {
         console.log(e.message);
       } finally {
-        setLoading(false);
       }
     };
     getItems();
-  }, [gender]);
+  }, [gender, products, skus]);
 
   const getAddress = async () => {
     const zipCode = form.getValues("zipCode");
@@ -143,8 +149,6 @@ export default function OrderCreateForm() {
     form.setValue("tel", data.tel);
     form.setValue("memo", data.memo);
   };
-
-  if (loading) return <Loading />;
 
   return (
     <Form {...form}>
@@ -374,6 +378,20 @@ export default function OrderCreateForm() {
                       pattern="[\d\-]*"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="applicant"
+              defaultValue=""
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>申請者</FormLabel>
+                  <FormControl>
+                    <Input placeholder="" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

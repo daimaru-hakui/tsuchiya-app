@@ -35,7 +35,11 @@ export default function OrderFormItem({ form, index, skus }: Props) {
             <FormItem className="flex flex-col">
               <FormLabel>サイズ</FormLabel>
               <FormControl>
-                <select {...form.register(`skus.${index}.id`)} defaultValue={field.value} className="border rounded-md py-2 px-2 w-[90px] h-10">
+                <select 
+                {...form.register(`skus.${index}.id`)} 
+                defaultValue={field.value} 
+                className="border rounded-md py-2 px-2 w-[90px] h-10"
+                >
                   <option value="">-</option>
                   {skus.map(({ size, id }) => (
                     <option key={size} value={id} >{size}</option>

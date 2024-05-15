@@ -33,7 +33,7 @@ export function useProduct() {
       productName: data.productName,
       displayName: data.displayName,
       isInseam: data.isInseam,
-      isMark:data.isMark,
+      isMark: data.isMark,
       gender: data.gender,
       skus: data.skus,
     });
@@ -43,7 +43,7 @@ export function useProduct() {
         throw new Error([result.error.formErrors.fieldErrors].join(","));
       }
       if (!session) {
-        throw new Error("session error ログインしてください");
+        throw new Error("認証エラー");
       }
       const batch = writeBatch(db);
       const productRef = doc(collection(db, "products"));
@@ -74,6 +74,7 @@ export function useProduct() {
           productName: result.data.productName,
           displayName: result.data.displayName,
           isInseam: result.data.isInseam,
+          isMark: result.data.isMark,
           gender: result.data.gender,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -120,7 +121,7 @@ export function useProduct() {
       });
 
       const skusRef = collectionGroup(db, "skus");
-      const q = query(skusRef,orderBy("sortNum","asc"), where("parentId", "==", productId));
+      const q = query(skusRef, orderBy("sortNum", "asc"), where("parentId", "==", productId));
       const snapshot = await getDocs(q);
       for (const doc of snapshot.docs) {
         await updateDoc(doc.ref, {

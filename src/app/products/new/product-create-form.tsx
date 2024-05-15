@@ -23,12 +23,12 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreateProduct, CreateProductSchema } from "@/types";
-// import { createProduct } from "@/actions";
-import { useProduct } from "@/hooks/useProduct";
+import * as actions from "@/actions";
+import { toast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
 
 export default function ProductCreateForm() {
   const [isPending, startTransition] = useTransition();
-  const { createProduct } = useProduct();
 
   const form = useForm<CreateProduct>({
     resolver: zodResolver(CreateProductSchema),
@@ -57,13 +57,25 @@ export default function ProductCreateForm() {
 
   const onSubmit = async (data: CreateProduct) => {
     startTransition(async () => {
-      const result = await createProduct(data);
-      if (result !== "error") {
+      const result = await actions.createProduct(data);
+      if (result.status === "success") {
+        toast({
+          title: "登録しました",
+          variant: "success",
+          description: format(new Date(), "PPpp"),
+        });
+
         reset();
         form.setValue("gender", data.gender, {
           shouldDirty: true,
         });
         remove();
+      } else if (result.status === "error") {
+        toast({
+          title: result.message,
+          variant: "destructive",
+          description: format(new Date(), "PPpp"),
+        });
       }
     });
   };
@@ -143,6 +155,25 @@ export default function ProductCreateForm() {
                 <FormItem className="flex items-end flex-row gap-3">
                   <div className="">
                     <FormLabel className="text-base mt-2">裾上げ</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={(e) => field.onChange(e.valueOf())}
+                      aria-readonly
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isMark"
+              defaultValue={true}
+              render={({ field }) => (
+                <FormItem className="flex items-end flex-row gap-3">
+                  <div className="">
+                    <FormLabel className="text-base mt-2">刺繍</FormLabel>
                   </div>
                   <FormControl>
                     <Switch

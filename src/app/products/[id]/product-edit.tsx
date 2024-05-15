@@ -21,11 +21,12 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { Product, UpdateProduct, UpdateProductSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import * as actions from "@/actions";
+import * as actions from "@/actions";
 import { Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useProduct } from "@/hooks/useProduct";
+import { toast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
 
 interface Props {
   product: Product;
@@ -34,7 +35,6 @@ interface Props {
 export default function ProductEdit({ product }: Props) {
   const [open, setOpen] = useState(false);
   const [isloading, startTransaction] = useTransition();
-  const { updateProduct } = useProduct();
 
   const form = useForm<UpdateProduct>({
     resolver: zodResolver(UpdateProductSchema),
@@ -42,8 +42,21 @@ export default function ProductEdit({ product }: Props) {
 
   const onSubmit = (data: UpdateProduct) => {
     startTransaction(async () => {
-      await updateProduct(data, product.id);
-      setOpen(false);
+      const result = await actions.updateProduct(data, product.id);
+      if (result.status === "success") {
+        toast({
+          title: "登録しました",
+          variant: "success",
+          description: format(new Date(), "PPpp"),
+        });
+        setOpen(false);
+      } else if (result.status === "error") {
+        toast({
+          title: result?.message,
+          variant: "destructive",
+          description: format(new Date(), "PPpp"),
+        });
+      }
     });
   };
 
