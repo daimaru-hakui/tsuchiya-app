@@ -48,7 +48,6 @@ interface Props {
 
 export default function OrderCreateForm({ products, skus }: Props) {
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
-  const [loading, setLoading] = useState(true);
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
 
@@ -63,7 +62,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
       const result = await actions.createOrder(data);
       if (result.status === "success") {
         toast({
-          title: "登録しました",
+          title: result.message,
           variant: "success",
           description: format(new Date(), "PPpp"),
         });
@@ -92,9 +91,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
         setItems(filterSkus);
       } catch (e: any) {
         console.log(e.message);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
     getItems();
   }, [gender, products, skus]);
@@ -148,8 +145,6 @@ export default function OrderCreateForm({ products, skus }: Props) {
     form.setValue("tel", data.tel);
     form.setValue("memo", data.memo);
   };
-
-  if (loading) return <Loading />;
 
   return (
     <Form {...form}>
@@ -379,6 +374,20 @@ export default function OrderCreateForm({ products, skus }: Props) {
                       pattern="[\d\-]*"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="applicant"
+              defaultValue=""
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>申請者</FormLabel>
+                  <FormControl>
+                    <Input placeholder="" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

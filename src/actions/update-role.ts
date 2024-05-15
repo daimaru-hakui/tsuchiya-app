@@ -1,9 +1,7 @@
 "use server";
 import { auth } from "@/auth";
 import { auth as firebaseAuth } from "@/lib/firebase/server";
-import paths from "@/paths";
 import { AdminUser, UpdatedAdminUser, UpdatedAdminUserSchema } from "@/types";
-import { redirect } from "next/navigation";
 
 export async function updateRole(
   data: UpdatedAdminUser,

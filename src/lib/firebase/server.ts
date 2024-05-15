@@ -6,8 +6,7 @@ const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string;
 export const firebaseAdmin =
   getApps()[0] ??
   initializeApp({
-    credential: cert(
-      JSON.parse(serviceAccount)),
+    credential: cert(JSON.parse(serviceAccount)),
   });
 
 export const auth = getAuth(firebaseAdmin);
