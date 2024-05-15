@@ -77,7 +77,6 @@ export default function OrderCreateForm({ products, skus }: Props) {
   };
 
   const isCompanyName = form.watch("companyName", true);
-  console.log(skus);
 
   useEffect(() => {
     const getItems = async () => {
@@ -87,15 +86,12 @@ export default function OrderCreateForm({ products, skus }: Props) {
         );
         const filterSkus = filterProducts.map((product) => {
           const parentSkus = skus.filter((sku) => sku.parentId === product.id);
-          return parentSkus
-            .map((sku) => ({ ...product, ...sku }))
-            .sort((a, b) => (a.sortNum - b.sortNum ? -1 : 1));
+          return parentSkus.map((sku) => ({ ...product, ...sku }));
         });
         setItems(filterSkus);
       } catch (e: any) {
         console.log(e.message);
-      } finally {
-      }
+      } 
     };
     getItems();
   }, [gender, products, skus]);
