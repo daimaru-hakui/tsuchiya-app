@@ -105,8 +105,8 @@ export async function createShipping(data: CreateShipping, orderId: string): Pro
 
       skus.push({
         skuRef,
-        doc: skuDoc,
-        detail
+        ...skuDoc,
+        ...detail
       });
 
       details.push(data);
@@ -117,16 +117,19 @@ export async function createShipping(data: CreateShipping, orderId: string): Pro
       count: newCount
     });
 
-    for (const { skuRef, doc, detail } of skus) {
-      if (doc.stock < detail.shippingQuantity) {
+    for (const sku of skus) {
+
+      if (sku.stock < sku.shippingQuantity) {
+
         return {
           status: "error",
           message: "在庫がありません"
         };
       }
-      transaction.update(skuRef, {
-        orderQuantity: doc.orderQuantity - detail.shippingQuantity,
-        stock: doc.stock - detail.shippingQuantity
+      console.log(sku.stock, sku.shippingQuantity);
+      transaction.update(sku.skuRef, {
+        orderQuantity: sku.orderQuantity - sku.shippingQuantity,
+        stock: sku.stock - sku.shippingQuantity
       });
     }
 

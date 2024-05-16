@@ -28,6 +28,7 @@ interface Props {
 export default function OrderShippingModal({ order, orderDetails }: Props) {
   const form = useForm<CreateShipping>();
   const [page, setPage] = useState(1);
+  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
 
@@ -35,7 +36,7 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
     startTransition(async () => {
       const d = { ...order, ...data, createdAt: "", updatedAt: "" };
       const result = await actions.createShipping(d, order.id);
-      toast(result, { reset });
+      toast(result, { reset, setOpen });
     });
   };
 
@@ -57,7 +58,7 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Package size={20} className="cursor-pointer" />
       </DialogTrigger>
