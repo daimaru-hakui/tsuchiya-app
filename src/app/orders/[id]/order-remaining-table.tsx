@@ -1,5 +1,11 @@
 "use client";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -7,18 +13,17 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@/components/ui/table";
 import { OrderDetail, CreateShipping } from "@/types";
 import { UseFormReturn } from "react-hook-form";
 
 interface Props {
-  orderDetails: OrderDetail[];
+  orderDetails: (OrderDetail & { stock: number })[];
   form: UseFormReturn<CreateShipping, any, undefined>;
 }
 
 export default function OrderRemainingTable({ orderDetails, form }: Props) {
-
   return (
     <Table className="min-w-[800px]">
       <TableHeader>
@@ -33,7 +38,7 @@ export default function OrderRemainingTable({ orderDetails, form }: Props) {
         {orderDetails?.map((detail, idx) => (
           <TableRow key={detail.id}>
             <TableCell>{detail.productNumber}</TableCell>
-            <TableCell >{detail.productName}</TableCell>
+            <TableCell>{detail.productName}</TableCell>
             <TableCell className="text-center">{detail.size}</TableCell>
             <TableCell className="w-[120px]">
               <input
@@ -48,9 +53,15 @@ export default function OrderRemainingTable({ orderDetails, form }: Props) {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input type="number" max={detail.orderQuantity} placeholder="" {...field} onChange={(event) =>
-                        field.onChange(+event.target.value)
-                      } />
+                      <Input
+                        type="number"
+                        max={detail.orderQuantity}
+                        placeholder=""
+                        {...field}
+                        onChange={(event) =>
+                          field.onChange(+event.target.value)
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

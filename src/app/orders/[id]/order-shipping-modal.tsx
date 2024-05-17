@@ -14,7 +14,7 @@ import {
 import OrderShippingTable from "./order-shipping-table";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { Order, OrderDetail, CreateShipping } from "@/types";
+import { Order, OrderDetail, CreateShipping, Sku } from "@/types";
 import { useState, useTransition } from "react";
 import OrderRemainingTable from "./order-remaining-table";
 import * as actions from "@/actions";
@@ -22,10 +22,13 @@ import { useToast } from "@/hooks/useToast";
 
 interface Props {
   order: Order;
-  orderDetails: OrderDetail[];
+  orderDetails:  (OrderDetail & {stock:number})[];
 }
 
-export default function OrderShippingModal({ order, orderDetails }: Props) {
+export default function OrderShippingModal({
+  order,
+  orderDetails,
+}: Props) {
   const form = useForm<CreateShipping>();
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
@@ -52,7 +55,8 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
         skuId: detail.skuId,
         quantity: detail.quantity,
         shippingQuantity: detail.shippingQuantity,
-        remainingQuantity: Number(detail.quantity) - Number(detail.shippingQuantity)
+        remainingQuantity:
+          Number(detail.quantity) - Number(detail.shippingQuantity),
       });
     });
   };
@@ -62,9 +66,12 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
       <DialogTrigger asChild>
         <Package size={20} className="cursor-pointer" />
       </DialogTrigger>
-      <DialogContent className="w-full md:min-w-[900px]">
+      <DialogContent className="w-full md:min-w-[800px] lg:min-w-[1200px]">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full overflow-auto">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="w-full overflow-auto"
+          >
             <DialogHeader>
               <DialogTitle>出荷処理</DialogTitle>
               <DialogDescription>
@@ -72,22 +79,20 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
               </DialogDescription>
             </DialogHeader>
             {page === 1 && (
-              <OrderShippingTable
-                orderDetails={orderDetails}
-                form={form}
-              />
+              <OrderShippingTable orderDetails={orderDetails} form={form} />
             )}
             {page === 2 && (
-              <OrderRemainingTable
-                orderDetails={orderDetails}
-                form={form}
-              />
+              <OrderRemainingTable orderDetails={orderDetails} form={form} />
             )}
             <DialogFooter className="mt-3 sm:justify-end">
               {page === 1 && (
                 <>
                   <DialogClose asChild>
-                    <Button type="button" variant="secondary" onClick={() => setPage(1)}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => setPage(1)}
+                    >
                       閉じる
                     </Button>
                   </DialogClose>
@@ -105,7 +110,14 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
               )}
               {page === 2 && (
                 <>
-                  <Button key="prev" variant="secondary" type="button" onClick={() => setPage(1)}>戻る</Button>
+                  <Button
+                    key="prev"
+                    variant="secondary"
+                    type="button"
+                    onClick={() => setPage(1)}
+                  >
+                    戻る
+                  </Button>
                   <Button type="submit">確定</Button>
                 </>
               )}

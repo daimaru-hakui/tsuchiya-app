@@ -16,7 +16,7 @@ export default async function OrderCreate() {
 
   const skusRes = skuDocs.docs
     .map((doc) => ({ ...doc.data() } as Sku))
-    .sort((a, b) => b.sortNum - a.sortNum);
+    .sort((a, b) => a.sortNum - b.sortNum);
   const jsonSkus = JSON.stringify(skusRes);
   const skus = JSON.parse(jsonSkus);
 
