@@ -11,20 +11,31 @@ import {
 } from "@/components/ui/table";
 import { db } from "@/lib/firebase/client";
 import { Order } from "@/types";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Loading from "../loading";
+import Status from "@/components/status";
+import OrderSearch from "./order-search";
+import { useStore } from "@/store";
+import { format } from "date-fns";
 
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>();
+  const statusSearch = useStore(state => state.statusSearch);
+  ;
 
   useEffect(() => {
     const ordersRef = collection(db, "orders");
+    const status = statusSearch === "all"
+      ? ["processing", "finished", "pending", "openOrder"]
+      : [statusSearch];
     const q = query(
       ordersRef,
       orderBy("serialNumber", "desc"),
       orderBy("createdAt", "desc"),
+      where("status", "!=", "canceled"),
+      where("status", "in", status)
     );
     const unsub = onSnapshot(q, {
       next: (snapshot) => {
@@ -35,7 +46,7 @@ export default function OrderList() {
       },
     });
     return () => unsub();
-  }, []);
+  }, [statusSearch]);
 
   if (!orders) return <Loading />;
 
@@ -44,6 +55,8 @@ export default function OrderList() {
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>発注一覧</CardTitle>
+
+          <OrderSearch />
           <Button size="sm" asChild>
             <Link href="/orders/new">発注登録</Link>
           </Button>
@@ -53,8 +66,10 @@ export default function OrderList() {
         <Table className="min-w-[2000px]">
           <TableHeader>
             <TableRow>
-              <TableHead>詳細</TableHead>
-              <TableHead>発注No.</TableHead>
+              <TableHead className="w-[80px]">詳細</TableHead>
+              <TableHead className="w-[105px]">ステータス</TableHead>
+              <TableHead className="w-[120px]">日付</TableHead>
+              <TableHead className="w-[90px]">発注No.</TableHead>
               <TableHead>所属名</TableHead>
               <TableHead>社員コード</TableHead>
               <TableHead>イニシャル</TableHead>
@@ -77,6 +92,10 @@ export default function OrderList() {
                     <Link href={`/orders/${order.id}`}>詳細</Link>
                   </Button>
                 </TableCell>
+                <TableCell className="text-center">
+                  <Status value={order.status} />
+                </TableCell>
+                <TableCell>{format(order.createdAt.toDate(), "yyyy-MM-dd")}</TableCell>
                 <TableCell>{order.serialNumber}</TableCell>
                 <TableCell>{order.section}</TableCell>
                 <TableCell>{order.employeeCode}</TableCell>

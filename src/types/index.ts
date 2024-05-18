@@ -1,4 +1,4 @@
-import { DocumentData, DocumentReference } from "firebase/firestore";
+import { DocumentData, DocumentReference, Timestamp } from "firebase/firestore";
 import { z } from "zod";
 
 export interface Product {
@@ -140,7 +140,8 @@ export const CreateShippingShema = z.object({
       quantity: z.number(),
       inseam: z.number().optional(),
       shippingQuantity: z.number(),
-      remainingQuantity: z.number(),
+      salePrice: z.number()
+      // remainingQuantity: z.number(),
     })
     .array(),
   siteCode: z.string(),
@@ -148,6 +149,8 @@ export const CreateShippingShema = z.object({
   zipCode: z.string(),
   address: z.string(),
   tel: z.string(),
+  shippingDate: z.string(),
+  shippingCharge: z.number(),
   memo: z.string().optional(),
 });
 
@@ -229,7 +232,6 @@ export const UpdateProductSchema = z.object({
   isMark: z.boolean(),
   gender: z.enum(["other", "man", "woman"]),
 });
-
 export type UpdateProduct = z.infer<typeof UpdateProductSchema>;
 
 export const UpdateSkuSchema = z.object({
@@ -240,5 +242,29 @@ export const UpdateSkuSchema = z.object({
   orderQuantity: z.number(),
   sortNum: z.number(),
 });
-
 export type UpdateSku = z.infer<typeof UpdateSkuSchema>;
+
+
+export type Shippings = {
+  id: string;
+  orderId: string;
+  orderRef: string;
+  serialNumber: number;
+  section: string;
+  employeeCode: string;
+  initial: string;
+  username: string;
+  companyName: string;
+  position: string;
+  siteCode: string;
+  siteName: string;
+  zipCode: string;
+  address: string;
+  tel: string;
+  memo: string,
+  uid: string;
+  status: string,
+  shippingDate: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};

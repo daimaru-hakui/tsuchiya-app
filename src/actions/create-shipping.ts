@@ -3,7 +3,6 @@ import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { CreateShipping, CreateShippingShema, OrderDetail, Sku } from "@/types";
 import {
-  DocumentData,
   DocumentReference,
   FieldValue,
 } from "firebase-admin/firestore";
@@ -11,7 +10,7 @@ import {
 export async function createShipping(
   data: CreateShipping,
   orderId: string
-): Promise<{ status: string; message: string }> {
+): Promise<{ status: string; message: string; }> {
   const result = CreateShippingShema.safeParse({
     orderId: orderId,
     section: data.section,
@@ -26,10 +25,13 @@ export async function createShipping(
     zipCode: data.zipCode,
     address: data.address,
     tel: data.tel,
+    shippingDate: data.shippingDate,
+    shippingCharge: data.shippingCharge,
     nemo: data.memo || "",
   });
 
   if (!result.success) {
+    console.log(result.error);
     return {
       status: "error",
       message: result.error.flatten().formErrors.join(),
@@ -65,13 +67,13 @@ export async function createShipping(
     skuRef: DocumentReference;
     quantity: number;
     shippingQuantity: number;
-    remainingQuantity: number;
+    // remainingQuantity: number;
     inseam?: number | undefined;
   } & Sku)[] = [];
 
   let orderDetails: (OrderDetail & {
     orderDetailRef: DocumentReference;
-    remainingQuantity: number;
+    shippingQuantity: number;
   })[] = [];
 
   let skus = [];
@@ -79,6 +81,7 @@ export async function createShipping(
   try {
     await db.runTransaction(async (transaction) => {
       const serialDoc = await transaction.get(serialRef);
+      const orderDoc = await transaction.get(orderRef);
 
       for (const detail of filterDetails) {
         const orderDetailRef = orderRef
@@ -89,10 +92,10 @@ export async function createShipping(
         orderDetails.push({
           ...orderDetailDoc.data(),
           orderDetailRef: orderDetailDoc.ref,
-          remainingQuantity: detail.remainingQuantity,
+          shippingQuantity: detail.shippingQuantity
         } as OrderDetail & {
           orderDetailRef: DocumentReference;
-          remainingQuantity: number;
+          shippingQuantity: number;
         });
 
         const skusRef = db
@@ -122,12 +125,26 @@ export async function createShipping(
         skus.push(skusData);
       }
 
+      const totalQuantity = orderDetails.reduce((sum, detail) => {
+        sum = sum + detail.quantity || 0;
+        return sum;
+      }, 0);
+
+      const totalShippingQuantity = orderDetails.reduce((sum, detail) => {
+        sum = sum + detail.shippingQuantity || 0;
+        return sum;
+      }, 0);
+
+      const status = totalQuantity === totalShippingQuantity ? "finished" : "openOrder";
+      transaction.update(orderRef, {
+        status
+      });
+
       const newCount = serialDoc.data()?.count + 1;
       transaction.update(serialRef, {
         count: newCount,
       });
 
-      
       let stocks = [];
       for (const sku of skus) {
         if (sku.stock < sku.shippingQuantity) {
@@ -146,9 +163,9 @@ export async function createShipping(
         });
       }
 
-      for (const { orderDetailRef, remainingQuantity } of orderDetails) {
+      for (const { orderDetailRef, quantity, shippingQuantity } of orderDetails) {
         transaction.update(orderDetailRef, {
-          quantity: remainingQuantity,
+          quantity: quantity - shippingQuantity,
         });
       }
 
@@ -170,7 +187,8 @@ export async function createShipping(
         tel: result.data.tel,
         memo: result.data.memo || "",
         uid: session.user.uid,
-        status: "",
+        status: "shipped",
+        shippingDate: result.data.shippingDate,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
@@ -202,7 +220,7 @@ export async function createShipping(
       console.error(e.message);
       return {
         status: "error",
-        message: e.message,
+        message: e.message || "エラーが発生しました",
       };
     } else {
       console.error(e);

@@ -25,6 +25,9 @@ export default function MainMenu() {
         <MenuItem href="/orders/new" >
           発注登録
         </MenuItem>
+        <MenuItem href="/shippings" >
+          出荷一覧
+        </MenuItem>
         <MenuItem href="/adjustments" >
           在庫調整
         </MenuItem>

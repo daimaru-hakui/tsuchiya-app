@@ -10,10 +10,11 @@ import {
 import { OrderDetail } from "@/types";
 
 interface Props {
-  orderDetails: (OrderDetail & { stock: number })[];
+  orderDetails: (OrderDetail & { stock: number; })[];
 }
 
 export default function OrderShowTable({ orderDetails }: Props) {
+
   return (
     <Table className="min-w-[600px]">
       <TableHeader>
@@ -21,7 +22,8 @@ export default function OrderShowTable({ orderDetails }: Props) {
           <TableHead>品番</TableHead>
           <TableHead>品名</TableHead>
           <TableHead className="text-center w-[80px]">サイズ</TableHead>
-          <TableHead className="text-center w-[80px]">数量</TableHead>
+          <TableHead className="text-center w-[90px]">発注数</TableHead>
+          <TableHead className="text-center w-[90px]">未出荷数</TableHead>
           <TableHead className="text-center w-[80px]">股下</TableHead>
           <TableHead>備考</TableHead>
         </TableRow>
@@ -33,6 +35,7 @@ export default function OrderShowTable({ orderDetails }: Props) {
             <TableCell>{item.productName}</TableCell>
             <TableCell className="text-center">{item.size}</TableCell>
             <TableCell className="text-right">{item.orderQuantity}</TableCell>
+            <TableCell className="text-right">{item.quantity || "完納"}</TableCell>
             <TableCell className="text-right">
               {item?.inseam && `${item.inseam}cm`}
             </TableCell>

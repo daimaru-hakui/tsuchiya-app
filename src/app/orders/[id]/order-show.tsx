@@ -2,16 +2,20 @@
 import OrderShowTable from "./order-show-table";
 import { useEffect, useState } from "react";
 import {
+  DocumentReference,
   collection,
   doc,
+  getDoc,
   limit,
   onSnapshot,
   orderBy,
   query,
   startAfter,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import { Order, OrderDetail } from "@/types";
+import { Order, OrderDetail, Sku } from "@/types";
 import Loading from "@/app/loading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, ChevronLeft, ChevronRight, Edit } from "lucide-react";
@@ -19,22 +23,27 @@ import OrderShippingModal from "./order-shipping-modal";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import paths from "@/paths";
+import Status from "@/components/status";
+import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
+import { format } from "date-fns";
+import { useStore } from "@/store";
 
 interface Props {
   id: string;
 }
 
 export default function OrderShow({ id }: Props) {
+  const session = useSession();
   const [order, setOrder] = useState<Order>();
   const router = useRouter();
   const [orderDetails, setOrderDetails] = useState<
-    (OrderDetail & { stock: number })[]
-  >([]);
-  const [orderDetailWithStocks, setOrderDetailWithStocks] = useState<
-    (OrderDetail & { stock: number })[]
+    (OrderDetail & { stock: number; })[]
   >([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
+  const statusSearch = useStore(state => state.statusSearch);
+  console.log(orderDetails);
 
   useEffect(() => {
     const orderRef = doc(db, "orders", id);
@@ -69,27 +78,16 @@ export default function OrderShow({ id }: Props) {
   }, [id]);
 
   useEffect(() => {
-    let data: OrderDetail[] = [];
-    orderDetails.forEach((detail) => {
-      onSnapshot(detail.skuRef, {
-        next: (snapshot) => {
-          const stock = snapshot.data()?.stock;
-          data.push({ ...detail, stock } as OrderDetail & { stock: number });
-        },
-        error: (e) => {
-          console.error(e);
-        },
-      });
-    });
-    setOrderDetailWithStocks(data);
-  }, [orderDetails]);
-
-  useEffect(() => {
     if (!order?.serialNumber) return;
+    const status = statusSearch === "all"
+      ? ["processing", "finished", "pending", "openOrder"]
+      : [statusSearch];
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef,
       orderBy("serialNumber", "asc"),
+      where("status", "!=", "canceled"),
+      where("status", "in", status),
       startAfter(order?.serialNumber),
       limit(1)
     );
@@ -104,14 +102,19 @@ export default function OrderShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [order?.serialNumber]);
+  }, [order?.serialNumber, statusSearch]);
 
   useEffect(() => {
     if (!order?.serialNumber) return;
+    const status = statusSearch === "all"
+      ? ["processing", "finished", "pending", "openOrder"]
+      : [statusSearch];
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef,
       orderBy("serialNumber", "desc"),
+      where("status", "!=", "canceled"),
+      where("status", "in", status),
       startAfter(order?.serialNumber),
       limit(1)
     );
@@ -126,7 +129,15 @@ export default function OrderShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [order?.serialNumber]);
+  }, [order?.serialNumber, statusSearch]);
+
+
+  const handleStatusChange = async (status: string) => {
+    const orderRef = doc(db, "orders", id);
+    await updateDoc(orderRef, {
+      status: status
+    });
+  };
 
   if (!order) return <Loading />;
 
@@ -139,10 +150,23 @@ export default function OrderShow({ id }: Props) {
             onClick={() => router.push(paths.orderAll())}
           />
           <span className="flex items-center gap-3 ml-auto">
-            <OrderShippingModal
-              order={order}
-              orderDetails={orderDetailWithStocks}
-            />
+            {order.status === 'pending'
+              && <Button size="xs" variant="outline"
+                onClick={() => handleStatusChange("canceled")}>キャンセル</Button>}
+            {order.status === 'pending'
+              // && session.data?.user.role === "member"
+              && (
+                <>
+                  <Button size="xs" variant="default"
+                    onClick={() => handleStatusChange("processing")}>受注する</Button>
+                </>
+              )}
+            {order.status !== "pending" && (
+              <OrderShippingModal
+                order={order}
+                orderDetails={orderDetails}
+              />
+            )}
             <Edit size={20} className="cursor-pointer" />
             <ChevronLeft
               className={cn("cursor-pointer", !prevPage && "opacity-35")}
@@ -154,69 +178,80 @@ export default function OrderShow({ id }: Props) {
             />
           </span>
         </div>
-        <CardTitle className="">詳細</CardTitle>
+        <CardTitle className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            詳細
+            <span className="flex items-center">
+              <Status value={order.status} />
+            </span>
+          </div>
+          <div className="text-base">
+            {format(new Date(order.createdAt.toDate()), "yyyy-MM-dd")}
+          </div>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr]">
           <div>
-            <div className={cn(dlStyles)}>
-              <div>発注No.</div>
-              <div>{order.serialNumber}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>所属名</div>
-              <div>{order.section}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>社員コード</div>
-              <div>{order.employeeCode}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>イニシャル</div>
-              <div>{order.initial}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>氏名</div>
-              <div>{order.username}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>役職</div>
-              <div>{order.position}</div>
-            </div>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>発注No.</dt>
+              <dd>{order.serialNumber}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>所属名</dt>
+              <dd>{order.section}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>社員コード</dt>
+              <dd>{order.employeeCode}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>イニシャル</dt>
+              <dd>{order.initial}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>氏名</dt>
+              <dd>{order.username}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>役職</dt>
+              <dd>{order.position}</dd>
+            </dl>
           </div>
           <div>
-            <div className={cn(dlStyles)}>
-              <div>工事コード</div>
-              <div>{order.serialNumber}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>現場名</div>
-              <div>{order.section}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>郵便番号</div>
-              <div>{order.employeeCode}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>住所</div>
-              <div>{order.initial}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>TEL</div>
-              <div>{order.username}</div>
-            </div>
-            <div className={cn(dlStyles)}>
-              <div>申請者</div>
-              <div>{order.position}</div>
-            </div>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>工事コード</dt>
+              <dd>{order.serialNumber}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>現場名</dt>
+              <dd>{order.section}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>郵便番号</dt>
+              <dd>{order.employeeCode}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>住所</dt>
+              <dd>{order.initial}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>TEL</dt>
+              <dd>{order.username}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>申請者</dt>
+              <dd>{order.position}</dd>
+            </dl>
           </div>
         </div>
         <div className="mt-4">
-          <OrderShowTable orderDetails={orderDetailWithStocks} />
+          <OrderShowTable orderDetails={orderDetails} />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-const dlStyles = "grid grid-cols-[140px_1fr] text-sm leading-7 px-4";
+const dlStyles = "grid grid-cols-[100px_1fr] text-sm leading-7 px-4";
+const dtStyles = "text-zinc-500 font-bold";
