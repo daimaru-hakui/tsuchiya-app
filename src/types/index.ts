@@ -127,6 +127,7 @@ export interface ShippingDetail {
 
 export const CreateShippingShema = z.object({
   orderId: z.string(),
+  orderNumber: z.number(),
   section: z.string(),
   employeeCode: z.string(),
   initial: z.string(),

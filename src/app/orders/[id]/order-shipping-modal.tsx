@@ -91,6 +91,10 @@ export default function OrderShippingModal({
               <DialogTitle>出荷処理</DialogTitle>
             </DialogHeader>
             <div className="flex gap-3 my-3 mx-2">
+              <input className="hidden"
+                defaultValue={Number(order.serialNumber)}
+                {...form.register("orderNumber", { valueAsNumber: true })}
+              />
               <FormField
                 control={form.control}
                 name="shippingDate"

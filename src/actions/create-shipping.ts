@@ -6,6 +6,7 @@ import {
   DocumentReference,
   FieldValue,
 } from "firebase-admin/firestore";
+import { collection } from "firebase/firestore";
 
 export async function createShipping(
   data: CreateShipping,
@@ -13,6 +14,7 @@ export async function createShipping(
 ): Promise<{ status: string; message: string; }> {
   const result = CreateShippingShema.safeParse({
     orderId: orderId,
+    orderNumber: data.orderNumber,
     section: data.section,
     employeeCode: data.employeeCode,
     initial: data.initial,
@@ -172,6 +174,7 @@ export async function createShipping(
       transaction.set(shippingRef, {
         id: shippingRef.id,
         serialNumber: newCount,
+        orderNumber: result.data.orderNumber,
         orderId: orderId,
         orderRef: orderRef,
         section: result.data.section,
@@ -187,7 +190,7 @@ export async function createShipping(
         tel: result.data.tel,
         memo: result.data.memo || "",
         uid: session.user.uid,
-        status: "shipped",
+        status: "picking",
         shippingDate: result.data.shippingDate,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
@@ -214,6 +217,25 @@ export async function createShipping(
           updatedAt: FieldValue.serverTimestamp(),
         });
       }
+      transaction.set(shippingRef.collection("shippingDetails").doc(), {
+        serialNumber: newCount,
+        shippingId: shippingRef.id,
+        shippingRef: shippingRef,
+        orderId: orderId,
+        orderRef: orderRef,
+        skuId: "",
+        skuRef: "",
+        productNumber: "",
+        productName: "送料",
+        salePrice: result.data.shippingCharge || 0,
+        costPrice: 0,
+        size: "",
+        quantity: 1,
+        inseam: null,
+        sortNum: 1000,
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
     });
   } catch (e: unknown) {
     if (e instanceof Error) {

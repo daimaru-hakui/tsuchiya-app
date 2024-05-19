@@ -2,7 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { db } from "@/lib/firebase/client";
 import { Shippings } from "@/types";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -10,7 +12,16 @@ export default function ShippingList() {
   const [shippings, setShippings] = useState<Shippings[]>([]);
 
   useEffect(() => {
-
+    const shippingsRef = collection(db, "shippings");
+    const q = query(shippingsRef, orderBy("serialNumber", "desc"));
+    const unsub = onSnapshot(q, {
+      next: (snapshot) => {
+        setShippings(snapshot.docs.map((doc) => (
+          { ...doc.data(), id: doc.id } as Shippings
+        )));
+      }
+    });
+    return () => unsub();
   }, []);
 
   return (
