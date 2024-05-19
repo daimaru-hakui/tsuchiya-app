@@ -92,7 +92,7 @@ export default function OrderShippingModal({
             </DialogHeader>
             <div className="flex gap-3 my-3 mx-2">
               <input className="hidden"
-                defaultValue={Number(order.serialNumber)}
+                defaultValue={Number(order.orderNumber)}
                 {...form.register("orderNumber", { valueAsNumber: true })}
               />
               <FormField

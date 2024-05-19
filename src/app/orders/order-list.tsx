@@ -23,7 +23,8 @@ import { format } from "date-fns";
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>();
   const statusSearch = useStore(state => state.statusSearch);
-  ;
+  const orderStartDate = useStore(state => state.orderStartDate);
+  const orderEndDate = useStore(state => state.orderEndDate);
 
   useEffect(() => {
     const ordersRef = collection(db, "orders");
@@ -35,7 +36,9 @@ export default function OrderList() {
       orderBy("serialNumber", "desc"),
       orderBy("createdAt", "desc"),
       where("status", "!=", "canceled"),
-      where("status", "in", status)
+      where("status", "in", status),
+      where("createdAt", ">=", orderStartDate),
+      where("createdAt", "<=", orderEndDate)
     );
     const unsub = onSnapshot(q, {
       next: (snapshot) => {
@@ -46,7 +49,7 @@ export default function OrderList() {
       },
     });
     return () => unsub();
-  }, [statusSearch]);
+  }, [statusSearch, orderStartDate, orderEndDate]);
 
   if (!orders) return <Loading />;
 

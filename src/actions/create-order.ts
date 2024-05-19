@@ -6,9 +6,8 @@ import { FieldValue } from "firebase-admin/firestore";
 
 export async function createOrder(
   data: CreateOrder
-): Promise<{ status: string; message: string }> {
+): Promise<{ status: string; message: string; }> {
   const result = CreateOrderSchema.safeParse({
-    ...data,
     section: data.section,
     employeeCode: data.employeeCode,
     initial: data.initial,
@@ -43,7 +42,7 @@ export async function createOrder(
   }
 
   const filterSkus = result.data.skus
-    .filter((product) => product.id && product.quantity >= 0)
+    .filter((product) => product.id && product.quantity > 0)
     .map((sku, idx) => ({ ...sku, sortNum: idx + 1 }));
 
   if (filterSkus.length === 0) {
@@ -98,7 +97,7 @@ export async function createOrder(
 
       transaction.set(orderRef, {
         id: orderRef.id,
-        serialNumber: newCount,
+        orderNumber: newCount,
         section: result.data.section,
         employeeCode: result.data.employeeCode,
         initial: result.data.initial,

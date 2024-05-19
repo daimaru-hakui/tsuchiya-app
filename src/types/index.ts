@@ -37,7 +37,7 @@ export interface Sku {
 
 export interface Order {
   id: string;
-  serialNumber: number;
+  orderNumber: number;
   section: string;
   employeeCode: string;
   initial: string;
@@ -49,10 +49,10 @@ export interface Order {
   zipCode: string;
   address: string;
   tel: string;
-  status: "pending";
-  memo: string;
   applicant: string;
+  memo: string;
   uid: string;
+  status: string;
   createdAt: any;
   updatedAt: any;
 }
@@ -82,9 +82,11 @@ export interface OrderDetail {
 
 export type Shipping = {
   id: string;
+  invoiceNumber: string;
+  shippingNumber: number;
+  orderNumber: number;
   orderId: string;
   orderRef: DocumentReference<DocumentData, DocumentData>;
-  serialNumber: number;
   section: string;
   employeeCode: string;
   initial: string;
@@ -96,11 +98,12 @@ export type Shipping = {
   zipCode: string;
   address: string;
   tel: string;
-  status: "pending";
+  applicant: string;
   memo: string;
+  status: string;
   userId: string;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 };
 
 export interface ShippingDetail {
@@ -150,9 +153,10 @@ export const CreateShippingShema = z.object({
   zipCode: z.string(),
   address: z.string(),
   tel: z.string(),
+  applicant: z.string(),
+  memo: z.string().optional(),
   shippingDate: z.string(),
   shippingCharge: z.number(),
-  memo: z.string().optional(),
 });
 
 export type CreateShipping = z.infer<typeof CreateShippingShema>;
@@ -174,8 +178,7 @@ export type UpdatedAdminUser = z.infer<typeof UpdatedAdminUserSchema>;
 export const CreateOrderSchema = z.object({
   section: z.string().min(1, { message: "所属名を入力してください。" }),
   employeeCode: z
-    .string()
-    .min(1, { message: "社員コードを入力してください。" }),
+    .string(),
   initial: z.string(),
   username: z.string(),
   companyName: z.boolean(),
@@ -244,28 +247,3 @@ export const UpdateSkuSchema = z.object({
   sortNum: z.number(),
 });
 export type UpdateSku = z.infer<typeof UpdateSkuSchema>;
-
-
-export type Shippings = {
-  id: string;
-  orderId: string;
-  orderRef: string;
-  serialNumber: number;
-  section: string;
-  employeeCode: string;
-  initial: string;
-  username: string;
-  companyName: string;
-  position: string;
-  siteCode: string;
-  siteName: string;
-  zipCode: string;
-  address: string;
-  tel: string;
-  memo: string,
-  uid: string;
-  status: string,
-  shippingDate: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-};

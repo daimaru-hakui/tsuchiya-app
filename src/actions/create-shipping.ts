@@ -50,7 +50,7 @@ export async function createShipping(
 
   const filterDetails = result.data.details.filter(
     (detail) => detail.shippingQuantity > 0
-  );
+  ).map((detail, idx) => ({ ...detail, sortNum: idx + 1 }));
 
   if (filterDetails.length === 0) {
     return {
@@ -173,7 +173,8 @@ export async function createShipping(
 
       transaction.set(shippingRef, {
         id: shippingRef.id,
-        serialNumber: newCount,
+        shippingNumber: newCount,
+        invoiceNumber: "",
         orderNumber: result.data.orderNumber,
         orderId: orderId,
         orderRef: orderRef,
@@ -198,7 +199,7 @@ export async function createShipping(
 
       for (const detail of details) {
         transaction.set(shippingRef.collection("shippingDetails").doc(), {
-          serialNumber: newCount,
+          shippingNumber: newCount,
           shippingId: shippingRef.id,
           shippingRef: shippingRef,
           orderId: orderId,
@@ -225,7 +226,7 @@ export async function createShipping(
         orderRef: orderRef,
         skuId: "",
         skuRef: "",
-        productNumber: "",
+        productNumber: "93-",
         productName: "送料",
         salePrice: result.data.shippingCharge || 0,
         costPrice: 0,

@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { FormControl } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
@@ -11,25 +10,40 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/store";
-import { format, subMonths } from "date-fns";
+import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function OrderSearch() {
   const statusSearch = useStore(state => state.statusSearch);
   const setStatusSearch = useStore(state => state.setStatusSearch);
-  const thisYear = new Date().getFullYear();
-  const thisMonth = new Date().getMonth();
-  const [startDate, setStartDate] = useState<Date | undefined>(subMonths(new Date(thisYear, thisMonth, 1), 3));
   const [startOpen, setStartOpen] = useState(false);
-  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [endOpen, setEndOpen] = useState(false);
+  const orderStartDate = useStore((state) => state.orderStartDate);
+  const setOrderStartDate = useStore((state) => state.setOrderStartDate);
+  const orderEndDate = useStore((state) => state.orderEndDate);
+  const setOrderEndDate = useStore((state) => state.setOrderEndDate);
+
+  const statusLabel = (value: string) => {
+    switch (value) {
+      case "all":
+        return "All";
+      case "openOrder":
+        return "注文残";
+      case "pending":
+        return "未処理";
+      case "processing":
+        return "処理中";
+      case "finished":
+        return "完納";
+    }
+  };
 
   return (
     <div className="flex gap-3">
       <Select onValueChange={(e) => setStatusSearch(e)}>
         <SelectTrigger className="w-[150px]">
-          <SelectValue placeholder={statusSearch} />
+          <SelectValue placeholder={statusLabel(statusSearch)} />
         </SelectTrigger>
         <SelectContent >
           <SelectItem value="all">All</SelectItem>
@@ -50,13 +64,13 @@ export default function OrderSearch() {
             variant={"outline"}
             className={cn(
               "w-[240px] pl-3 text-left font-normal",
-              !startDate && "text-muted-foreground"
+              !orderStartDate && "text-muted-foreground"
             )}
           >
-            {startDate ? (
-              `start: ${format(startDate, "yyyy-MM-dd")}`
+            {orderStartDate ? (
+              `start: ${format(orderStartDate, "yyyy-MM-dd")}`
             ) : (
-              <span>{startDate}</span>
+              <span>{orderStartDate}</span>
             )}
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
           </Button>
@@ -65,8 +79,8 @@ export default function OrderSearch() {
           <Calendar
             mode="single"
             numberOfMonths={1}
-            selected={startDate}
-            onSelect={setStartDate}
+            selected={orderStartDate}
+            onSelect={setOrderStartDate}
             initialFocus
           />
           <div className="w-full text-center">
@@ -92,13 +106,13 @@ export default function OrderSearch() {
             variant={"outline"}
             className={cn(
               "w-[240px] pl-3 text-left font-normal",
-              !endDate && "text-muted-foreground"
+              !orderEndDate && "text-muted-foreground"
             )}
           >
-            {endDate ? (
-              `end: ${format(endDate, "yyyy-MM-dd")}`
+            {orderEndDate ? (
+              `end: ${format(orderEndDate, "yyyy-MM-dd")}`
             ) : (
-              <span>{endDate}</span>
+              <span>{orderEndDate}</span>
             )}
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
           </Button>
@@ -107,8 +121,8 @@ export default function OrderSearch() {
           <Calendar
             mode="single"
             numberOfMonths={1}
-            selected={endDate}
-            onSelect={setEndDate}
+            selected={orderEndDate}
+            onSelect={setOrderEndDate}
             initialFocus
           />
           <div className="w-full text-center">

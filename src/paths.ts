@@ -17,8 +17,14 @@ const paths = {
   orderShow(id: string) {
     return `/orders/${id}`;
   },
+  shippingAll() {
+    return `/shippings`;
+  },
+  shippingShow(id: string) {
+    return `/shippings/${id}`;
+  },
   adminAll() {
-    return `/admin`
+    return `/admin`;
   }
 };
 

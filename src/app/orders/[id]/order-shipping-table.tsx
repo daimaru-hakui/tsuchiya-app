@@ -81,6 +81,14 @@ export default function OrderShippingTable({ orderDetails, form, getSkuStock, pa
                 })}
                 defaultValue={Number(detail.quantity)}
               />
+              <input
+                type="number"
+                className="hidden"
+                {...form.register(`details.${idx}.inseam`, {
+                  valueAsNumber: true,
+                })}
+                defaultValue={Number(detail.inseam)}
+              />
             </TableCell>
             <TableCell>{detail.productName}</TableCell>
             <TableCell className="text-center">{detail.size}</TableCell>
