@@ -82,7 +82,7 @@ export interface OrderDetail {
 
 export type Shipping = {
   id: string;
-  invoiceNumber: string;
+  trackingNumber: string;
   shippingNumber: number;
   orderNumber: number;
   orderId: string;
@@ -101,6 +101,7 @@ export type Shipping = {
   applicant: string;
   memo: string;
   status: string;
+  courier: "seino" | "sagawa" | "fukuyama",
   userId: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;

@@ -8,7 +8,7 @@ import { collection } from "firebase/firestore";
 export async function createShipping(
   data: CreateShipping,
   orderId: string
-): Promise<{ status: string; message: string }> {
+): Promise<{ status: string; message: string; }> {
   const result = CreateShippingShema.safeParse({
     orderId: orderId,
     orderNumber: data.orderNumber,
@@ -177,7 +177,8 @@ export async function createShipping(
       transaction.set(shippingRef, {
         id: shippingRef.id,
         shippingNumber: newCount,
-        invoiceNumber: "",
+        trackingNumber: "",
+        courier: "",
         orderNumber: result.data.orderNumber,
         orderId: orderId,
         orderRef: orderRef,

@@ -41,7 +41,6 @@ export default function OrderShow({ id }: Props) {
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
   const statusSearch = useStore(state => state.statusSearch);
-  console.log(orderDetails);
 
   useEffect(() => {
     const orderRef = doc(db, "orders", id);
@@ -178,7 +177,7 @@ export default function OrderShow({ id }: Props) {
         </div>
         <CardTitle className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            詳細
+            発注詳細
             <span className="flex items-center">
               <Status value={order.status} />
             </span>

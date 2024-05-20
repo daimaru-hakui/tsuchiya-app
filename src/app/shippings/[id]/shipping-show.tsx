@@ -12,6 +12,8 @@ import { db } from "@/lib/firebase/client";
 import { Shipping, ShippingDetail } from "@/types";
 import Loading from "@/app/loading";
 import ShippingShowTable from "./shipping-show-table";
+import ShippingInvoiceModal from "./shipping-invoice-modal";
+import Link from "next/link";
 
 interface Props {
   id: string;
@@ -108,7 +110,17 @@ export default function ShippingShow({ id }: Props) {
     return () => unsub();
   }, [shipping?.shippingNumber]);
 
-  console.log(shippingDetails);
+
+  const getCourierName = (courier: string) => {
+    switch (courier) {
+      case "seino":
+        return "西濃運輸";
+      case "sagawa":
+        return "佐川急便";
+      case "fukuyama":
+        return "福山通運";
+    }
+  };
 
   if (!shipping) return <Loading />;
 
@@ -121,8 +133,10 @@ export default function ShippingShow({ id }: Props) {
             onClick={() => router.push(paths.shippingAll())}
           />
           <span className="flex items-center gap-3 ml-auto">
-
-            <Edit size={20} className="cursor-pointer" />
+            <ShippingInvoiceModal
+              shippingId={id}
+              trackingNumber={shipping.trackingNumber}
+              courier={shipping.courier} />
             <ChevronLeft
               className={cn("cursor-pointer", !prevPage && "opacity-35")}
               onClick={() => prevPage && router.push(paths.shippingShow(prevPage))}
@@ -135,7 +149,7 @@ export default function ShippingShow({ id }: Props) {
         </div>
         <CardTitle className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            詳細
+            出荷詳細
             <span className="flex items-center">
               <Status value={shipping.status} />
             </span>
@@ -146,11 +160,27 @@ export default function ShippingShow({ id }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr]">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] mb-5">
           <div>
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>出荷No.</dt>
               <dd>{shipping.shippingNumber}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>送状No.</dt>
+              <dd>{shipping.trackingNumber}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>運送便</dt>
+              <dd><Link href={``}>{getCourierName(shipping.courier)}</Link></dd>
+            </dl>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr]">
+          <div>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>発注No.</dt>
+              <dd>{shipping.orderNumber}</dd>
             </dl>
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>所属名</dt>
@@ -205,7 +235,7 @@ export default function ShippingShow({ id }: Props) {
           {/* <OrderShowTable shippingDetails={shippingDetails} /> */}
         </div>
       </CardContent>
-    </Card>
+    </Card >
   );
 }
 

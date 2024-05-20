@@ -70,8 +70,8 @@ export default function OrderList() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[80px]">詳細</TableHead>
-              <TableHead className="w-[105px]">ステータス</TableHead>
               <TableHead className="w-[120px]">日付</TableHead>
+              <TableHead className="w-[105px]">ステータス</TableHead>
               <TableHead className="w-[90px]">発注No.</TableHead>
               <TableHead>所属名</TableHead>
               <TableHead>社員コード</TableHead>
@@ -95,10 +95,10 @@ export default function OrderList() {
                     <Link href={`/orders/${order.id}`}>詳細</Link>
                   </Button>
                 </TableCell>
+                <TableCell>{format(order.createdAt.toDate(), "yyyy-MM-dd")}</TableCell>
                 <TableCell className="text-center">
                   <Status value={order.status} />
                 </TableCell>
-                <TableCell>{format(order.createdAt.toDate(), "yyyy-MM-dd")}</TableCell>
                 <TableCell>{order.orderNumber}</TableCell>
                 <TableCell>{order.section}</TableCell>
                 <TableCell>{order.employeeCode}</TableCell>

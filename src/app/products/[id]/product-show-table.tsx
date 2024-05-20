@@ -47,7 +47,7 @@ export default function ProductShowTable({ id }: Props) {
           <TableHead>販売価格</TableHead>
           <TableHead>仕入価格</TableHead>
           <TableHead>在庫</TableHead>
-          <TableHead>受注数量</TableHead>
+          <TableHead>受注数</TableHead>
           <TableHead>順番</TableHead>
           <TableHead>詳細</TableHead>
         </TableRow>

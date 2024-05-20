@@ -88,3 +88,10 @@
   -webkit-appearance: none;
   -moz-appearance: textfield !important;
 }
+
+#noAllow input[type='number']::-webkit-outer-spin-button,
+#noAllow input[type='number']::-webkit-inner-spin-button,
+#noAllow input[type='number']  {
+  -webkit-appearance: none;
+  -moz-appearance: textfield !important;
+}

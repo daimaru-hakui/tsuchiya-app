@@ -8,6 +8,8 @@ interface Props {
 export default function ShippingPage({ params }: Props) {
   const id = params.id;
   return (
-    <ShippingShow id={id} />
+    <div className="w-full flex items-center justify-center py-4">
+      <ShippingShow id={id} />
+    </div>
   );
 }

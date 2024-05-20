@@ -9,9 +9,10 @@ import { format } from "date-fns";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Loading from "../loading";
 
 export default function ShippingList() {
-  const [shippings, setShippings] = useState<Shipping[]>([]);
+  const [shippings, setShippings] = useState<Shipping[]>();
 
   useEffect(() => {
     const shippingsRef = collection(db, "shippings");
@@ -26,14 +27,24 @@ export default function ShippingList() {
     return () => unsub();
   }, []);
 
+  const getTrackingLink = (tracking: string, courier: string) => {
+    switch (courier) {
+      case "seino":
+        return `https://track.seino.co.jp/kamotsu/GempyoNoShokai.do?action=%E3%80%80%E6%A4%9C+%E7%B4%A2%E3%80%80&GNPNO1=${tracking}`;
+      case "sagawa":
+        return `https://k2k.sagawa-exp.co.jp/p/web/okurijosearch.do?okurijoNo=${tracking}`;
+      case "fukuyama":
+        return `https://corp.fukutsu.co.jp/situation/tracking_no_hunt/${tracking}`;
+    }
+  };
+
+  if (!shippings) return <Loading />;
+
   return (
     <Card className="w-full overflow-auto">
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>出荷一覧</CardTitle>
-          <Button size="sm" asChild>
-            <Link href="/shippings/new">発注登録</Link>
-          </Button>
         </div>
       </CardHeader>
       <CardContent className="overflow-auto">
@@ -41,8 +52,8 @@ export default function ShippingList() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[80px]">詳細</TableHead>
-              <TableHead className="w-[115px]">ステータス</TableHead>
-              <TableHead className="w-[120px]">日付</TableHead>
+              <TableHead className="w-[115px]">日付</TableHead>
+              <TableHead className="w-[115px] text-center">ステータス</TableHead>
               <TableHead className="w-[120px]">送状No.</TableHead>
               <TableHead className="w-[90px]">出荷No.</TableHead>
               <TableHead className="w-[90px]">発注No.</TableHead>
@@ -69,12 +80,21 @@ export default function ShippingList() {
                   </Button>
                 </TableCell>
                 <TableCell>
+                  {format(new Date(shipping.createdAt.toDate()), "yyyy-MM-dd")}
+                </TableCell>
+                <TableCell className="text-center">
                   <Status value={shipping.status} />
                 </TableCell>
                 <TableCell>
-                  {format(new Date(shipping.createdAt.toDate()), "yyyy-MM-dd")}
+                  <Link
+                    href={`${getTrackingLink(shipping.trackingNumber, shipping.courier)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    {shipping.trackingNumber}
+                  </Link>
                 </TableCell>
-                <TableCell>{shipping.invoiceNumber}</TableCell>
                 <TableCell>{shipping.shippingNumber}</TableCell>
                 <TableCell>{shipping.orderNumber}</TableCell>
                 <TableCell>{shipping.section}</TableCell>
@@ -94,6 +114,6 @@ export default function ShippingList() {
           </TableBody>
         </Table>
       </CardContent>
-    </Card>
+    </Card >
   );
 }

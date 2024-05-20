@@ -22,7 +22,7 @@ import { useForm } from "react-hook-form";
 import { Product, UpdateProduct, UpdateProductSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as actions from "@/actions";
-import { Loader2 } from "lucide-react";
+import { Edit, Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/useToast";
@@ -65,7 +65,7 @@ export default function ProductEdit({ product }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="xs">編集</Button>
+        <Edit size={20} className="cursor-pointer" />
       </DialogTrigger>
       <DialogContent className="max-w-[650px]">
         <Form {...form}>

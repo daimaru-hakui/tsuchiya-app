@@ -37,7 +37,10 @@ export async function updateProduct(data: UpdateProduct, productId: string): Pro
       ...result.data
     });
 
-    const skuDocs = await db.collectionGroup("skus").orderBy("sortNum", "asc").where("parentId", "==", productId).get();
+    const skuDocs = await db.collectionGroup("skus")
+      .orderBy("sortNum", "asc")
+      .where("parentId", "==", productId)
+      .get();
 
     for (const doc of skuDocs.docs) {
       await doc.ref.update({
@@ -47,6 +50,7 @@ export async function updateProduct(data: UpdateProduct, productId: string): Pro
         isInseam: data.isInseam,
         isMark: data.isMark,
         gender: data.gender,
+        productId: productId
       });
     }
   } catch (e: unknown) {
