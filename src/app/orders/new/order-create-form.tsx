@@ -54,6 +54,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
   });
 
   const onSubmit = (data: CreateOrder) => {
+    console.log(data)
     const result = confirm("登録して宜しいでしょうか");
     if (!result) return;
     startTransition(async () => {

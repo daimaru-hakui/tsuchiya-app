@@ -81,7 +81,7 @@ export function useShipping() {
         orderDetails.push({
           ...orderDetailDoc.data(),
           orderDetailRef: orderDetailRef,
-          remainingQuantity: detail.remainingQuantity,
+          // remainingQuantity: detail.remainingQuantity,
         } as OrderDetail & {
           remainingQuantity: number;
           orderDetailRef: DocumentReference<DocumentData, DocumentData>;

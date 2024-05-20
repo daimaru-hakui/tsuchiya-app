@@ -83,7 +83,7 @@ export default function OrderShow({ id }: Props) {
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef,
-      orderBy("serialNumber", "asc"),
+      orderBy("orderNumber", "asc"),
       where("status", "!=", "canceled"),
       where("status", "in", status),
       startAfter(order?.orderNumber),
@@ -110,7 +110,7 @@ export default function OrderShow({ id }: Props) {
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef,
-      orderBy("serialNumber", "desc"),
+      orderBy("orderNumber", "desc"),
       where("status", "!=", "canceled"),
       where("status", "in", status),
       startAfter(order?.orderNumber),

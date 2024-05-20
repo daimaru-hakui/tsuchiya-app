@@ -3,10 +3,11 @@ import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { CreateOrder, CreateOrderSchema, OrderDetail } from "@/types";
 import { FieldValue } from "firebase-admin/firestore";
+import { revalidatePath } from "next/cache";
 
 export async function createOrder(
   data: CreateOrder
-): Promise<{ status: string; message: string; }> {
+): Promise<{ status: string; message: string }> {
   const result = CreateOrderSchema.safeParse({
     section: data.section,
     employeeCode: data.employeeCode,
@@ -55,8 +56,8 @@ export async function createOrder(
   const serialRef = db.collection("serialNumbers").doc("orderNumber");
   const orderRef = db.collection("orders").doc();
 
-  await db
-    .runTransaction(async (transaction) => {
+  try {
+    await db.runTransaction(async (transaction) => {
       const serialDoc = await transaction.get(serialRef);
 
       let details: OrderDetail[] = [];
@@ -138,21 +139,22 @@ export async function createOrder(
           updatedAt: FieldValue.serverTimestamp(),
         });
       }
-    })
-    .catch((e: unknown) => {
-      if (e instanceof Error) {
-        console.error(e.message);
-        return {
-          status: "error",
-          message: e.message,
-        };
-      } else {
-        return {
-          status: "error",
-          message: "登録が失敗しました",
-        };
-      }
     });
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error(e.message);
+      return {
+        status: "error",
+        message: e.message,
+      };
+    } else {
+      console.error(e)
+      return {
+        status: "error",
+        message: "登録が失敗しました",
+      };
+    }
+  }
   return {
     status: "success",
     message: "登録しました",

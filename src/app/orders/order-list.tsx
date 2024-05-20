@@ -33,7 +33,7 @@ export default function OrderList() {
       : [statusSearch];
     const q = query(
       ordersRef,
-      orderBy("serialNumber", "desc"),
+      orderBy("orderNumber", "desc"),
       orderBy("createdAt", "desc"),
       where("status", "!=", "canceled"),
       where("status", "in", status),
@@ -99,7 +99,7 @@ export default function OrderList() {
                   <Status value={order.status} />
                 </TableCell>
                 <TableCell>{format(order.createdAt.toDate(), "yyyy-MM-dd")}</TableCell>
-                <TableCell>{order.serialNumber}</TableCell>
+                <TableCell>{order.orderNumber}</TableCell>
                 <TableCell>{order.section}</TableCell>
                 <TableCell>{order.employeeCode}</TableCell>
                 <TableCell>{order.initial}</TableCell>
