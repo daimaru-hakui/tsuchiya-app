@@ -2,16 +2,13 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { CreateShipping, CreateShippingShema, OrderDetail, Sku } from "@/types";
-import {
-  DocumentReference,
-  FieldValue,
-} from "firebase-admin/firestore";
+import { DocumentReference, FieldValue } from "firebase-admin/firestore";
 import { collection } from "firebase/firestore";
 
 export async function createShipping(
   data: CreateShipping,
   orderId: string
-): Promise<{ status: string; message: string; }> {
+): Promise<{ status: string; message: string }> {
   const result = CreateShippingShema.safeParse({
     orderId: orderId,
     orderNumber: data.orderNumber,
@@ -27,9 +24,10 @@ export async function createShipping(
     zipCode: data.zipCode,
     address: data.address,
     tel: data.tel,
+    applicant: data.applicant,
+    nemo: data.memo || "",
     shippingDate: data.shippingDate,
     shippingCharge: data.shippingCharge,
-    nemo: data.memo || "",
   });
 
   if (!result.success) {
@@ -48,9 +46,9 @@ export async function createShipping(
     };
   }
 
-  const filterDetails = result.data.details.filter(
-    (detail) => detail.shippingQuantity > 0
-  ).map((detail, idx) => ({ ...detail, sortNum: idx + 1 }));
+  const filterDetails = result.data.details
+    .filter((detail) => detail.shippingQuantity > 0)
+    .map((detail, idx) => ({ ...detail, sortNum: idx + 1 }));
 
   if (filterDetails.length === 0) {
     return {
@@ -94,7 +92,7 @@ export async function createShipping(
         orderDetails.push({
           ...orderDetailDoc.data(),
           orderDetailRef: orderDetailDoc.ref,
-          shippingQuantity: detail.shippingQuantity
+          shippingQuantity: detail.shippingQuantity,
         } as OrderDetail & {
           orderDetailRef: DocumentReference;
           shippingQuantity: number;
@@ -137,9 +135,10 @@ export async function createShipping(
         return sum;
       }, 0);
 
-      const status = totalQuantity === totalShippingQuantity ? "finished" : "openOrder";
+      const status =
+        totalQuantity === totalShippingQuantity ? "finished" : "openOrder";
       transaction.update(orderRef, {
-        status
+        status,
       });
 
       const newCount = serialDoc.data()?.count + 1;
@@ -165,7 +164,11 @@ export async function createShipping(
         });
       }
 
-      for (const { orderDetailRef, quantity, shippingQuantity } of orderDetails) {
+      for (const {
+        orderDetailRef,
+        quantity,
+        shippingQuantity,
+      } of orderDetails) {
         transaction.update(orderDetailRef, {
           quantity: quantity - shippingQuantity,
         });
