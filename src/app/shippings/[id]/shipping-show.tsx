@@ -7,13 +7,23 @@ import paths from "@/paths";
 import Status from "@/components/status";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
-import { collection, doc, limit, onSnapshot, orderBy, query, startAfter, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  startAfter,
+  where,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { Shipping, ShippingDetail } from "@/types";
 import Loading from "@/app/loading";
 import ShippingShowTable from "./shipping-show-table";
 import ShippingInvoiceModal from "./shipping-invoice-modal";
 import Link from "next/link";
+import { useStore } from "@/store";
 
 interface Props {
   id: string;
@@ -25,6 +35,7 @@ export default function ShippingShow({ id }: Props) {
   const [shippingDetails, setShippingDetails] = useState<ShippingDetail[]>([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
+  const shippingStatusSearch = useStore((state) => state.shippingStatusSearch);
 
   useEffect(() => {
     const shippingRef = doc(db, "shippings", id);
@@ -41,32 +52,40 @@ export default function ShippingShow({ id }: Props) {
   }, [id]);
 
   useEffect(() => {
-    const shippingDetailRef = collection(db, "shippings", id, "shippingDetails");
+    const shippingDetailRef = collection(
+      db,
+      "shippings",
+      id,
+      "shippingDetails"
+    );
     const q = query(shippingDetailRef, orderBy("sortNum", "asc"));
     const unsub = onSnapshot(q, {
       next: (snapshot) => {
-        setShippingDetails(snapshot.docs.map(doc => (
-          { ...doc.data(), id: doc.id } as ShippingDetail
-        )));
+        setShippingDetails(
+          snapshot.docs.map(
+            (doc) => ({ ...doc.data(), id: doc.id } as ShippingDetail)
+          )
+        );
       },
       error: (e) => {
         console.error(e.message);
-      }
+      },
     });
     return () => unsub();
   }, [id]);
 
   useEffect(() => {
     if (!shipping?.shippingNumber) return;
-    // const status = statusSearch === "all"
-    //   ? ["processing", "finished", "pending", "openOrder"]
-    // : [statusSearch];
+    const status =
+      shippingStatusSearch === "all"
+        ? ["picking", "finished"]
+        : [shippingStatusSearch];
     const ordersRef = collection(db, "shippings");
     const q = query(
       ordersRef,
       orderBy("shippingNumber", "asc"),
       where("status", "!=", "canceled"),
-      // where("status", "in", status),
+      where("status", "in", status),
       startAfter(shipping?.shippingNumber),
       limit(1)
     );
@@ -81,19 +100,20 @@ export default function ShippingShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [shipping?.shippingNumber]);
+  }, [shipping?.shippingNumber, shippingStatusSearch]);
 
   useEffect(() => {
     if (!shipping?.shippingNumber) return;
-    // const status = statusSearch === "all"
-    //   ? ["processing", "finished", "pending", "openOrder"]
-    //   : [statusSearch];
+    const status =
+      shippingStatusSearch === "all"
+        ? ["picking", "finished"]
+        : [shippingStatusSearch];
     const ordersRef = collection(db, "shippings");
     const q = query(
       ordersRef,
       orderBy("shippingNumber", "desc"),
       where("status", "!=", "canceled"),
-      // where("status", "in", status),
+      where("status", "in", status),
       startAfter(shipping?.shippingNumber),
       limit(1)
     );
@@ -108,8 +128,7 @@ export default function ShippingShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [shipping?.shippingNumber]);
-
+  }, [shipping?.shippingNumber, shippingStatusSearch]);
 
   const getCourierName = (courier: string) => {
     switch (courier) {
@@ -125,7 +144,7 @@ export default function ShippingShow({ id }: Props) {
   if (!shipping) return <Loading />;
 
   return (
-    <Card className="w-full md:w-[900px] overflow-auto">
+    <Card className="w-full md:w-[1200px] overflow-auto">
       <CardHeader>
         <div className="flex justify-between mb-4">
           <ArrowLeft
@@ -136,14 +155,19 @@ export default function ShippingShow({ id }: Props) {
             <ShippingInvoiceModal
               shippingId={id}
               trackingNumber={shipping.trackingNumber}
-              courier={shipping.courier} />
+              courier={shipping.courier}
+            />
             <ChevronLeft
               className={cn("cursor-pointer", !prevPage && "opacity-35")}
-              onClick={() => prevPage && router.push(paths.shippingShow(prevPage))}
+              onClick={() =>
+                prevPage && router.push(paths.shippingShow(prevPage))
+              }
             />
             <ChevronRight
               className={cn("cursor-pointer", !nextPage && "opacity-35")}
-              onClick={() => nextPage && router.push(paths.shippingShow(nextPage))}
+              onClick={() =>
+                nextPage && router.push(paths.shippingShow(nextPage))
+              }
             />
           </span>
         </div>
@@ -172,7 +196,9 @@ export default function ShippingShow({ id }: Props) {
             </dl>
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>運送便</dt>
-              <dd><Link href={``}>{getCourierName(shipping.courier)}</Link></dd>
+              <dd>
+                <Link href={``}>{getCourierName(shipping.courier)}</Link>
+              </dd>
             </dl>
           </div>
         </div>
@@ -235,7 +261,7 @@ export default function ShippingShow({ id }: Props) {
           {/* <OrderShowTable shippingDetails={shippingDetails} /> */}
         </div>
       </CardContent>
-    </Card >
+    </Card>
   );
 }
 

@@ -139,7 +139,7 @@ export default function OrderShow({ id }: Props) {
   if (!order) return <Loading />;
 
   return (
-    <Card className="w-full md:w-[900px] overflow-auto">
+    <Card className="w-full md:w-[1200px] overflow-auto">
       <CardHeader>
         <div className="flex justify-between mb-4">
           <ArrowLeft

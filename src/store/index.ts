@@ -6,19 +6,41 @@ type State = {
   setStatusSearch: (value: string) => void;
   orderStartDate: Date;
   setOrderStartDate: (date: Date | undefined) => void;
-  orderEndDate: Date | undefined;
+  orderEndDate: Date;
   setOrderEndDate: (date: Date | undefined) => void;
+
+  shippingStatusSearch: string;
+  setShippingStatusSearch: (value: string) => void;
+  shippingStartDate: Date;
+  setShippingStartDate: (date: Date | undefined) => void;
+  shippingEndDate: Date;
+  setShippingEndDate: (date: Date | undefined) => void;
 };
 
 const thisYear = new Date().getFullYear();
 const thisMonth = new Date().getMonth();
 const thisDate = new Date().getDate();
 
+const startDate = subMonths(new Date(thisYear, thisMonth, 1), 3);
+const endDate = new Date(thisYear, thisMonth, thisDate, 23, 59, 59);
+
 export const useStore = create<State>((set) => ({
   statusSearch: "all",
   setStatusSearch: (value) => set((state) => ({ statusSearch: value })),
-  orderStartDate: subMonths(new Date(thisYear, thisMonth, 1), 3),
-  setOrderStartDate: (date) => set((state) => ({ orderStartDate: date })),
-  orderEndDate: new Date(thisYear, thisMonth, 20, thisDate,23,59,59),
-  setOrderEndDate: (date) => set((state) => ({ orderEndDate: date })),
+  orderStartDate: startDate,
+  setOrderStartDate: (date) =>
+    set((state) => ({ orderStartDate: date || startDate })),
+  orderEndDate: endDate,
+  setOrderEndDate: (date) =>
+    set((state) => ({ orderEndDate: date || endDate })),
+
+  shippingStatusSearch: "all",
+  setShippingStatusSearch: (value) =>
+    set((state) => ({ shippingStatusSearch: value })),
+  shippingStartDate: startDate,
+  setShippingStartDate: (date) =>
+    set((state) => ({ shippingStartDate: date || startDate })),
+  shippingEndDate: endDate,
+  setShippingEndDate: (date) =>
+    set((state) => ({ shippingEndDate: date || endDate })),
 }));

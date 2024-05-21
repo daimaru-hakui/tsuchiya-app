@@ -11,7 +11,13 @@ import {
 } from "@/components/ui/table";
 import { db } from "@/lib/firebase/client";
 import { Order } from "@/types";
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Loading from "../loading";
@@ -19,18 +25,21 @@ import Status from "@/components/status";
 import OrderSearch from "./order-search";
 import { useStore } from "@/store";
 import { format } from "date-fns";
+import useFunctons from "@/hooks/useFunctons";
 
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>();
-  const statusSearch = useStore(state => state.statusSearch);
-  const orderStartDate = useStore(state => state.orderStartDate);
-  const orderEndDate = useStore(state => state.orderEndDate);
+  const statusSearch = useStore((state) => state.statusSearch);
+  const orderStartDate = useStore((state) => state.orderStartDate);
+  const orderEndDate = useStore((state) => state.orderEndDate);
+  const { zeroPadding } = useFunctons();
 
   useEffect(() => {
     const ordersRef = collection(db, "orders");
-    const status = statusSearch === "all"
-      ? ["processing", "finished", "pending", "openOrder"]
-      : [statusSearch];
+    const status =
+      statusSearch === "all"
+        ? ["processing", "finished", "pending", "openOrder"]
+        : [statusSearch];
     const q = query(
       ordersRef,
       orderBy("orderNumber", "desc"),
@@ -58,8 +67,9 @@ export default function OrderList() {
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>発注一覧</CardTitle>
-
-          <OrderSearch />
+          <div className="hidden lg:block">
+            <OrderSearch />
+          </div>
           <Button size="sm" asChild>
             <Link href="/orders/new">発注登録</Link>
           </Button>
@@ -95,11 +105,13 @@ export default function OrderList() {
                     <Link href={`/orders/${order.id}`}>詳細</Link>
                   </Button>
                 </TableCell>
-                <TableCell>{format(order.createdAt.toDate(), "yyyy-MM-dd")}</TableCell>
+                <TableCell>
+                  {format(order.createdAt.toDate(), "yyyy-MM-dd")}
+                </TableCell>
                 <TableCell className="text-center">
                   <Status value={order.status} />
                 </TableCell>
-                <TableCell>{order.orderNumber}</TableCell>
+                <TableCell>{zeroPadding(order.orderNumber)}</TableCell>
                 <TableCell>{order.section}</TableCell>
                 <TableCell>{order.employeeCode}</TableCell>
                 <TableCell>{order.initial}</TableCell>

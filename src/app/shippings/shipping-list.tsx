@@ -2,30 +2,66 @@
 import Status from "@/components/status";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { db } from "@/lib/firebase/client";
 import { Shipping } from "@/types";
 import { format } from "date-fns";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Loading from "../loading";
+import ShippingSearch from "./shipping-search";
+import { useStore } from "@/store";
+import useFunctons from "@/hooks/useFunctons";
 
 export default function ShippingList() {
   const [shippings, setShippings] = useState<Shipping[]>();
+  const shippingStatusSearch = useStore((state) => state.shippingStatusSearch);
+  const shippingStartDate = useStore((state) => state.shippingStartDate);
+  const shippingEndDate = useStore((state) => state.shippingEndDate);
+  const { zeroPadding } = useFunctons();
 
   useEffect(() => {
     const shippingsRef = collection(db, "shippings");
-    const q = query(shippingsRef, orderBy("shippingNumber", "desc"));
+    const status =
+      shippingStatusSearch === "all"
+        ? ["picking", "finished"]
+        : [shippingStatusSearch];
+
+    const q = query(
+      shippingsRef,
+      orderBy("shippingNumber", "desc"),
+      orderBy("createdAt", "desc"),
+      where("status", "!=", "canceled"),
+      where("status", "in", status),
+      where("createdAt", ">=", shippingStartDate),
+      where("createdAt", "<=", shippingEndDate)
+    );
+
     const unsub = onSnapshot(q, {
       next: (snapshot) => {
-        setShippings(snapshot.docs.map((doc) => (
-          { ...doc.data(), id: doc.id } as Shipping
-        )));
-      }
+        setShippings(
+          snapshot.docs.map(
+            (doc) => ({ ...doc.data(), id: doc.id } as Shipping)
+          )
+        );
+      },
     });
     return () => unsub();
-  }, []);
+  }, [shippingStatusSearch, shippingStartDate, shippingEndDate]);
 
   const getTrackingLink = (tracking: string, courier: string) => {
     switch (courier) {
@@ -45,6 +81,10 @@ export default function ShippingList() {
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>出荷一覧</CardTitle>
+          <div className="hidden lg:block">
+            <ShippingSearch />
+          </div>
+          <div></div>
         </div>
       </CardHeader>
       <CardContent className="overflow-auto">
@@ -53,7 +93,9 @@ export default function ShippingList() {
             <TableRow>
               <TableHead className="w-[80px]">詳細</TableHead>
               <TableHead className="w-[115px]">日付</TableHead>
-              <TableHead className="w-[115px] text-center">ステータス</TableHead>
+              <TableHead className="w-[115px] text-center">
+                ステータス
+              </TableHead>
               <TableHead className="w-[120px]">送状No.</TableHead>
               <TableHead className="w-[90px]">出荷No.</TableHead>
               <TableHead className="w-[90px]">発注No.</TableHead>
@@ -87,7 +129,10 @@ export default function ShippingList() {
                 </TableCell>
                 <TableCell>
                   <Link
-                    href={`${getTrackingLink(shipping.trackingNumber, shipping.courier)}`}
+                    href={`${getTrackingLink(
+                      shipping.trackingNumber,
+                      shipping.courier
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 underline"
@@ -95,8 +140,8 @@ export default function ShippingList() {
                     {shipping.trackingNumber}
                   </Link>
                 </TableCell>
-                <TableCell>{shipping.shippingNumber}</TableCell>
-                <TableCell>{shipping.orderNumber}</TableCell>
+                <TableCell>{zeroPadding(shipping.shippingNumber)}</TableCell>
+                <TableCell>{zeroPadding(shipping.orderNumber)}</TableCell>
                 <TableCell>{shipping.section}</TableCell>
                 <TableCell>{shipping.employeeCode}</TableCell>
                 <TableCell>{shipping.initial}</TableCell>
@@ -114,6 +159,6 @@ export default function ShippingList() {
           </TableBody>
         </Table>
       </CardContent>
-    </Card >
+    </Card>
   );
 }
