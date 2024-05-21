@@ -22,7 +22,8 @@ export interface Sku {
   isMark: boolean;
   displayName: string;
   gender: "man" | "woman" | "other";
-  parentId: string;
+  productId: string;
+  productRef: DocumentReference;
   size: string;
   price: number;
   salePrice: number;
@@ -60,9 +61,9 @@ export interface Order {
 export interface OrderDetail {
   id: string;
   orderId: string;
-  orderRef: DocumentReference<DocumentData, DocumentData>;
+  orderRef: DocumentReference;
   skuId: string;
-  skuRef: DocumentReference<DocumentData, DocumentData>;
+  skuRef: DocumentReference;
   productNumber: string;
   productName: string;
   size: string;
@@ -73,7 +74,6 @@ export interface OrderDetail {
   orderQuantity: number;
   quantity: number;
   inseam?: number | null;
-  memo?: string;
   sortNum: number;
   uid: string;
   createdAt: any;
@@ -101,7 +101,7 @@ export type Shipping = {
   applicant: string;
   memo: string;
   status: string;
-  courier: "seino" | "sagawa" | "fukuyama",
+  courier: "seino" | "sagawa" | "fukuyama";
   userId: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -145,7 +145,7 @@ export const CreateShippingShema = z.object({
       quantity: z.number(),
       inseam: z.number().optional(),
       shippingQuantity: z.number(),
-      salePrice: z.number()
+      salePrice: z.number(),
       // remainingQuantity: z.number(),
     })
     .array(),
@@ -178,8 +178,7 @@ export type UpdatedAdminUser = z.infer<typeof UpdatedAdminUserSchema>;
 
 export const CreateOrderSchema = z.object({
   section: z.string().min(1, { message: "所属名を入力してください。" }),
-  employeeCode: z
-    .string(),
+  employeeCode: z.string(),
   initial: z.string(),
   username: z.string(),
   companyName: z.boolean(),

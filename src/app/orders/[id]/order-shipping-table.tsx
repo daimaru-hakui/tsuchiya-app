@@ -55,7 +55,6 @@ export default function OrderShippingTable({ orderDetails, form, getSkuStock, pa
           <TableHead className="w-[100px] font-bold text-primary">出荷数</TableHead>
           <TableHead className="w-[100px]">単価</TableHead>
           <TableHead className="text-center w-[80px]">股下</TableHead>
-          <TableHead>備考</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -146,7 +145,6 @@ export default function OrderShippingTable({ orderDetails, form, getSkuStock, pa
             <TableCell className="text-right">
               {detail?.inseam && `${detail.inseam}cm`}
             </TableCell>
-            <TableCell className="text-right">{detail?.memo}</TableCell>
           </TableRow>
         ))}
       </TableBody>

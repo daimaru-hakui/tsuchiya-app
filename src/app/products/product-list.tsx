@@ -15,17 +15,25 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Loading from "../loading";
+import useFunctons from "@/hooks/useFunctons";
 
 export default function ProductList() {
   const [products, setProducts] = useState<Product[]>();
+  const { getGender } = useFunctons();
 
   useEffect(() => {
     const productsRef = collection(db, "products");
     const q = query(productsRef, orderBy("sortNum", "asc"));
     onSnapshot(q, (snapshot) => {
-      setProducts(snapshot.docs.map(doc => ({
-        id: doc.id, ...doc.data()
-      } as Product)));
+      setProducts(
+        snapshot.docs.map(
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Product)
+        )
+      );
     });
   }, []);
 
@@ -49,7 +57,7 @@ export default function ProductList() {
               <TableHead>表示名</TableHead>
               <TableHead>品番</TableHead>
               <TableHead>品名</TableHead>
-              <TableHead>性別</TableHead>
+              <TableHead>区分</TableHead>
               <TableHead>刺繍</TableHead>
               <TableHead>裾上げ</TableHead>
             </TableRow>
@@ -65,7 +73,7 @@ export default function ProductList() {
                 <TableCell>{product.displayName}</TableCell>
                 <TableCell>{product.productNumber}</TableCell>
                 <TableCell>{product.productName}</TableCell>
-                <TableCell>{product.gender}</TableCell>
+                <TableCell>{getGender(product.gender)}</TableCell>
                 <TableCell>{product.isMark && "あり"}</TableCell>
                 <TableCell>{product.isInseam && "あり"}</TableCell>
               </TableRow>

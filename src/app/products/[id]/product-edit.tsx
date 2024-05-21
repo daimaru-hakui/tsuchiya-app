@@ -136,7 +136,7 @@ export default function ProductEdit({ product }: Props) {
                   render={({ field }) => (
                     <FormItem className="flex items-end flex-row gap-3">
                       <div className="">
-                        <FormLabel className="text-base mt-2">裾上げ</FormLabel>
+                        <FormLabel className="text-sm mt-2">裾上</FormLabel>
                       </div>
                       <FormControl>
                         <Switch
@@ -155,7 +155,7 @@ export default function ProductEdit({ product }: Props) {
                   render={({ field }) => (
                     <FormItem className="flex items-end flex-row gap-3">
                       <div className="">
-                        <FormLabel className="text-base mt-2">刺繍</FormLabel>
+                        <FormLabel className="text-sm mt-2">刺繍</FormLabel>
                       </div>
                       <FormControl>
                         <Switch
