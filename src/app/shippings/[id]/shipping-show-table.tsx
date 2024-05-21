@@ -36,7 +36,6 @@ export default function ShippingShowTable({ shippingDetails }: Props) {
           <TableHead className="text-center min-w-[90px]">単価</TableHead>
           <TableHead className="text-center min-w-[90px]">合計</TableHead>
           <TableHead className="text-center min-w-[80px]">股下</TableHead>
-          <TableHead className="min-w-[200px]">備考</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -57,7 +56,6 @@ export default function ShippingShowTable({ shippingDetails }: Props) {
             <TableCell className="text-right">
               {item?.inseam && `${item.inseam}cm`}
             </TableCell>
-            <TableCell className="text-right">{item?.memo}</TableCell>
           </TableRow>
         ))}
       </TableBody>

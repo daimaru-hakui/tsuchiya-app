@@ -173,7 +173,7 @@ export default function ProductEdit({ product }: Props) {
                   defaultValue={product.gender}
                   render={({ field }) => (
                     <FormItem className="space-y-3">
-                      <FormLabel>性別</FormLabel>
+                      <FormLabel>区分</FormLabel>
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}

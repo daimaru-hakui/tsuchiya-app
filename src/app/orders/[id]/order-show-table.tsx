@@ -37,7 +37,6 @@ export default function OrderShowTable({ orderDetails }: Props) {
           <TableHead className="text-center w-[90px]">価格</TableHead>
           <TableHead className="w-[100px]">合計</TableHead>
           <TableHead className="text-center min-w-[90px]">股下</TableHead>
-          <TableHead className="min-w-[200px]">備考</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -59,7 +58,6 @@ export default function OrderShowTable({ orderDetails }: Props) {
             <TableCell className="text-right">
               {item?.inseam && `${item.inseam}cm`}
             </TableCell>
-            <TableCell className="text-right">{item?.memo}</TableCell>
           </TableRow>
         ))}
       </TableBody>

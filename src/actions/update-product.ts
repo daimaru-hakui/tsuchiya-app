@@ -2,23 +2,26 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { UpdateProduct, UpdateProductSchema } from "@/types";
+import { FieldValue } from "firebase-admin/firestore";
 
-export async function updateProduct(data: UpdateProduct, productId: string): Promise<{ status: string, message: string; }> {
-
+export async function updateProduct(
+  data: UpdateProduct,
+  productId: string
+): Promise<{ status: string; message: string }> {
   const result = UpdateProductSchema.safeParse({
     productNumber: data.productNumber,
     productName: data.productName,
     displayName: data.displayName,
     isInseam: data.isInseam,
     isMark: data.isMark,
-    gender: data.gender
+    gender: data.gender,
   });
 
   if (!result.success) {
-    console.log(result.error.flatten().formErrors.join(','));
+    console.log(result.error.flatten().formErrors.join(","));
     return {
       status: "error",
-      message: result.error.flatten().formErrors.join(',')
+      message: result.error.flatten().formErrors.join(","),
     };
   }
 
@@ -27,17 +30,19 @@ export async function updateProduct(data: UpdateProduct, productId: string): Pro
     console.log("no session");
     return {
       status: "error",
-      message: "認証エラー"
+      message: "認証エラー",
     };
   }
 
   try {
     const productRef = db.collection("products").doc(productId);
     productRef.update({
-      ...result.data
+      ...result.data,
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
-    const skuDocs = await db.collectionGroup("skus")
+    const skuDocs = await db
+      .collectionGroup("skus")
       .orderBy("sortNum", "asc")
       .where("parentId", "==", productId)
       .get();
@@ -50,7 +55,9 @@ export async function updateProduct(data: UpdateProduct, productId: string): Pro
         isInseam: data.isInseam,
         isMark: data.isMark,
         gender: data.gender,
-        productId: productId
+        productId: productId,
+        productRef: productRef,
+        updatedAt: FieldValue.serverTimestamp(),
       });
     }
   } catch (e: unknown) {
@@ -58,17 +65,17 @@ export async function updateProduct(data: UpdateProduct, productId: string): Pro
       console.error(e.message);
       return {
         status: "error",
-        message: e.message
+        message: e.message,
       };
     } else {
       return {
         status: "error",
-        message: "更新が失敗しました"
+        message: "更新が失敗しました",
       };
     }
-  };
+  }
   return {
     status: "success",
-    message: "更新しました"
+    message: "更新しました",
   };
 }

@@ -36,11 +36,11 @@ export default function OrderShow({ id }: Props) {
   const [order, setOrder] = useState<Order>();
   const router = useRouter();
   const [orderDetails, setOrderDetails] = useState<
-    (OrderDetail & { stock: number; })[]
+    (OrderDetail & { stock: number })[]
   >([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
-  const statusSearch = useStore(state => state.statusSearch);
+  const statusSearch = useStore((state) => state.statusSearch);
 
   useEffect(() => {
     const orderRef = doc(db, "orders", id);
@@ -76,9 +76,10 @@ export default function OrderShow({ id }: Props) {
 
   useEffect(() => {
     if (!order?.orderNumber) return;
-    const status = statusSearch === "all"
-      ? ["processing", "finished", "pending", "openOrder"]
-      : [statusSearch];
+    const status =
+      statusSearch === "all"
+        ? ["processing", "finished", "pending", "openOrder"]
+        : [statusSearch];
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef,
@@ -103,9 +104,10 @@ export default function OrderShow({ id }: Props) {
 
   useEffect(() => {
     if (!order?.orderNumber) return;
-    const status = statusSearch === "all"
-      ? ["processing", "finished", "pending", "openOrder"]
-      : [statusSearch];
+    const status =
+      statusSearch === "all"
+        ? ["processing", "finished", "pending", "openOrder"]
+        : [statusSearch];
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef,
@@ -128,11 +130,10 @@ export default function OrderShow({ id }: Props) {
     return () => unsub();
   }, [order?.orderNumber, statusSearch]);
 
-
   const handleStatusChange = async (status: string) => {
     const orderRef = doc(db, "orders", id);
     await updateDoc(orderRef, {
-      status: status
+      status: status,
     });
   };
 
@@ -147,22 +148,29 @@ export default function OrderShow({ id }: Props) {
             onClick={() => router.push(paths.orderAll())}
           />
           <span className="flex items-center gap-3 ml-auto">
-            {order.status === 'pending'
-              && <Button size="xs" variant="outline"
-                onClick={() => handleStatusChange("canceled")}>キャンセル</Button>}
-            {order.status === 'pending'
+            {order.status === "pending" && (
+              <Button
+                size="xs"
+                variant="outline"
+                onClick={() => handleStatusChange("canceled")}
+              >
+                キャンセル
+              </Button>
+            )}
+            {order.status === "pending" && (
               // && session.data?.user.role === "member"
-              && (
-                <>
-                  <Button size="xs" variant="default"
-                    onClick={() => handleStatusChange("processing")}>受注する</Button>
-                </>
-              )}
+              <>
+                <Button
+                  size="xs"
+                  variant="default"
+                  onClick={() => handleStatusChange("processing")}
+                >
+                  受注する
+                </Button>
+              </>
+            )}
             {order.status !== "pending" && (
-              <OrderShippingModal
-                order={order}
-                orderDetails={orderDetails}
-              />
+              <OrderShippingModal order={order} orderDetails={orderDetails} />
             )}
             <Edit size={20} className="cursor-pointer" />
             <ChevronLeft
@@ -207,6 +215,10 @@ export default function OrderShow({ id }: Props) {
               <dd>{order.initial}</dd>
             </dl>
             <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>社名刺繍</dt>
+              <dd>{order.companyName ? "あり" : "-"}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>氏名</dt>
               <dd>{order.username}</dd>
             </dl>
@@ -239,6 +251,10 @@ export default function OrderShow({ id }: Props) {
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>申請者</dt>
               <dd>{order.applicant}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>備考</dt>
+              <dd>{order.memo}</dd>
             </dl>
           </div>
         </div>

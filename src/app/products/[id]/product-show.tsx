@@ -21,6 +21,7 @@ import Loading from "../../loading";
 import { cn } from "@/lib/utils";
 import paths from "@/paths";
 import Link from "next/link";
+import useFunctons from "@/hooks/useFunctons";
 
 interface Props {
   id: string;
@@ -31,6 +32,7 @@ export default function ProductShow({ id }: Props) {
   const router = useRouter();
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
+  const { getGender } = useFunctons();
 
   // const handlePageBack = () => {
   //   router.back();
@@ -149,7 +151,7 @@ export default function ProductShow({ id }: Props) {
             </dl>
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>性別</dt>
-              <dd>{product.gender}</dd>
+              <dd>{getGender(product.gender)}</dd>
             </dl>
           </div>
         </div>

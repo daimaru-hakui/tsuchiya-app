@@ -221,6 +221,10 @@ export default function ShippingShow({ id }: Props) {
               <dd>{shipping.initial}</dd>
             </dl>
             <dl className={cn(dlStyles)}>
+              <dt className={cn(dtStyles)}>会社刺繍</dt>
+              <dd>{shipping.companyName ? "あり" : "-"}</dd>
+            </dl>
+            <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>氏名</dt>
               <dd>{shipping.username}</dd>
             </dl>

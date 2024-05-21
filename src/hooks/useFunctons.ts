@@ -4,7 +4,19 @@ export default function useFunctons() {
     return result;
   };
 
+  const getGender = (value: string) => {
+    switch (value) {
+      case "other":
+        return "兼用";
+      case "man":
+        return "男性用";
+      case "woman":
+        return "女性用";
+    }
+  };
+
   return {
-    zeroPadding
+    zeroPadding,
+    getGender,
   };
 }

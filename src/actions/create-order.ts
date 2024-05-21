@@ -1,9 +1,15 @@
 "use server";
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import { CreateOrder, CreateOrderSchema, OrderDetail } from "@/types";
-import { FieldValue } from "firebase-admin/firestore";
-import { revalidatePath } from "next/cache";
+import { CreateOrder, CreateOrderSchema, Sku } from "@/types";
+import { DocumentReference, FieldValue } from "firebase-admin/firestore";
+
+interface DataDetail {
+  quantity: number;
+  size: string;
+  inseam?: number | undefined;
+  skuRef: DocumentReference;
+}
 
 export async function createOrder(
   data: CreateOrder
@@ -55,41 +61,88 @@ export async function createOrder(
 
   const serialRef = db.collection("serialNumbers").doc("orderNumber");
   const orderRef = db.collection("orders").doc();
+  const optionsRef = db.collection("options").doc("marking").collection("skus");
+  const companyNameRef = optionsRef.doc("companyName");
+  const initialNameRef = optionsRef.doc("initialName");
+  const inseamRef = optionsRef.doc("inseamProcessing");
 
   try {
     await db.runTransaction(async (transaction) => {
       const serialDoc = await transaction.get(serialRef);
 
-      let details: OrderDetail[] = [];
+      let details: (Sku & DataDetail)[] = [];
       let skuItems = [];
       for (const sku of filterSkus) {
-        const collRef = db
+        const skusRef = db
           .collectionGroup("skus")
           .where("id", "==", sku.id)
           .orderBy("id", "asc")
           .orderBy("sortNum", "asc");
 
-        const snapShot = await transaction.get(collRef);
-        const skuDoc = snapShot.docs[0].data();
+        const snapShot = await transaction.get(skusRef);
+        const skuDoc = snapShot.docs[0].data() as Sku;
         const skuRef = db
           .collection("products")
-          .doc(skuDoc.parentId)
+          .doc(skuDoc.productId)
           .collection("skus")
           .doc(sku.id);
-        const data = { ...snapShot.docs[0]?.data(), ...sku, skuRef } as any;
+
         skuItems.push({
           ref: skuRef,
           doc: skuDoc,
           sku,
         });
+        const data = { ...skuDoc, ...sku, skuRef } as any;
         details.push(data);
       }
 
       for (const { ref, doc, sku } of skuItems) {
         transaction.update(ref, {
-          orderQuantity: (await doc.orderQuantity) + sku.quantity,
+          orderQuantity: doc.orderQuantity + sku.quantity,
         });
       }
+
+      // // 会社名刺繍
+      // const companyMarkSum = details
+      //   .filter((detail) => detail.isMark && result.data.companyName)
+      //   .reduce((sum: number, detail) => sum + detail.quantity, 0);
+
+      // if (companyMarkSum > 0) {
+      //   const snapshot = await companyNameRef.get();
+      //   details.push({
+      //     ...(snapshot.data() as Sku),
+      //     quantity: companyMarkSum,
+      //     skuRef: companyNameRef,
+      //   });
+      // }
+
+      // // イニシャル刺繍
+      // const initialNameSum = details
+      //   .filter((detail) => detail.isMark && result.data.initial)
+      //   .reduce((sum: number, detail) => sum + detail.quantity, 0);
+
+      // if (initialNameSum > 0) {
+      //   const snapshot = await initialNameRef.get();
+      //   details.push({
+      //     ...(snapshot.data() as Sku),
+      //     quantity: initialNameSum,
+      //     skuRef: initialNameRef,
+      //   });
+      // }
+
+      // // 裾上げ修理
+      // const inseamSum = details
+      //   .filter((detail) => detail.isInseam && detail.inseam)
+      //   .reduce((sum, detail) => sum + detail.quantity, 0);
+
+      // if (inseamSum > 0) {
+      //   const snapshot = await inseamRef.get();
+      //   details.push({
+      //     ...(snapshot.data() as Sku),
+      //     quantity: inseamSum,
+      //     skuRef: inseamRef,
+      //   });
+      // }
 
       const newCount = serialDoc.data()?.count + 1;
       transaction.update(serialRef, {
@@ -148,7 +201,7 @@ export async function createOrder(
         message: e.message,
       };
     } else {
-      console.error(e)
+      console.error(e);
       return {
         status: "error",
         message: "登録が失敗しました",
