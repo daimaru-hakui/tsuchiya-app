@@ -10,27 +10,14 @@ export default function MainMenu() {
         <MenuTitle />
       </header>
       <ul className="py-2 grow hidden md:block">
-        <MenuItem href="/dashboard" >
-          ダッシュボード
-        </MenuItem>
-        <MenuItem href="/products" >
-          商品一覧
-        </MenuItem>
-        <MenuItem href="/products/new" >
-          商品登録
-        </MenuItem>
-        <MenuItem href="/orders" >
-          発注一覧
-        </MenuItem>
-        <MenuItem href="/orders/new" >
-          発注登録
-        </MenuItem>
-        <MenuItem href="/shippings" >
-          出荷一覧
-        </MenuItem>
-        <MenuItem href="/adjustments" >
-          在庫調整
-        </MenuItem>
+        <MenuItem href="/dashboard">ダッシュボード</MenuItem>
+        <MenuItem href="/products">商品一覧</MenuItem>
+        <MenuItem href="/products/new">商品登録</MenuItem>
+        <MenuItem href="/orders">発注一覧</MenuItem>
+        <MenuItem href="/orders/new">発注登録</MenuItem>
+        <MenuItem href="/shippings">出荷一覧</MenuItem>
+        <MenuItem href="/invoice">請求書</MenuItem>
+        <MenuItem href="/adjustments">在庫調整</MenuItem>
       </ul>
       <footer className="flex items-center grow md:grow-0">
         <LogoutButton />

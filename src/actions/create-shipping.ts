@@ -3,12 +3,21 @@ import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { CreateShipping, CreateShippingShema, OrderDetail, Sku } from "@/types";
 import { DocumentReference, FieldValue } from "firebase-admin/firestore";
-import { collection } from "firebase/firestore";
+
+interface DataDetail {
+  id: string;
+  skuId: string;
+  quantity: number;
+  shippingQuantity: number;
+  salePrice: number;
+  inseam?: number | undefined;
+  skuRef: DocumentReference;
+}
 
 export async function createShipping(
   data: CreateShipping,
   orderId: string
-): Promise<{ status: string; message: string; }> {
+): Promise<{ status: string; message: string }> {
   const result = CreateShippingShema.safeParse({
     orderId: orderId,
     orderNumber: data.orderNumber,
@@ -60,16 +69,19 @@ export async function createShipping(
   const serialRef = db.collection("serialNumbers").doc("shippingNumber");
   const shippingRef = db.collection("shippings").doc();
   const orderRef = db.collection("orders").doc(orderId);
+  const optionsRef = db.collection("options").doc("marking").collection("skus");
+  const companyNameRef = optionsRef.doc("companyName");
+  const initialNameRef = optionsRef.doc("initialName");
+  const transferSheetRef = optionsRef.doc("transferSheet");
+  const pressFeeRef = optionsRef.doc("pressFee");
+  const inseamRef = optionsRef.doc("inseamProcessing");
+  const shippingFeeRef = db
+    .collection("options")
+    .doc("delivery")
+    .collection("skus")
+    .doc("shippingFee");
 
-  let details: ({
-    id: string;
-    skuId: string;
-    skuRef: DocumentReference;
-    quantity: number;
-    shippingQuantity: number;
-    // remainingQuantity: number;
-    inseam?: number | undefined;
-  } & Sku)[] = [];
+  let shippingDetails: (Sku & DataDetail)[] = [];
 
   let orderDetails: (OrderDetail & {
     orderDetailRef: DocumentReference;
@@ -105,11 +117,10 @@ export async function createShipping(
           .orderBy("sortNum", "asc");
 
         const skuDocs = await transaction.get(skusRef);
-
         const skuDoc = skuDocs.docs[0].data() as Sku;
         const skuRef = skuDocs.docs[0].ref;
 
-        const detailData = {
+        const shippingDetailData = {
           skuRef,
           ...skuDoc,
           ...detail,
@@ -121,7 +132,7 @@ export async function createShipping(
           ...detail,
         };
 
-        details.push(detailData);
+        shippingDetails.push(shippingDetailData);
         skus.push(skusData);
       }
 
@@ -141,6 +152,83 @@ export async function createShipping(
         status,
       });
 
+      // 会社名刺繍
+      const topsSum = shippingDetails
+        .filter((detail) => detail.isMark)
+        .reduce((sum: number, detail) => sum + detail.quantity, 0);
+
+      if (topsSum > 0) {
+        const snapshot = await companyNameRef.get();
+        shippingDetails.push({
+          ...(snapshot.data() as Sku),
+          quantity: topsSum,
+          skuRef: companyNameRef,
+          skuId: snapshot.id,
+        } as DataDetail & Sku);
+      }
+
+      // 転写シート代
+      if (topsSum > 0) {
+        const snapshot = await transferSheetRef.get();
+        shippingDetails.push({
+          ...(snapshot.data() as Sku),
+          quantity: topsSum,
+          skuRef: transferSheetRef,
+          skuId: snapshot.id,
+        } as DataDetail & Sku);
+      }
+
+      // プレス代
+      if (topsSum > 0) {
+        const snapshot = await pressFeeRef.get();
+        shippingDetails.push({
+          ...(snapshot.data() as Sku),
+          quantity: topsSum,
+          skuRef: pressFeeRef,
+          skuId: snapshot.id,
+        } as DataDetail & Sku);
+      }
+
+      // イニシャル刺繍
+      const initialNameSum = shippingDetails
+        .filter((detail) => detail.isMark && result.data.initial)
+        .reduce((sum: number, detail) => sum + detail.quantity, 0);
+
+      if (initialNameSum > 0) {
+        const snapshot = await initialNameRef.get();
+        shippingDetails.push({
+          ...(snapshot.data() as Sku),
+          quantity: initialNameSum,
+          skuRef: initialNameRef,
+          skuId: snapshot.id,
+        } as Sku & DataDetail);
+      }
+
+      // 裾上げ修理
+      const inseamSum = shippingDetails
+        .filter((detail) => detail.isInseam && detail.inseam)
+        .reduce((sum, detail) => sum + detail.quantity, 0);
+
+      if (inseamSum > 0) {
+        const snapshot = await inseamRef.get();
+        shippingDetails.push({
+          ...(snapshot.data() as Sku),
+          quantity: inseamSum,
+          skuRef: inseamRef,
+          skuId: snapshot.id,
+        } as DataDetail & Sku);
+      }
+
+      const shippingSnap = await shippingFeeRef.get();
+      shippingDetails.push({
+        ...shippingSnap.data(),
+        skuRef: shippingFeeRef,
+        salePrice: result.data.shippingCharge || 0,
+        costPrice: 0,
+        quantity: 1,
+      } as DataDetail & Sku);
+
+      // 連番
       const newCount = serialDoc.data()?.count + 1;
       transaction.update(serialRef, {
         count: newCount,
@@ -201,7 +289,7 @@ export async function createShipping(
         updatedAt: FieldValue.serverTimestamp(),
       });
 
-      for (const detail of details) {
+      for (const detail of shippingDetails) {
         transaction.set(shippingRef.collection("shippingDetails").doc(), {
           shippingNumber: newCount,
           shippingId: shippingRef.id,
@@ -218,29 +306,11 @@ export async function createShipping(
           quantity: detail.quantity || 0,
           inseam: detail.inseam || null,
           sortNum: detail.sortNum,
+          shippingDate: result.data.shippingDate,
           createdAt: FieldValue.serverTimestamp(),
           updatedAt: FieldValue.serverTimestamp(),
         });
       }
-      transaction.set(shippingRef.collection("shippingDetails").doc(), {
-        serialNumber: newCount,
-        shippingId: shippingRef.id,
-        shippingRef: shippingRef,
-        orderId: orderId,
-        orderRef: orderRef,
-        skuId: "",
-        skuRef: "",
-        productNumber: "93-",
-        productName: "送料",
-        salePrice: result.data.shippingCharge || 0,
-        costPrice: 0,
-        size: "",
-        quantity: 1,
-        inseam: null,
-        sortNum: 1000,
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
     });
   } catch (e: unknown) {
     if (e instanceof Error) {
