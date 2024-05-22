@@ -40,5 +40,6 @@ export const config = {
     "/api/products/:path*",
     "/shippings/:path*",
     "/adjustments/:path*",
+    "/invoice/:path*"
   ],
 };

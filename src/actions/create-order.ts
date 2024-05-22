@@ -61,10 +61,6 @@ export async function createOrder(
 
   const serialRef = db.collection("serialNumbers").doc("orderNumber");
   const orderRef = db.collection("orders").doc();
-  const optionsRef = db.collection("options").doc("marking").collection("skus");
-  const companyNameRef = optionsRef.doc("companyName");
-  const initialNameRef = optionsRef.doc("initialName");
-  const inseamRef = optionsRef.doc("inseamProcessing");
 
   try {
     await db.runTransaction(async (transaction) => {

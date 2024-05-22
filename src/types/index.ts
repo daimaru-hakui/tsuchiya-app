@@ -110,6 +110,7 @@ export type Shipping = {
 export interface ShippingDetail {
   id: string;
   shippingId: string;
+  shippingNumber:number;
   shippingRef: DocumentReference<DocumentData, DocumentData>;
   orderDetailId: string;
   orderDetailRef: DocumentReference<DocumentData, DocumentData>;
