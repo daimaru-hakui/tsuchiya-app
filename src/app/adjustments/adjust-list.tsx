@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import AdjustItem from "./adjust-item";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import { Product } from "@/types";
+import { Product } from "@/types/product.type";
 
 export default function AdjustList() {
   const [products, setProducts] = useState<Product[]>([]);

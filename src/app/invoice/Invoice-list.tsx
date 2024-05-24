@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { db } from "@/lib/firebase/client";
-import { Order, Shipping, ShippingDetail } from "@/types";
 import {
   collection,
   collectionGroup,
@@ -22,11 +21,11 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Loading from "../loading";
-import Status from "@/components/status";
 import { useStore } from "@/store";
 import { format } from "date-fns";
 import useFunctons from "@/hooks/useFunctons";
 import InvoiceSearch from "./invoice-search";
+import { Shipping, ShippingDetail } from "@/types/shipping.type";
 
 interface Data {
   details: (ShippingDetail & { subTotal: number })[];
@@ -38,9 +37,8 @@ export default function InvoiceList() {
   const [shippingDetails, setShippingDetails] = useState<ShippingDetail[]>();
   const [data, setData] = useState<(Shipping & Data)[]>();
   const [totalAmount, setTotalAmount] = useState(0);
-  const statusSearch = useStore((state) => state.statusSearch);
-  const orderStartDate = useStore((state) => state.orderStartDate);
-  const orderEndDate = useStore((state) => state.orderEndDate);
+  const invoiceStartDate = useStore((state) => state.invoiceStartDate);
+  const invoiceEndDate = useStore((state) => state.invoiceEndDate);
   const { zeroPadding } = useFunctons();
 
   useEffect(() => {
@@ -51,8 +49,8 @@ export default function InvoiceList() {
       orderBy("createdAt", "asc"),
       where("status", "!=", "canceled"),
       where("status", "==", "finished"),
-      where("createdAt", ">=", orderStartDate),
-      where("createdAt", "<=", orderEndDate)
+      where("createdAt", ">=", invoiceStartDate),
+      where("createdAt", "<=", invoiceEndDate)
     );
     const unsub = onSnapshot(q, {
       next: (snapshot) => {
@@ -63,7 +61,7 @@ export default function InvoiceList() {
       },
     });
     return () => unsub();
-  }, [statusSearch, orderStartDate, orderEndDate]);
+  }, [invoiceStartDate, invoiceEndDate]);
 
   useEffect(() => {
     const shippingDetailRef = collectionGroup(db, "shippingDetails");
@@ -71,8 +69,8 @@ export default function InvoiceList() {
     const q = query(
       shippingDetailRef,
       orderBy("createdAt", "asc"),
-      where("createdAt", ">=", orderStartDate),
-      where("createdAt", "<=", orderEndDate)
+      where("createdAt", ">=", invoiceStartDate),
+      where("createdAt", "<=", invoiceEndDate)
     );
     const unsub = onSnapshot(q, {
       next: (snapshot) => {
@@ -83,7 +81,7 @@ export default function InvoiceList() {
       },
     });
     return () => unsub();
-  }, [statusSearch, orderStartDate, orderEndDate]);
+  }, [invoiceStartDate, invoiceEndDate]);
 
   useEffect(() => {
     if (!shippings) return;

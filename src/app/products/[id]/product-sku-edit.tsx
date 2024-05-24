@@ -19,11 +19,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-import { Sku, UpdateSku, UpdateSkuSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import * as actions from "@/actions";
 import { useToast } from "@/hooks/useToast";
+import { Sku, UpdateSku, UpdateSkuSchema } from "@/types/product.type";
 
 interface Props {
   sku: Sku;
@@ -40,7 +40,7 @@ export default function ProductSkuEdit({ sku }: Props) {
 
   const onSubmit = (data: UpdateSku) => {
     startTransaction(async () => {
-      const result = await actions.updateSku(data, sku.parentId, sku.id);
+      const result = await actions.updateSku(data, sku.productId, sku.id);
       toast(result, { setOpen });
     });
   };

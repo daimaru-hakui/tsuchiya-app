@@ -22,9 +22,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CreateProduct, CreateProductSchema } from "@/types";
 import * as actions from "@/actions";
 import { useToast } from "@/hooks/useToast";
+import { CreateProduct, CreateProductSchema } from "@/types/product.type";
 
 export default function ProductCreateForm() {
   const [isPending, startTransition] = useTransition();

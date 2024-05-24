@@ -1,6 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
 import { db } from "@/lib/firebase/client";
-import { CreateOrder, CreateOrderSchema, OrderDetail } from "@/types";
+import { CreateOrder, CreateOrderSchema, OrderDetail } from "@/types/order.type";
 import { format } from "date-fns";
 import {
   collection,

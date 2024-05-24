@@ -1,12 +1,8 @@
 import { toast } from "@/components/ui/use-toast";
 import { db } from "@/lib/firebase/client";
-import {
-  CreateShipping,
-  CreateShippingShema,
-  OrderDetail,
-  ShippingDetail,
-  Sku,
-} from "@/types";
+import { OrderDetail } from "@/types/order.type";
+import { Sku } from "@/types/product.type";
+import { CreateShipping, CreateShippingShema, ShippingDetail } from "@/types/shipping.type";
 import { format } from "date-fns";
 import { FirebaseError } from "firebase/app";
 import {

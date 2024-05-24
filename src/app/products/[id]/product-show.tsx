@@ -13,7 +13,6 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import { Product } from "@/types";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ProductEdit from "./product-edit";
@@ -22,6 +21,7 @@ import { cn } from "@/lib/utils";
 import paths from "@/paths";
 import Link from "next/link";
 import useFunctons from "@/hooks/useFunctons";
+import { Product } from "@/types/product.type";
 
 interface Props {
   id: string;

@@ -1,7 +1,7 @@
 "use server";
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import { CreateProduct, CreateProductSchema } from "@/types";
+import { CreateProduct, CreateProductSchema } from "@/types/product.type";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function createProduct(data: CreateProduct):

@@ -21,15 +21,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import OrderFormItem from "./order-form-item";
-import { db } from "@/lib/firebase/client";
-import {
-  collectionGroup,
-  collection,
-  query,
-  orderBy,
-  getDocs,
-} from "firebase/firestore";
-import { CreateOrder, CreateOrderSchema, Product, Sku } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -37,6 +28,9 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import * as actions from "@/actions";
 import { useToast } from "@/hooks/useToast";
+import { Product, Sku } from "@/types/product.type";
+import { CreateOrder, CreateOrderSchema } from "@/types/order.type";
+import Loading from "@/app/loading";
 
 interface Props {
   products: Product[];
@@ -54,7 +48,6 @@ export default function OrderCreateForm({ products, skus }: Props) {
   });
 
   const onSubmit = (data: CreateOrder) => {
-    console.log(data)
     const result = confirm("登録して宜しいでしょうか");
     if (!result) return;
     startTransition(async () => {
@@ -72,7 +65,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
           (product) => product.gender === "other" || product.gender === gender
         );
         const filterSkus = filterProducts.map((product) => {
-          const parentSkus = skus.filter((sku) => sku.parentId === product.id);
+          const parentSkus = skus.filter((sku) => sku.productId === product.id);
           return parentSkus.map((sku) => ({ ...product, ...sku }));
         });
         setItems(filterSkus);
@@ -132,6 +125,8 @@ export default function OrderCreateForm({ products, skus }: Props) {
     form.setValue("tel", data.tel);
     form.setValue("memo", data.memo);
   };
+
+  if(!items) return <Loading/>
 
   return (
     <Form {...form}>

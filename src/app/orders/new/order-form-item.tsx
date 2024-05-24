@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { CreateOrder, Product, Sku } from "@/types";
+import { CreateOrder } from "@/types/order.type";
+import { Product, Sku } from "@/types/product.type";
 import { UseFormReturn } from "react-hook-form";
 
 interface Props {

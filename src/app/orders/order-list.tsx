@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { db } from "@/lib/firebase/client";
-import { Order } from "@/types";
 import {
   collection,
   onSnapshot,
@@ -26,6 +25,7 @@ import OrderSearch from "./order-search";
 import { useStore } from "@/store";
 import { format } from "date-fns";
 import useFunctons from "@/hooks/useFunctons";
+import { Order } from "@/types/order.type";
 
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>();

@@ -19,13 +19,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-import { Product, UpdateProduct, UpdateProductSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as actions from "@/actions";
 import { Edit, Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/useToast";
+import { Product, UpdateProduct, UpdateProductSchema } from "@/types/product.type";
 
 interface Props {
   product: Product;

@@ -1,9 +1,9 @@
 import { auth } from "@/auth";
 import { auth as firebaseAuth } from "@/lib/firebase/server";
 import AdminList from "./admin-list";
-import { AdminUser } from "@/types";
 import { redirect } from "next/navigation";
 import paths from "@/paths";
+import { AdminUser } from "@/types/admin.type";
 
 export interface User {
   users: AdminUser;

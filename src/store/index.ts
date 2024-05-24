@@ -15,6 +15,11 @@ type State = {
   setShippingStartDate: (date: Date | undefined) => void;
   shippingEndDate: Date;
   setShippingEndDate: (date: Date | undefined) => void;
+
+  invoiceStartDate: Date;
+  setInvoiceStartDate: (date: Date | undefined) => void;
+  invoiceEndDate: Date;
+  setInvoiceEndDate: (date: Date | undefined) => void;
 };
 
 const thisYear = new Date().getFullYear();
@@ -43,4 +48,9 @@ export const useStore = create<State>((set) => ({
   shippingEndDate: endDate,
   setShippingEndDate: (date) =>
     set((state) => ({ shippingEndDate: date || endDate })),
+
+  invoiceStartDate: startDate,
+  setInvoiceStartDate: (value) => set((state) => ({ invoiceStartDate: value })),
+  invoiceEndDate: endDate,
+  setInvoiceEndDate: (value) => set((state) => ({ invoiceEndDate: value })),
 }));

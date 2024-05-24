@@ -1,7 +1,7 @@
 "use server";
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import { UpdateSku, UpdateSkuSchema } from "@/types";
+import { UpdateSku, UpdateSkuSchema } from "@/types/product.type";
 
 export async function updateSku(
   data: UpdateSku,
