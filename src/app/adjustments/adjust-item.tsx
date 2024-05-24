@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Product } from "@/types";
+import { Product } from "@/types/product.type";
 import React from "react";
 
 interface Props {

@@ -8,10 +8,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { db } from "@/lib/firebase/client";
-import { Sku } from "@/types";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import ProductSkuEdit from "./product-sku-edit";
+import { Sku } from "@/types/product.type";
 
 interface Props {
   id: string;

@@ -27,13 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AdminUser, UpdatedAdminUser, UpdatedAdminUserSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as actions from "@/actions";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
+import { AdminUser, UpdatedAdminUser, UpdatedAdminUserSchema } from "@/types/admin.type";
 
 interface Props {
   user: AdminUser;

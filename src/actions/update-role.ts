@@ -1,7 +1,7 @@
 "use server";
 import { auth } from "@/auth";
 import { auth as firebaseAuth } from "@/lib/firebase/server";
-import { AdminUser, UpdatedAdminUser, UpdatedAdminUserSchema } from "@/types";
+import { AdminUser, UpdatedAdminUser, UpdatedAdminUserSchema } from "@/types/admin.type";
 
 export async function updateRole(
   data: UpdatedAdminUser,

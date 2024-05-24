@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase/server";
-import { Product } from "@/types";
+import { Product } from "@/types/product.type";
 import { NextRequest, NextResponse } from "next/server";
 
 export  async function GET(res:NextRequest) {

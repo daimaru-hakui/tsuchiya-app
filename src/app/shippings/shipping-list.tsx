@@ -11,7 +11,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { db } from "@/lib/firebase/client";
-import { Shipping } from "@/types";
 import { format } from "date-fns";
 import {
   collection,
@@ -26,6 +25,7 @@ import Loading from "../loading";
 import ShippingSearch from "./shipping-search";
 import { useStore } from "@/store";
 import useFunctons from "@/hooks/useFunctons";
+import { Shipping } from "@/types/shipping.type";
 
 export default function ShippingList() {
   const [shippings, setShippings] = useState<Shipping[]>();

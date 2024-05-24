@@ -15,7 +15,6 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import { Order, OrderDetail } from "@/types";
 import Loading from "@/app/loading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, ChevronLeft, ChevronRight, Edit } from "lucide-react";
@@ -27,6 +26,7 @@ import Status from "@/components/status";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useStore } from "@/store";
+import { Order, OrderDetail } from "@/types/order.type";
 
 interface Props {
   id: string;

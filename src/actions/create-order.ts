@@ -1,7 +1,8 @@
 "use server";
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import { CreateOrder, CreateOrderSchema, Sku } from "@/types";
+import { CreateOrder, CreateOrderSchema } from "@/types/order.type";
+import { Sku } from "@/types/product.type";
 import { DocumentReference, FieldValue } from "firebase-admin/firestore";
 
 interface DataDetail {
@@ -98,48 +99,6 @@ export async function createOrder(
         });
       }
 
-      // // 会社名刺繍
-      // const companyMarkSum = details
-      //   .filter((detail) => detail.isMark && result.data.companyName)
-      //   .reduce((sum: number, detail) => sum + detail.quantity, 0);
-
-      // if (companyMarkSum > 0) {
-      //   const snapshot = await companyNameRef.get();
-      //   details.push({
-      //     ...(snapshot.data() as Sku),
-      //     quantity: companyMarkSum,
-      //     skuRef: companyNameRef,
-      //   });
-      // }
-
-      // // イニシャル刺繍
-      // const initialNameSum = details
-      //   .filter((detail) => detail.isMark && result.data.initial)
-      //   .reduce((sum: number, detail) => sum + detail.quantity, 0);
-
-      // if (initialNameSum > 0) {
-      //   const snapshot = await initialNameRef.get();
-      //   details.push({
-      //     ...(snapshot.data() as Sku),
-      //     quantity: initialNameSum,
-      //     skuRef: initialNameRef,
-      //   });
-      // }
-
-      // // 裾上げ修理
-      // const inseamSum = details
-      //   .filter((detail) => detail.isInseam && detail.inseam)
-      //   .reduce((sum, detail) => sum + detail.quantity, 0);
-
-      // if (inseamSum > 0) {
-      //   const snapshot = await inseamRef.get();
-      //   details.push({
-      //     ...(snapshot.data() as Sku),
-      //     quantity: inseamSum,
-      //     skuRef: inseamRef,
-      //   });
-      // }
-
       const newCount = serialDoc.data()?.count + 1;
       transaction.update(serialRef, {
         count: newCount,
@@ -171,7 +130,7 @@ export async function createOrder(
         transaction.set(orderRef.collection("orderDetails").doc(), {
           orderId: orderRef.id,
           orderRef: orderRef,
-          serialNumber: newCount,
+          orderNumber: newCount,
           skuId: detail.id,
           skuRef: detail.skuRef,
           productNumber: detail.productNumber,

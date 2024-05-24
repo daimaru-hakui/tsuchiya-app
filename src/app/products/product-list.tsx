@@ -10,12 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { db } from "@/lib/firebase/client";
-import { Product } from "@/types";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Loading from "../loading";
 import useFunctons from "@/hooks/useFunctons";
+import { Product } from "@/types/product.type";
 
 export default function ProductList() {
   const [products, setProducts] = useState<Product[]>();

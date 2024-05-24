@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import AdminEditModal from "./admin-edit-modal";
-import { AdminUser } from "@/types";
+import { AdminUser } from "@/types/admin.type";
 
 export interface Props {
   users: AdminUser[];

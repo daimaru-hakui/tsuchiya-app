@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase/server";
 import OrderCreateForm from "./order-create-form";
-import { Product, Sku } from "@/types";
+import { Product, Sku } from "@/types/product.type";
 
 export default async function OrderCreate() {
   const [productDocs, skuDocs] = await Promise.all([

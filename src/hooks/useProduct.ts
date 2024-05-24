@@ -1,13 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
 import { db } from "@/lib/firebase/client";
-import {
-  CreateProduct,
-  CreateProductSchema,
-  UpdateProduct,
-  UpdateProductSchema,
-  UpdateSku,
-  UpdateSkuSchema,
-} from "@/types";
+import { CreateProduct, CreateProductSchema, UpdateProduct, UpdateProductSchema, UpdateSku, UpdateSkuSchema } from "@/types/product.type";
 import { format } from "date-fns";
 import {
   collection,

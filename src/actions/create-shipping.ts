@@ -1,7 +1,9 @@
 "use server";
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import { CreateShipping, CreateShippingShema, OrderDetail, Sku } from "@/types";
+import { OrderDetail } from "@/types/order.type";
+import { Sku } from "@/types/product.type";
+import { CreateShipping, CreateShippingShema } from "@/types/shipping.type";
 import { DocumentReference, FieldValue } from "firebase-admin/firestore";
 
 interface DataDetail {
@@ -9,9 +11,11 @@ interface DataDetail {
   skuId: string;
   quantity: number;
   shippingQuantity: number;
+  shippingStockQuantity: number;
   salePrice: number;
   inseam?: number | undefined;
   skuRef: DocumentReference;
+  isStock: boolean;
 }
 
 export async function createShipping(
@@ -43,7 +47,7 @@ export async function createShipping(
     console.log(result.error);
     return {
       status: "error",
-      message: result.error.flatten().formErrors.join(),
+      message: result.error.flatten().formErrors.join(","),
     };
   }
 
@@ -56,7 +60,9 @@ export async function createShipping(
   }
 
   const filterDetails = result.data.details
-    .filter((detail) => detail.shippingQuantity > 0)
+    .filter(
+      (detail) => detail.shippingQuantity + detail.shippingStockQuantity > 0
+    )
     .map((detail, idx) => ({ ...detail, sortNum: idx + 1 }));
 
   if (filterDetails.length === 0) {
@@ -86,6 +92,7 @@ export async function createShipping(
   let orderDetails: (OrderDetail & {
     orderDetailRef: DocumentReference;
     shippingQuantity: number;
+    shippingStockQuantity: number;
   })[] = [];
 
   let skus = [];
@@ -93,22 +100,14 @@ export async function createShipping(
   try {
     await db.runTransaction(async (transaction) => {
       const serialDoc = await transaction.get(serialRef);
-      const orderDoc = await transaction.get(orderRef);
 
       for (const detail of filterDetails) {
         const orderDetailRef = orderRef
           .collection("orderDetails")
           .doc(detail.id);
-        const orderDetailDoc = await transaction.get(orderDetailRef);
 
-        orderDetails.push({
-          ...orderDetailDoc.data(),
-          orderDetailRef: orderDetailDoc.ref,
-          shippingQuantity: detail.shippingQuantity,
-        } as OrderDetail & {
-          orderDetailRef: DocumentReference;
-          shippingQuantity: number;
-        });
+        const orderDetailSnap = await transaction.get(orderDetailRef);
+        const orderDetail = { ...orderDetailSnap.data() } as OrderDetail;
 
         const skusRef = db
           .collectionGroup("skus")
@@ -117,23 +116,44 @@ export async function createShipping(
           .orderBy("sortNum", "asc");
 
         const skuDocs = await transaction.get(skusRef);
-        const skuDoc = skuDocs.docs[0].data() as Sku;
+        const sku = skuDocs.docs[0].data() as Sku;
         const skuRef = skuDocs.docs[0].ref;
 
-        const shippingDetailData = {
-          skuRef,
-          ...skuDoc,
-          ...detail,
-        };
+        if (detail.shippingQuantity > 0) {
+          shippingDetails.push({
+            skuRef,
+            ...sku,
+            ...detail,
+            quantity: detail.shippingQuantity,
+            isStock: false,
+          });
+        }
 
-        const skusData = {
+        skus.push({
           skuRef,
-          ...skuDoc,
+          ...sku,
           ...detail,
-        };
+        });
 
-        shippingDetails.push(shippingDetailData);
-        skus.push(skusData);
+        orderDetails.push({
+          orderDetailRef: orderDetailRef,
+          skuId: orderDetail.skuId,
+          skuRef: orderDetail.skuRef,
+          productNumber: orderDetail.productNumber,
+          productName: orderDetail.productName,
+          size: orderDetail.size,
+          quantity: orderDetail.quantity,
+          inseam: orderDetail.inseam,
+          sortNum: orderDetail.sortNum,
+          shippingQuantity: detail.shippingQuantity,
+          shippingStockQuantity: detail.shippingStockQuantity,
+        } as Sku &
+          OrderDetail & {
+            skuRef: DocumentReference;
+            orderDetailRef: DocumentReference;
+            shippingQuantity: number;
+            shippingStockQuantity: number;
+          });
       }
 
       const totalQuantity = orderDetails.reduce((sum, detail) => {
@@ -146,16 +166,44 @@ export async function createShipping(
         return sum;
       }, 0);
 
+      const totalShippingStockQuantity = orderDetails.reduce(
+        (sum, detail) => sum + detail.shippingStockQuantity,
+        0
+      );
+
+      // ステータス変更
       const status =
-        totalQuantity === totalShippingQuantity ? "finished" : "openOrder";
+        totalQuantity === totalShippingQuantity + totalShippingStockQuantity
+          ? "finished"
+          : "openOrder";
       transaction.update(orderRef, {
         status,
+      });
+
+      // 在庫分
+      const stockOrderDetails = orderDetails.filter(
+        (detail) => detail.shippingStockQuantity > 0
+      );
+
+      stockOrderDetails.forEach(async (detail) => {
+        shippingDetails.push({
+          productNumber: detail.productNumber,
+          productName: detail.productName,
+          size: detail.size,
+          quantity: detail.shippingStockQuantity,
+          salePrice: 0,
+          inseam: detail.inseam,
+          skuRef: detail.skuRef,
+          skuId: detail.skuId,
+          sortNum: detail.sortNum + 0.5,
+          isStock: true,
+        } as DataDetail & Sku & any);
       });
 
       // 会社名刺繍
       const topsSum = shippingDetails
         .filter((detail) => detail.isMark)
-        .reduce((sum: number, detail) => sum + detail.quantity, 0);
+        .reduce((sum: number, detail) => sum + detail.shippingQuantity, 0);
 
       if (topsSum > 0) {
         const snapshot = await companyNameRef.get();
@@ -192,7 +240,7 @@ export async function createShipping(
       // イニシャル刺繍
       const initialNameSum = shippingDetails
         .filter((detail) => detail.isMark && result.data.initial)
-        .reduce((sum: number, detail) => sum + detail.quantity, 0);
+        .reduce((sum: number, detail) => sum + detail.shippingQuantity, 0);
 
       if (initialNameSum > 0) {
         const snapshot = await initialNameRef.get();
@@ -205,9 +253,13 @@ export async function createShipping(
       }
 
       // 裾上げ修理
-      const inseamSum = shippingDetails
-        .filter((detail) => detail.isInseam && detail.inseam)
-        .reduce((sum, detail) => sum + detail.quantity, 0);
+      const inseamSum = result.data.details
+        .filter((detail) => detail.inseam)
+        .reduce(
+          (sum, detail) =>
+            sum + detail.shippingQuantity + detail.shippingStockQuantity,
+          0
+        );
 
       if (inseamSum > 0) {
         const snapshot = await inseamRef.get();
@@ -219,6 +271,7 @@ export async function createShipping(
         } as DataDetail & Sku);
       }
 
+      // 送料
       const shippingSnap = await shippingFeeRef.get();
       shippingDetails.push({
         ...shippingSnap.data(),
@@ -234,31 +287,38 @@ export async function createShipping(
         count: newCount,
       });
 
-      let stocks = [];
+      //　在庫エラー
+      let stockMessages = [];
       for (const sku of skus) {
-        if (sku.stock < sku.shippingQuantity) {
-          stocks.push(`${sku.productNumber} 在庫がありません`);
+        if (sku.stock < sku.shippingStockQuantity) {
+          stockMessages.push(`${sku.productNumber} 在庫がありません`);
         }
       }
 
-      if (stocks.length > 0) {
-        throw new Error(stocks.join("\n"));
+      if (stockMessages.length > 0) {
+        throw new Error(stockMessages.join("\n"));
       }
 
+      // 在庫引き落とし
       for (const sku of skus) {
         transaction.update(sku.skuRef, {
-          orderQuantity: sku.orderQuantity - sku.shippingQuantity,
-          stock: sku.stock - sku.shippingQuantity,
+          // orderQuantity: sku.orderQuantity - sku.shippingQuantity,
+          stock: sku.stock - sku.shippingStockQuantity,
         });
       }
 
+      // 注文残の計算
       for (const {
         orderDetailRef,
         quantity,
+        shippingStockQuantity,
         shippingQuantity,
       } of orderDetails) {
+        if (quantity < shippingQuantity + shippingStockQuantity) {
+          throw new Error("出荷数量が残数量を超過しています");
+        }
         transaction.update(orderDetailRef, {
-          quantity: quantity - shippingQuantity,
+          quantity: quantity - (shippingQuantity + shippingStockQuantity),
         });
       }
 
@@ -296,7 +356,7 @@ export async function createShipping(
           shippingRef: shippingRef,
           orderId: orderId,
           orderRef: orderRef,
-          skuId: detail.id,
+          skuId: detail.id || "",
           skuRef: detail.skuRef,
           productNumber: detail.productNumber,
           productName: detail.productName,
@@ -306,6 +366,7 @@ export async function createShipping(
           quantity: detail.quantity || 0,
           inseam: detail.inseam || null,
           sortNum: detail.sortNum,
+          isStock: detail.isStock || false,
           shippingDate: result.data.shippingDate,
           createdAt: FieldValue.serverTimestamp(),
           updatedAt: FieldValue.serverTimestamp(),

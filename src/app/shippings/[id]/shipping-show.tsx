@@ -18,12 +18,12 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import { Shipping, ShippingDetail } from "@/types";
 import Loading from "@/app/loading";
 import ShippingShowTable from "./shipping-show-table";
 import ShippingInvoiceModal from "./shipping-invoice-modal";
 import Link from "next/link";
 import { useStore } from "@/store";
+import { Shipping, ShippingDetail } from "@/types/shipping.type";
 
 interface Props {
   id: string;

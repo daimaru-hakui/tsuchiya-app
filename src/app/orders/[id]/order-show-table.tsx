@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { OrderDetail } from "@/types";
+import { OrderDetail } from "@/types/order.type";
 
 interface Props {
   orderDetails: (OrderDetail & { stock: number })[];
