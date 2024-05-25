@@ -196,7 +196,7 @@ export default function OrderShow({ id }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr]">
+        <div className="grid grid-cols-1 lg:grid-cols-2">
           <div>
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>発注No.</dt>

@@ -55,6 +55,7 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
   const toast = useToast();
 
   const onSubmit = (data: CreateShipping) => {
+    console.log(data.shippingCharge)
     startTransition(async () => {
       const d = {
         ...order,
@@ -89,7 +90,7 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
       <DialogTrigger asChild>
         <Package size={20} className="cursor-pointer" />
       </DialogTrigger>
-      <DialogContent className="w-full md:min-w-[800px] lg:min-w-[1200px] 2xl:min-w-[1400px]">
+      <DialogContent className="w-full overflow-auto max-h-screen  md:min-w-[800px] lg:min-w-[1200px] 2xl:min-w-[1400px]">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -165,17 +166,16 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
                   render={({ field }) => (
                     <FormItem className="flex flex-col w-[150px]">
                       <FormLabel>送料</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={"0"}>
+                      <Select onValueChange={field.onChange} defaultValue={"700"}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={field.value} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="w-[200px]">
-                          <SelectItem value={"0"}>{0}円</SelectItem>
-                          <SelectItem value={"500"}>大阪 {500}円</SelectItem>
-                          <SelectItem value={"600"}>大阪 {600}円</SelectItem>
-                          <SelectItem value={"700"}>大阪 {700}円</SelectItem>
+                          <SelectItem value={"700"}>{700}円</SelectItem>
+                          <SelectItem value={"1500"}>沖縄 {1500}円</SelectItem>
+                          <SelectItem value={"3400"}>大阪 {3400}円</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

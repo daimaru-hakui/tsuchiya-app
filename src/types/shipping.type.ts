@@ -5,6 +5,7 @@ export type Shipping = {
   id: string;
   trackingNumber: string;
   shippingNumber: number;
+  shippingDate: string;
   orderNumber: number;
   orderId: string;
   orderRef: DocumentReference;
@@ -70,7 +71,6 @@ export const CreateShippingShema = z.object({
       shippingStockQuantity: z.number(),
       shippingQuantity: z.number(),
       salePrice: z.number(),
-      // remainingQuantity: z.number(),
     })
     .array(),
   siteCode: z.string().max(100),
@@ -83,5 +83,17 @@ export const CreateShippingShema = z.object({
   shippingDate: z.string(),
   shippingCharge: z.number(),
 });
-
 export type CreateShipping = z.infer<typeof CreateShippingShema>;
+
+export const UpdateShippingSchema = z.object({
+  shippingDate: z.any(),
+  details: z
+    .object({
+      id: z.string(),
+      quantity: z.number().min(0),
+      inseam: z.number().optional(),
+      salePrice: z.number().min(0),
+    })
+    .array(),
+});
+export type UpdateShipping = z.infer<typeof UpdateShippingSchema>;

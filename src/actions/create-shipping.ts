@@ -4,6 +4,7 @@ import { db } from "@/lib/firebase/server";
 import { OrderDetail } from "@/types/order.type";
 import { Sku } from "@/types/product.type";
 import { CreateShipping, CreateShippingShema } from "@/types/shipping.type";
+import { format } from "date-fns";
 import { DocumentReference, FieldValue } from "firebase-admin/firestore";
 
 interface DataDetail {
@@ -39,7 +40,7 @@ export async function createShipping(
     tel: data.tel,
     applicant: data.applicant,
     nemo: data.memo || "",
-    shippingDate: data.shippingDate,
+    shippingDate: format(data.shippingDate, "yyyy-MM-dd"),
     shippingCharge: data.shippingCharge,
   });
 
@@ -211,7 +212,7 @@ export async function createShipping(
           ...(snapshot.data() as Sku),
           quantity: topsSum,
           skuRef: companyNameRef,
-          skuId: snapshot.id,
+          skuId: "",
         } as DataDetail & Sku);
       }
 
@@ -222,7 +223,7 @@ export async function createShipping(
           ...(snapshot.data() as Sku),
           quantity: topsSum,
           skuRef: transferSheetRef,
-          skuId: snapshot.id,
+          skuId: "",
         } as DataDetail & Sku);
       }
 
@@ -233,7 +234,7 @@ export async function createShipping(
           ...(snapshot.data() as Sku),
           quantity: topsSum,
           skuRef: pressFeeRef,
-          skuId: snapshot.id,
+          skuId: "",
         } as DataDetail & Sku);
       }
 
@@ -248,7 +249,7 @@ export async function createShipping(
           ...(snapshot.data() as Sku),
           quantity: initialNameSum,
           skuRef: initialNameRef,
-          skuId: snapshot.id,
+          skuId: "",
         } as Sku & DataDetail);
       }
 
@@ -267,7 +268,7 @@ export async function createShipping(
           ...(snapshot.data() as Sku),
           quantity: inseamSum,
           skuRef: inseamRef,
-          skuId: snapshot.id,
+          skuId: "",
         } as DataDetail & Sku);
       }
 
@@ -279,6 +280,7 @@ export async function createShipping(
         salePrice: result.data.shippingCharge || 0,
         costPrice: 0,
         quantity: 1,
+        skuId: "",
       } as DataDetail & Sku);
 
       // 連番

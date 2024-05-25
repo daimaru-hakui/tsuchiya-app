@@ -15,11 +15,10 @@ interface Props {
 }
 
 export default function OrderShowTable({ orderDetails }: Props) {
-  
   const totalAmount = () => {
     const total = orderDetails.reduce(
       (sum: number, detail: { orderQuantity: number; salePrice: number }) =>
-        (sum = sum + detail.orderQuantity * detail.salePrice),
+        sum + detail.orderQuantity * detail.salePrice,
       0
     );
     return total.toLocaleString();
