@@ -62,7 +62,7 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
         ...data,
         createdAt: "",
         updatedAt: "",
-        shippingCharge: Number(data.shippingCharge || 0),
+        shippingCharge: Number(data.shippingCharge || 700),
       };
       const result = await actions.createShipping(d, order.id);
       toast(result, { reset, setOpen });

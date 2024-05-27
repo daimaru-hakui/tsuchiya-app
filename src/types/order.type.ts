@@ -72,3 +72,31 @@ export const CreateOrderSchema = z.object({
 });
 
 export type CreateOrder = z.infer<typeof CreateOrderSchema>;
+
+export const UpdateOrderSchema = z.object({
+  orderId: z.string(),
+  section: z.string(),
+  employeeCode: z.string(),
+  initial: z.string().optional(),
+  username: z.string(),
+  companyName: z.boolean(),
+  position: z.string(),
+  details: z
+    .object({
+      id: z.string(),
+      quantity: z.number().min(0),
+      orderQuantity: z.number().min(0),
+      salePrice: z.number().min(0),
+      inseam: z.number().optional(),
+    })
+    .array(),
+  siteCode: z.string(),
+  siteName: z.string(),
+  zipCode: z.string(),
+  address: z.string(),
+  tel: z.string(),
+  applicant: z.string(),
+  memo: z.string().optional(),
+});
+
+export type UpdateOrder = z.infer<typeof UpdateOrderSchema>;

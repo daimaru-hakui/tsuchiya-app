@@ -137,6 +137,8 @@ export default function InvoiceList() {
               <TableHead className="min-w-[120px]">日付</TableHead>
               <TableHead className="w-[90px]">出荷No.</TableHead>
               <TableHead className="w-[90px]">発注No.</TableHead>
+              <TableHead className="min-w-[110px]">イニシャル</TableHead>
+              <TableHead className="min-w-[100px]">名前</TableHead>
               <TableHead className="">
                 <div className="flex">
                   <div className="w-[100px] px-2">品番</div>
@@ -167,13 +169,18 @@ export default function InvoiceList() {
                 <TableCell className="text-center">
                   {zeroPadding(d.orderNumber)}
                 </TableCell>
+                <TableCell className="text-center">{d.initial}</TableCell>
+                <TableCell>{d.username}</TableCell>
                 <TableCell>
                   {d.details.map((detail, idx) => (
                     <div key={idx} className="flex items-start my-1">
                       <div className="w-[100px] px-2">
                         {detail.productNumber}
                       </div>
-                      <div className="w-[300px] px-2">{detail.productName}{detail.isStock && "【在庫】"}</div>
+                      <div className="w-[300px] px-2">
+                        {detail.productName}
+                        {detail.isStock && "【在庫】"}
+                      </div>
                       <div className="w-[80px] px-2 text-center">
                         {detail.size}
                       </div>

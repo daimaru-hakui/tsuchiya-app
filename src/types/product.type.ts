@@ -69,7 +69,6 @@ export interface Sku {
   salePrice: number;
   costPrice: number;
   stock: number;
-  orderQuantity: number;
   parentRef: any;
   sortNum: number;
   createdAt: Date;
@@ -81,7 +80,6 @@ export const UpdateSkuSchema = z.object({
   salePrice: z.number(),
   costPrice: z.number(),
   stock: z.number(),
-  orderQuantity: z.number(),
   sortNum: z.number(),
 });
 export type UpdateSku = z.infer<typeof UpdateSkuSchema>;

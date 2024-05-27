@@ -68,7 +68,6 @@ export async function createOrder(
       const serialDoc = await transaction.get(serialRef);
 
       let details: (Sku & DataDetail)[] = [];
-      let skuItems = [];
       for (const sku of filterSkus) {
         const skusRef = db
           .collectionGroup("skus")
@@ -84,19 +83,8 @@ export async function createOrder(
           .collection("skus")
           .doc(sku.id);
 
-        skuItems.push({
-          ref: skuRef,
-          doc: skuDoc,
-          sku,
-        });
         const data = { ...skuDoc, ...sku, skuRef } as any;
         details.push(data);
-      }
-
-      for (const { ref, doc, sku } of skuItems) {
-        transaction.update(ref, {
-          orderQuantity: doc.orderQuantity + sku.quantity,
-        });
       }
 
       const newCount = serialDoc.data()?.count + 1;

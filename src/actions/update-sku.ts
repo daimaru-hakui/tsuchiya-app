@@ -14,7 +14,6 @@ export async function updateSku(
     salePrice: data.salePrice,
     costPrice: data.costPrice,
     stock: data.stock,
-    orderQuantity: data.orderQuantity,
     sortNum: data.sortNum,
   });
 
@@ -51,7 +50,6 @@ export async function updateSku(
       salePrice: result.data.salePrice,
       costPrice: result.data.costPrice,
       stock: result.data.stock,
-      orderQuantity: result.data.orderQuantity,
       sortNum: result.data.sortNum,
     });
   } catch (e: unknown) {
