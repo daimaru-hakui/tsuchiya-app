@@ -119,7 +119,6 @@ export function useShipping() {
           throw new Error("在庫がありません");
         }
         transaction.update(skuRef, {
-          orderQuantity: doc.orderQuantity - detail.shippingQuantity,
           stock: doc.stock - detail.shippingQuantity,
         });
       }
