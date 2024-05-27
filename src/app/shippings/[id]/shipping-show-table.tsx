@@ -16,8 +16,7 @@ interface Props {
 export default function ShippingShowTable({ shippingDetails }: Props) {
   const totalAmount = () => {
     const total = shippingDetails.reduce(
-      (sum: number, detail: { quantity: number; salePrice: number }) =>
-        (sum = sum + detail.quantity * detail.salePrice),
+      (sum: number, detail) => (sum = sum + detail.quantity * detail.salePrice),
       0
     );
     return total.toLocaleString();
@@ -31,7 +30,7 @@ export default function ShippingShowTable({ shippingDetails }: Props) {
           <TableHead className="min-w-[100px]">品番</TableHead>
           <TableHead className="min-w-[250px]">品名</TableHead>
           <TableHead className="text-center min-w-[90px]">サイズ</TableHead>
-          <TableHead className="text-center min-w-[90px]">出荷注数</TableHead>
+          <TableHead className="text-center min-w-[90px]">出荷数</TableHead>
           <TableHead className="text-center min-w-[90px]">単価</TableHead>
           <TableHead className="text-center min-w-[90px]">合計</TableHead>
           <TableHead className="text-center min-w-[90px]">股下</TableHead>

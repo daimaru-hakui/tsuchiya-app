@@ -134,7 +134,7 @@ export default function OrderShippingTable({
             <TableCell className="text-right">{detail.orderQuantity}</TableCell>
             <TableCell className="text-right">{detail.quantity}</TableCell>
             <TableCell className="text-right">{detail.stock}</TableCell>
-            <TableCell className="pr-1">
+            <TableCell className="p-1">
               <FormField
                 control={form.control}
                 name={`details.${idx}.shippingStockQuantity`}

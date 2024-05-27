@@ -148,28 +148,6 @@ export default function ProductSkuEdit({ sku }: Props) {
                   )}
                 />
                 <FormField
-                  defaultValue={sku.orderQuantity || 0}
-                  control={form.control}
-                  name="orderQuantity"
-                  render={({ field }) => (
-                    <FormItem className="text-left">
-                      <FormLabel>受注数量</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          autoComplete="off"
-                          {...field}
-                          onChange={(event) =>
-                            field.onChange(+event.target.value)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
                   defaultValue={sku.sortNum || 0}
                   control={form.control}
                   name="sortNum"

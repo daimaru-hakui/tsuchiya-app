@@ -64,7 +64,7 @@ export default function ShippingInvoiceModal({ courier, trackingNumber, shipping
       <DialogTrigger asChild>
         <Button size="xs"> {trackingNumber ? "送状更新" : "送状登録"}</Button>
       </DialogTrigger>
-      <DialogContent className="w-full md:w-[350px]">
+      <DialogContent className="w-full overflow-auto max-h-screen md:w-[350px]">
         <DialogHeader>
           <DialogTitle>送状登録</DialogTitle>
         </DialogHeader>

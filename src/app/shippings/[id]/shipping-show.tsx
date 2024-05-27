@@ -24,6 +24,7 @@ import ShippingInvoiceModal from "./shipping-invoice-modal";
 import Link from "next/link";
 import { useStore } from "@/store";
 import { Shipping, ShippingDetail } from "@/types/shipping.type";
+import ShippingEditModal from "./shipping-edit-modal";
 
 interface Props {
   id: string;
@@ -157,6 +158,12 @@ export default function ShippingShow({ id }: Props) {
               trackingNumber={shipping.trackingNumber}
               courier={shipping.courier}
             />
+            {shipping.status !== "finished" && (
+              <ShippingEditModal
+                shipping={shipping}
+                shippingDetails={shippingDetails}
+              />
+            )}
             <ChevronLeft
               className={cn("cursor-pointer", !prevPage && "opacity-35")}
               onClick={() =>
@@ -184,7 +191,7 @@ export default function ShippingShow({ id }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] mb-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 mb-5">
           <div>
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>出荷No.</dt>
@@ -202,7 +209,7 @@ export default function ShippingShow({ id }: Props) {
             </dl>
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr]">
+        <div className="grid grid-cols-1 lg:grid-cols-2">
           <div>
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>発注No.</dt>

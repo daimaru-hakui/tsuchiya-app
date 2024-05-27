@@ -152,7 +152,6 @@ export function useProduct() {
       salePrice: data.salePrice,
       costPrice: data.costPrice,
       stock: data.stock,
-      orderQuantity: data.orderQuantity,
       sortNum: data.sortNum,
     });
 
@@ -174,7 +173,6 @@ export function useProduct() {
         salePrice: result.data.salePrice,
         costPrice: result.data.costPrice,
         stock: result.data.stock,
-        orderQuantity: result.data.orderQuantity,
         sortNum: result.data.sortNum,
       });
       toast({
