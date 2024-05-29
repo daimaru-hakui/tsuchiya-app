@@ -149,7 +149,7 @@ export default function OrderShow({ id }: Props) {
             className="cursor-pointer"
             onClick={() => router.push(paths.orderAll())}
           />
-          <span className="flex items-center gap-3 ml-auto">
+          <span className="flex items-center gap-4 ml-auto">
             {order.status === "pending" && (
               <Button
                 size="xs"

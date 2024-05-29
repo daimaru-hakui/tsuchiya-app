@@ -6,7 +6,7 @@ import Header from "@/components/layouts/header/header";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { NextAuthProvider } from "@/lib/providers/next-auth-provider";
-import MainMenu from "@/components/layouts/sidebar/main-menu";
+import MainMenu from "@/components/layouts/sidebar/MainMenu";
 import { ToastProvider } from "@/components/toast-provider";
 
 const NotoSans = Noto_Sans({

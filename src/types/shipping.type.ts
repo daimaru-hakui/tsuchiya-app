@@ -97,3 +97,9 @@ export const UpdateShippingSchema = z.object({
     .array(),
 });
 export type UpdateShipping = z.infer<typeof UpdateShippingSchema>;
+
+export const DeleteShippingSchema = z.object({
+  shippingId: z.string(),
+  orderId: z.string(),
+});
+export type DeleteShipping = z.infer<typeof DeleteShippingSchema>;

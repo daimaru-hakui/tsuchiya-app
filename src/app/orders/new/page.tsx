@@ -20,6 +20,8 @@ export default async function OrderCreate() {
   const jsonSkus = JSON.stringify(skusRes);
   const skus = JSON.parse(jsonSkus);
 
+  if (!skus) return;
+
   return (
     <div className="">
       <OrderCreateForm products={products} skus={skus} />
