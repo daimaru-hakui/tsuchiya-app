@@ -27,15 +27,14 @@ import useFunctons from "@/hooks/useFunctons";
 import InvoiceSearch from "./invoice-search";
 import { Shipping, ShippingDetail } from "@/types/shipping.type";
 
-interface Data {
-  details: (ShippingDetail & { subTotal: number })[];
-  total: number;
+interface Details {
+  details: ShippingDetail[];
 }
 
 export default function InvoiceList() {
   const [shippings, setShippings] = useState<Shipping[]>();
   const [shippingDetails, setShippingDetails] = useState<ShippingDetail[]>();
-  const [data, setData] = useState<(Shipping & Data)[]>();
+  const [data, setData] = useState<(Shipping & Details)[]>();
   const [totalAmount, setTotalAmount] = useState(0);
   const invoiceStartDate = useStore((state) => state.invoiceStartDate);
   const invoiceEndDate = useStore((state) => state.invoiceEndDate);
@@ -65,7 +64,6 @@ export default function InvoiceList() {
 
   useEffect(() => {
     const shippingDetailRef = collectionGroup(db, "shippingDetails");
-    console.log(shippingDetailRef);
     const q = query(
       shippingDetailRef,
       orderBy("createdAt", "asc"),
@@ -89,35 +87,22 @@ export default function InvoiceList() {
       const filterDetails = shippingDetails?.filter(
         (detail) => detail.shippingNumber === shipping.shippingNumber
       );
-      let details: (ShippingDetail & { subTotal: number })[] = [];
-      filterDetails?.forEach((detail) => {
-        const newDetail = {
-          ...detail,
-          subTotal: detail.salePrice * detail.quantity,
-        };
-        details.push(newDetail);
-      });
-      const sortDetails = details?.sort((a, b) =>
+      const sortDetails = filterDetails?.sort((a, b) =>
         a.sortNum < b.sortNum ? -1 : 1
       );
-
-      const total = sortDetails?.reduce(
-        (sum, detail) => sum + detail.subTotal,
-        0
-      );
-      return { details, ...shipping, total: total || 0 };
+      let details: Shipping & Details;
+      details = { details: sortDetails || [], ...shipping };
+      return details;
     });
-    const totalAmount = data.reduce((sum, d) => sum + d.total, 0);
+    const totalAmount = data.reduce((sum, d) => sum + (d?.totalAmount || 0), 0);
     setTotalAmount(totalAmount);
     setData(data);
   }, [shippingDetails, shippings]);
 
   if (!data) return <Loading />;
 
-  console.log(data);
-
   return (
-    <Card className="w-full md:w-[1300px] overflow-auto">
+    <Card className="w-full md:w-[1300px] lg:w-[1500px] overflow-auto">
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>請求明細</CardTitle>
@@ -188,13 +173,13 @@ export default function InvoiceList() {
                         {detail.quantity}
                       </div>
                       <div className="w-[80px] px-2 text-right">
-                        {detail.subTotal.toLocaleString()}
+                        {(detail.quantity * detail.salePrice).toLocaleString()}
                       </div>
                     </div>
                   ))}
                 </TableCell>
                 <TableCell className="w-[80px]">
-                  {d.total.toLocaleString()}
+                  {d.totalAmount.toLocaleString()}
                 </TableCell>
               </TableRow>
             ))}

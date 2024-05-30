@@ -4,7 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -12,28 +12,36 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/useToast";
 import { db } from "@/lib/firebase/client";
-import { doc, updateDoc } from "firebase/firestore";
+import { timeStamp } from "console";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
 interface Props {
   shippingId: string;
-  courier: string,
+  courier: string;
   trackingNumber: string;
+  totalAmount: number;
 }
 
 interface Inputs {
-  trackingNumber: string, courier: string;
+  trackingNumber: string;
+  courier: string;
 }
 
-export default function ShippingInvoiceModal({ courier, trackingNumber, shippingId }: Props) {
+export default function ShippingInvoiceModal({
+  courier,
+  trackingNumber,
+  shippingId,
+  totalAmount,
+}: Props) {
   const form = useForm<Inputs>();
   const [isPending, startTransaction] = useTransition();
   const [open, setOpen] = useState(false);
@@ -46,16 +54,21 @@ export default function ShippingInvoiceModal({ courier, trackingNumber, shipping
         await updateDoc(shippingRef, {
           trackingNumber: data.trackingNumber,
           courier: data.courier,
-          status: data.trackingNumber ? "finished" : "picking"
+          status: data.trackingNumber ? "finished" : "picking",
+          totalAmount,
+          updatedAt: serverTimestamp(),
         });
-        toast({ status: "success", message: trackingNumber ? "更新しました" : "登録しました" });
+        toast({
+          status: "success",
+          message: trackingNumber ? "更新しました" : "登録しました",
+        });
         setOpen(false);
       } catch (e: unknown) {
         if (e instanceof Error) {
           const result = { status: "error", message: e.message };
           toast(result);
         }
-      };
+      }
     });
   };
 
@@ -75,9 +88,9 @@ export default function ShippingInvoiceModal({ courier, trackingNumber, shipping
               name="trackingNumber"
               defaultValue={trackingNumber || ""}
               render={({ field }) => (
-                <FormItem id="noAllow" >
+                <FormItem id="noAllow">
                   <FormLabel>送状No.</FormLabel>
-                  <FormControl id="noAllow" >
+                  <FormControl id="noAllow">
                     <Input type="number" {...field} />
                   </FormControl>
                   <FormMessage />
@@ -101,25 +114,19 @@ export default function ShippingInvoiceModal({ courier, trackingNumber, shipping
                         <FormControl>
                           <RadioGroupItem value="seino" />
                         </FormControl>
-                        <FormLabel className="font-normal">
-                          西濃運輸
-                        </FormLabel>
+                        <FormLabel className="font-normal">西濃運輸</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
                           <RadioGroupItem value="sagawa" />
                         </FormControl>
-                        <FormLabel className="font-normal">
-                          佐川急便
-                        </FormLabel>
+                        <FormLabel className="font-normal">佐川急便</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
                           <RadioGroupItem value="fukuyama" />
                         </FormControl>
-                        <FormLabel className="font-normal">
-                          福山通運
-                        </FormLabel>
+                        <FormLabel className="font-normal">福山通運</FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>

@@ -44,10 +44,12 @@ export default function ShippingSearch() {
       <CalendarInput
         date={shippingStartDate}
         setDate={setShippingStartDate}
+        title="start"
       />
       <CalendarInput
         date={shippingEndDate}
         setDate={setShippingEndDate}
+        title="end"
       />
     </div>
   );

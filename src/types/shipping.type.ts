@@ -25,6 +25,7 @@ export type Shipping = {
   status: string;
   courier: "seino" | "sagawa" | "fukuyama";
   userId: string;
+  totalAmount: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };

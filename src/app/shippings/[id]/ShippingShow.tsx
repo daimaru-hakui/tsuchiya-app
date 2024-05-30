@@ -19,12 +19,12 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import Loading from "@/app/loading";
-import ShippingShowTable from "./shipping-show-table";
-import ShippingInvoiceModal from "./shipping-invoice-modal";
+import ShippingShowTable from "./ShippingShowTable";
+import ShippingInvoiceModal from "./ShippingInvoiceModal";
 import Link from "next/link";
 import { useStore } from "@/store";
 import { Shipping, ShippingDetail } from "@/types/shipping.type";
-import ShippingEditModal from "./shipping-edit-modal";
+import ShippingEditModal from "./ShippingEditModal";
 import ShippingDeleteButton from "./ShippingDeleteButton";
 import useFunctons from "@/hooks/useFunctons";
 
@@ -38,6 +38,7 @@ export default function ShippingShow({ id }: Props) {
   const [shippingDetails, setShippingDetails] = useState<ShippingDetail[]>([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
+  const [totalAmount, setTotalAmount] = useState(0);
   const shippingStatusSearch = useStore((state) => state.shippingStatusSearch);
   const { getTrackingLink } = useFunctons();
 
@@ -145,6 +146,20 @@ export default function ShippingShow({ id }: Props) {
     }
   };
 
+  useEffect(() => {
+    const getTotalAmount = () => {
+      const total = shippingDetails.reduce(
+        (sum: number, detail) =>
+          (sum = sum + detail.quantity * detail.salePrice),
+        0
+      );
+      setTotalAmount(total);
+    };
+    getTotalAmount();
+  }, [shippingDetails]);
+
+  console.log(totalAmount)
+
   if (!shipping) return <Loading />;
 
   return (
@@ -160,6 +175,7 @@ export default function ShippingShow({ id }: Props) {
               shippingId={id}
               trackingNumber={shipping.trackingNumber}
               courier={shipping.courier}
+              totalAmount={totalAmount}
             />
             {shipping.status !== "finished" && (
               <>
@@ -287,7 +303,10 @@ export default function ShippingShow({ id }: Props) {
           </div>
         </div>
         <div className="mt-4">
-          <ShippingShowTable shippingDetails={shippingDetails} />
+          <ShippingShowTable
+            shippingDetails={shippingDetails}
+            totalAmount={totalAmount}
+          />
           {/* <OrderShowTable shippingDetails={shippingDetails} /> */}
         </div>
       </CardContent>

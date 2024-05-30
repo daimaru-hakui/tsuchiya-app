@@ -1,5 +1,6 @@
 import CalendarInput from "@/components/carendar-input";
 import { useStore } from "@/store";
+import { format } from "date-fns";
 
 export default function InvoiceSearch() {
   const invoiceStartDate = useStore((state) => state.invoiceStartDate);
@@ -7,10 +8,13 @@ export default function InvoiceSearch() {
   const invoiceEndDate = useStore((state) => state.invoiceEndDate);
   const setInvoiceEndDate = useStore((state) => state.setInvoiceEndDate);
 
+  console.log(invoiceEndDate)
+  console.log(new Date(invoiceEndDate))
+
   return (
     <div className="flex flex-col lg:flex-row gap-3">
-      <CalendarInput date={invoiceStartDate} setDate={setInvoiceStartDate} />
-      <CalendarInput date={invoiceEndDate} setDate={setInvoiceEndDate} />
+      <CalendarInput date={invoiceStartDate} setDate={setInvoiceStartDate} title={"start"} />
+      <CalendarInput date={invoiceEndDate} setDate={setInvoiceEndDate}  title={"end"} />
     </div>
   );
 }

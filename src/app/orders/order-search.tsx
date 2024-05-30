@@ -45,8 +45,16 @@ export default function OrderSearch() {
           <SelectItem value="finished">完納</SelectItem>
         </SelectContent>
       </Select>
-      <CalendarInput date={orderStartDate} setDate={setOrderStartDate} />
-      <CalendarInput date={orderEndDate} setDate={setOrderEndDate} />
+      <CalendarInput
+        date={orderStartDate}
+        setDate={setOrderStartDate}
+        title="start"
+      />
+      <CalendarInput
+        date={orderEndDate}
+        setDate={setOrderEndDate}
+        title="end"
+      />
     </div>
   );
 }

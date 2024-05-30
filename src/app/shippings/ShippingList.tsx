@@ -22,7 +22,7 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Loading from "../loading";
-import ShippingSearch from "./shipping-search";
+import ShippingSearch from "./ShippingSearch";
 import { useStore } from "@/store";
 import useFunctons from "@/hooks/useFunctons";
 import { Shipping } from "@/types/shipping.type";

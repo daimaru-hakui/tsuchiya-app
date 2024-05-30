@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { signIn } from "next-auth/react";
 import { auth } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
@@ -22,11 +22,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
-  email: z.string()
+  email: z
+    .string()
     .email({ message: "emailを入力してください。" })
-    .min(1, { message: "1文字以上入力してください" }).max(100),
-  password: z.string()
-    .min(1, { message: "パスワードを入力してください。" }),
+    .min(1, { message: "1文字以上入力してください" })
+    .max(100),
+  password: z.string().min(1, { message: "パスワードを入力してください。" }),
 });
 
 export type FormSchema = z.infer<typeof formSchema>;
@@ -64,6 +65,13 @@ export default function LoginForm() {
     }
   };
 
+  useEffect(() => {
+    const logout = async () => {
+      await signOut(auth);
+    };
+    logout();
+  }, []);
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -93,7 +101,11 @@ export default function LoginForm() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="password" {...field} />
+                      <Input
+                        type="password"
+                        placeholder="password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

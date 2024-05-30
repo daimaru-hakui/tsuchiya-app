@@ -1,4 +1,4 @@
-import ShippingShow from "./shipping-show";
+import ShippingShow from "./ShippingShow";
 
 interface Props {
   params: {
