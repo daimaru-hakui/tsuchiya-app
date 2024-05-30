@@ -7,27 +7,38 @@ import DashboardChart from "./dashboard-chart";
 import { useEffect, useState } from "react";
 import {
   collection,
+  collectionGroup,
   getAggregateFromServer,
   getCountFromServer,
+  getDocs,
   query,
   sum,
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
+import { useStore } from "@/store";
+import { Sku } from "@/types/product.type";
+import DashboardCard from "./DashboardCard";
 
 export default function DashboardStats() {
   const [ordersCount, setOrdersCount] = useState(0);
   const [shippingsCount, setShippingsCount] = useState(0);
   const [shippingsTotalAmount, setShippingsTotalAmount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
+  const [openOrderCount, setOpenOrderCount] = useState(0);
   const [pickingCount, setPickingCount] = useState(0);
+  const [stockTotalAmount, setStockTotalAmount] = useState(0);
+  const setOrderStatus = useStore((state) => state.setOrderStatus);
+  const setShippingStatus = useStore((state) => state.setShippingStatus);
 
   useEffect(() => {
     getOrderCount();
     getShippingCount();
     getShippingTotalAmount();
     getPendingCount();
-    getPickingCount()
+    getOpenOrderCount();
+    getPickingCount();
+    getTotalStockAmount();
   }, []);
 
   const getOrderCount = async () => {
@@ -77,6 +88,13 @@ export default function DashboardStats() {
     setPendingCount(snapshot.data().count);
   };
 
+  const getOpenOrderCount = async () => {
+    const coll = collection(db, "orders");
+    const q = query(coll, where("status", "==", "openOrder"));
+    const snapshot = await getCountFromServer(q);
+    setOpenOrderCount(snapshot.data().count);
+  };
+
   const getPickingCount = async () => {
     const coll = collection(db, "shippings");
     const q = query(coll, where("status", "==", "picking"));
@@ -84,65 +102,79 @@ export default function DashboardStats() {
     setPickingCount(snapshot.data().count);
   };
 
+  const getTotalStockAmount = async () => {
+    const coll = collectionGroup(db, "skus");
+    const q = query(coll, where("stock", ">", 0));
+    const skusSnap = await getDocs(q);
+    const docs = skusSnap.docs.map((doc) => ({ ...doc.data() } as Sku));
+    setStockTotalAmount(
+      docs.reduce((sum, doc) => sum + doc.salePrice * doc.stock, 0)
+    );
+  };
+
   return (
     <div className="space-y-4">
-      <div className="grid lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">当月受注件数</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-5xl font-bold">{ordersCount}</div>
-            <Button size="xs" asChild>
-              <Link href="/">一覧へ</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">当月出荷件数</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-5xl font-bold">{shippingsCount}</div>
-            <Button size="xs" asChild>
-              <Link href="/">一覧へ</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">当月購入金額</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-5xl font-bold">
-              {shippingsTotalAmount.toLocaleString()}円
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid lg:grid-cols-4 gap-4">
+        <DashboardCard title="当月受注件数" quantity={ordersCount}>
+          <Button size="xs" asChild>
+            <Link href="/orders">一覧へ</Link>
+          </Button>
+        </DashboardCard>
+        <DashboardCard title="当月出荷件数" quantity={shippingsCount}>
+          <Button
+            size="xs"
+            asChild
+            onClick={() => setShippingStatus("finished")}
+          >
+            <Link href="/shippings">一覧へ</Link>
+          </Button>
+        </DashboardCard>
+        <DashboardCard
+          title="当月購入金額"
+          quantity={shippingsTotalAmount.toLocaleString() + "円"}
+        ></DashboardCard>
+        <DashboardCard
+          title="在庫金額"
+          quantity={stockTotalAmount.toLocaleString() + "円"}
+        />
       </div>
-      <div className="grid lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">受注未処理件数</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-5xl font-bold">{pendingCount}</div>
-            <Button size="xs" asChild>
-              <Link href="/">一覧へ</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">出荷未処理件数</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-5xl font-bold">{pickingCount}</div>
-            <Button size="xs" asChild>
-              <Link href="/">一覧へ</Link>
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="grid lg:grid-cols-4 gap-4">
+        <DashboardCard title="受注未処理件数" quantity={pendingCount}>
+          <Button
+            size="xs"
+            asChild
+            onClick={() => {
+              setOrderStatus("pending");
+            }}
+          >
+            <Link href="/orders">一覧へ</Link>
+          </Button>
+        </DashboardCard>
+        <DashboardCard title="受注処理中件数" quantity={pendingCount}>
+          <Button
+            size="xs"
+            asChild
+            onClick={() => {
+              setOrderStatus("processing");
+            }}
+          >
+            <Link href="/orders">一覧へ</Link>
+          </Button>
+        </DashboardCard>
+        <DashboardCard title="受注残件数" quantity={openOrderCount}>
+          <Button size="xs" asChild onClick={() => setOrderStatus("openOrder")}>
+            <Link href="/orders">一覧へ</Link>
+          </Button>
+        </DashboardCard>
+        <DashboardCard title="出荷未処理件数" quantity={pickingCount}>
+          <Button
+            size="xs"
+            asChild
+            onClick={() => setShippingStatus("picking")}
+          >
+            <Link href="/shippings">一覧へ</Link>
+          </Button>
+        </DashboardCard>
       </div>
       <Card className="my-4">
         <CardHeader>

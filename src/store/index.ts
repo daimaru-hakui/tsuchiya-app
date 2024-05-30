@@ -2,15 +2,15 @@ import { format, subMonths } from "date-fns";
 import { create } from "zustand";
 
 type State = {
-  statusSearch: string;
-  setStatusSearch: (value: string) => void;
+  orderStatus: string;
+  setOrderStatus: (value: string) => void;
   orderStartDate: Date;
   setOrderStartDate: (date: Date | undefined) => void;
   orderEndDate: Date;
   setOrderEndDate: (date: Date | undefined) => void;
 
-  shippingStatusSearch: string;
-  setShippingStatusSearch: (value: string) => void;
+  shippingStatus: string;
+  setShippingStatus: (value: string) => void;
   shippingStartDate: Date;
   setShippingStartDate: (date: Date | undefined) => void;
   shippingEndDate: Date;
@@ -38,8 +38,8 @@ const handleEndDate = (date: Date | undefined) => {
 };
 
 export const useStore = create<State>((set) => ({
-  statusSearch: "all",
-  setStatusSearch: (value) => set((state) => ({ statusSearch: value })),
+  orderStatus: "all",
+  setOrderStatus: (value) => set((state) => ({ orderStatus: value })),
   orderStartDate: startDate,
   setOrderStartDate: (date) =>
     set((state) => ({ orderStartDate: date || startDate })),
@@ -47,9 +47,9 @@ export const useStore = create<State>((set) => ({
   setOrderEndDate: (date) =>
     set((state) => ({ orderEndDate: handleEndDate(date) || endDate })),
 
-  shippingStatusSearch: "all",
-  setShippingStatusSearch: (value) =>
-    set((state) => ({ shippingStatusSearch: value })),
+  shippingStatus: "all",
+  setShippingStatus: (value) =>
+    set((state) => ({ shippingStatus: value })),
   shippingStartDate: startDate,
   setShippingStartDate: (date) =>
     set((state) => ({ shippingStartDate: date || startDate })),

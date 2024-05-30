@@ -29,7 +29,7 @@ import { Shipping } from "@/types/shipping.type";
 
 export default function ShippingList() {
   const [shippings, setShippings] = useState<Shipping[]>();
-  const shippingStatusSearch = useStore((state) => state.shippingStatusSearch);
+  const shippingStatus = useStore((state) => state.shippingStatus);
   const shippingStartDate = useStore((state) => state.shippingStartDate);
   const shippingEndDate = useStore((state) => state.shippingEndDate);
   const { zeroPadding } = useFunctons();
@@ -37,9 +37,7 @@ export default function ShippingList() {
   useEffect(() => {
     const shippingsRef = collection(db, "shippings");
     const status =
-      shippingStatusSearch === "all"
-        ? ["picking", "finished"]
-        : [shippingStatusSearch];
+      shippingStatus === "all" ? ["picking", "finished"] : [shippingStatus];
 
     const q = query(
       shippingsRef,
@@ -61,7 +59,7 @@ export default function ShippingList() {
       },
     });
     return () => unsub();
-  }, [shippingStatusSearch, shippingStartDate, shippingEndDate]);
+  }, [shippingStatus, shippingStartDate, shippingEndDate]);
 
   const getTrackingLink = (tracking: string, courier: string) => {
     switch (courier) {
@@ -88,76 +86,83 @@ export default function ShippingList() {
         </div>
       </CardHeader>
       <CardContent className="overflow-auto">
-        <Table className="min-w-[2000px]">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[80px]">詳細</TableHead>
-              <TableHead className="w-[115px]">日付</TableHead>
-              <TableHead className="w-[115px] text-center">
-                ステータス
-              </TableHead>
-              <TableHead className="w-[120px]">送状No.</TableHead>
-              <TableHead className="w-[90px]">出荷No.</TableHead>
-              <TableHead className="w-[90px]">発注No.</TableHead>
-              <TableHead>所属名</TableHead>
-              <TableHead>社員コード</TableHead>
-              <TableHead>イニシャル</TableHead>
-              <TableHead>氏名</TableHead>
-              <TableHead>役職</TableHead>
-              <TableHead>社名</TableHead>
-              <TableHead>工事コード</TableHead>
-              <TableHead>現場名 又は組織名</TableHead>
-              <TableHead>郵便番号</TableHead>
-              <TableHead>住所</TableHead>
-              <TableHead>電話番号</TableHead>
-              <TableHead>備考</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {shippings.map((shipping) => (
-              <TableRow key={shipping.id}>
-                <TableCell>
-                  <Button size="xs" asChild>
-                    <Link href={`/shippings/${shipping.id}`}>詳細</Link>
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  {format(new Date(shipping.createdAt.toDate()), "yyyy-MM-dd")}
-                </TableCell>
-                <TableCell className="text-center">
-                  <Status value={shipping.status} />
-                </TableCell>
-                <TableCell>
-                  <Link
-                    href={`${getTrackingLink(
-                      shipping.trackingNumber,
-                      shipping.courier
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline"
-                  >
-                    {shipping.trackingNumber}
-                  </Link>
-                </TableCell>
-                <TableCell>{zeroPadding(shipping.shippingNumber)}</TableCell>
-                <TableCell>{zeroPadding(shipping.orderNumber)}</TableCell>
-                <TableCell>{shipping.section}</TableCell>
-                <TableCell>{shipping.employeeCode}</TableCell>
-                <TableCell>{shipping.initial}</TableCell>
-                <TableCell>{shipping.username}</TableCell>
-                <TableCell>{shipping.position}</TableCell>
-                <TableCell>{shipping.companyName && " あり"}</TableCell>
-                <TableCell>{shipping.siteCode}</TableCell>
-                <TableCell>{shipping.siteName}</TableCell>
-                <TableCell>{shipping.zipCode}</TableCell>
-                <TableCell>{shipping.address}</TableCell>
-                <TableCell>{shipping.tel}</TableCell>
-                <TableCell>{shipping.memo}</TableCell>
+        {shippings.length > 0 ? (
+          <Table className="min-w-[2000px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[80px]">詳細</TableHead>
+                <TableHead className="w-[115px]">日付</TableHead>
+                <TableHead className="w-[115px] text-center">
+                  ステータス
+                </TableHead>
+                <TableHead className="w-[120px]">送状No.</TableHead>
+                <TableHead className="w-[90px]">出荷No.</TableHead>
+                <TableHead className="w-[90px]">発注No.</TableHead>
+                <TableHead>所属名</TableHead>
+                <TableHead>社員コード</TableHead>
+                <TableHead>イニシャル</TableHead>
+                <TableHead>氏名</TableHead>
+                <TableHead>役職</TableHead>
+                <TableHead>社名</TableHead>
+                <TableHead>工事コード</TableHead>
+                <TableHead>現場名 又は組織名</TableHead>
+                <TableHead>郵便番号</TableHead>
+                <TableHead>住所</TableHead>
+                <TableHead>電話番号</TableHead>
+                <TableHead>備考</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {shippings.map((shipping) => (
+                <TableRow key={shipping.id}>
+                  <TableCell>
+                    <Button size="xs" asChild>
+                      <Link href={`/shippings/${shipping.id}`}>詳細</Link>
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    {format(
+                      new Date(shipping.createdAt.toDate()),
+                      "yyyy-MM-dd"
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Status value={shipping.status} />
+                  </TableCell>
+                  <TableCell>
+                    <Link
+                      href={`${getTrackingLink(
+                        shipping.trackingNumber,
+                        shipping.courier
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      {shipping.trackingNumber}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{zeroPadding(shipping.shippingNumber)}</TableCell>
+                  <TableCell>{zeroPadding(shipping.orderNumber)}</TableCell>
+                  <TableCell>{shipping.section}</TableCell>
+                  <TableCell>{shipping.employeeCode}</TableCell>
+                  <TableCell>{shipping.initial}</TableCell>
+                  <TableCell>{shipping.username}</TableCell>
+                  <TableCell>{shipping.position}</TableCell>
+                  <TableCell>{shipping.companyName && " あり"}</TableCell>
+                  <TableCell>{shipping.siteCode}</TableCell>
+                  <TableCell>{shipping.siteName}</TableCell>
+                  <TableCell>{shipping.zipCode}</TableCell>
+                  <TableCell>{shipping.address}</TableCell>
+                  <TableCell>{shipping.tel}</TableCell>
+                  <TableCell>{shipping.memo}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="text-center">該当する検索結果はありません。</div>
+        )}
       </CardContent>
     </Card>
   );

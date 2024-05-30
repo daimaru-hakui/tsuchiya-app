@@ -40,7 +40,7 @@ export default function OrderShow({ id }: Props) {
   >([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
-  const statusSearch = useStore((state) => state.statusSearch);
+  const orderStatus = useStore((state) => state.orderStatus);
 
   useEffect(() => {
     const orderRef = doc(db, "orders", id);
@@ -77,9 +77,9 @@ export default function OrderShow({ id }: Props) {
   useEffect(() => {
     if (!order?.orderNumber) return;
     const status =
-      statusSearch === "all"
+      orderStatus === "all"
         ? ["processing", "finished", "pending", "openOrder"]
-        : [statusSearch];
+        : [orderStatus];
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef,
@@ -100,14 +100,14 @@ export default function OrderShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [order?.orderNumber, statusSearch]);
+  }, [order?.orderNumber, orderStatus]);
 
   useEffect(() => {
     if (!order?.orderNumber) return;
     const status =
-      statusSearch === "all"
+      orderStatus === "all"
         ? ["processing", "finished", "pending", "openOrder"]
-        : [statusSearch];
+        : [orderStatus];
     const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef,
@@ -128,7 +128,7 @@ export default function OrderShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [order?.orderNumber, statusSearch]);
+  }, [order?.orderNumber, orderStatus]);
 
   const handleStatusChange = async (status: string) => {
     const result = confirm("確定して宜しいでしょうか");

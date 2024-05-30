@@ -39,7 +39,7 @@ export default function ShippingShow({ id }: Props) {
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
   const [totalAmount, setTotalAmount] = useState(0);
-  const shippingStatusSearch = useStore((state) => state.shippingStatusSearch);
+  const shippingStatus = useStore((state) => state.shippingStatus);
   const { getTrackingLink } = useFunctons();
 
   useEffect(() => {
@@ -82,9 +82,7 @@ export default function ShippingShow({ id }: Props) {
   useEffect(() => {
     if (!shipping?.shippingNumber) return;
     const status =
-      shippingStatusSearch === "all"
-        ? ["picking", "finished"]
-        : [shippingStatusSearch];
+      shippingStatus === "all" ? ["picking", "finished"] : [shippingStatus];
     const ordersRef = collection(db, "shippings");
     const q = query(
       ordersRef,
@@ -105,14 +103,12 @@ export default function ShippingShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [shipping?.shippingNumber, shippingStatusSearch]);
+  }, [shipping?.shippingNumber, shippingStatus]);
 
   useEffect(() => {
     if (!shipping?.shippingNumber) return;
     const status =
-      shippingStatusSearch === "all"
-        ? ["picking", "finished"]
-        : [shippingStatusSearch];
+      shippingStatus === "all" ? ["picking", "finished"] : [shippingStatus];
     const ordersRef = collection(db, "shippings");
     const q = query(
       ordersRef,
@@ -133,7 +129,7 @@ export default function ShippingShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [shipping?.shippingNumber, shippingStatusSearch]);
+  }, [shipping?.shippingNumber, shippingStatus]);
 
   const getCourierName = (courier: string) => {
     switch (courier) {
@@ -157,8 +153,6 @@ export default function ShippingShow({ id }: Props) {
     };
     getTotalAmount();
   }, [shippingDetails]);
-
-  console.log(totalAmount)
 
   if (!shipping) return <Loading />;
 
