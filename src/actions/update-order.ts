@@ -1,7 +1,13 @@
 "use server";
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
-import { Order, UpdateOrder, UpdateOrderSchema } from "@/types/order.type";
+import {
+  Order,
+  OrderDetail,
+  UpdateOrder,
+  UpdateOrderSchema,
+} from "@/types/order.type";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function updateOrder(
   data: UpdateOrder
@@ -49,6 +55,19 @@ export async function updateOrder(
     await db.runTransaction(async (transaction) => {
       const orderSnap = await transaction.get(orderRef);
       const order = orderSnap.data() as Order;
+
+      for (const detail of result.data.details) {
+        const ref = orderDetailsRef.doc(detail.id);
+        const orderDetailDoc = await transaction.get(ref);
+        const orderDetail = orderDetailDoc.data() as OrderDetail;
+        const skuRef = orderDetail.skuRef as any;
+
+        transaction.update(skuRef, {
+          orderQuantity: FieldValue.increment(
+            detail.orderQuantity - orderDetail.orderQuantity
+          ),
+        });
+      }
 
       transaction.update(orderRef, {
         orderId: result.data.orderId,

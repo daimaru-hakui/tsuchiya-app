@@ -54,7 +54,7 @@ export interface ShippingDetail {
   updatedAt: any;
 }
 
-export const CreateShippingShema = z.object({
+export const CreateShippingSchema = z.object({
   orderId: z.string(),
   orderNumber: z.number().max(100),
   section: z.string().max(100),
@@ -84,7 +84,7 @@ export const CreateShippingShema = z.object({
   shippingDate: z.string(),
   shippingCharge: z.number(),
 });
-export type CreateShipping = z.infer<typeof CreateShippingShema>;
+export type CreateShipping = z.infer<typeof CreateShippingSchema>;
 
 export const UpdateShippingSchema = z.object({
   shippingDate: z.any(),

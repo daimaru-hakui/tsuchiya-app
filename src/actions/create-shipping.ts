@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { OrderDetail } from "@/types/order.type";
 import { Sku } from "@/types/product.type";
-import { CreateShipping, CreateShippingShema } from "@/types/shipping.type";
+import { CreateShipping, CreateShippingSchema } from "@/types/shipping.type";
 import { format } from "date-fns";
 import { DocumentReference, FieldValue } from "firebase-admin/firestore";
 
@@ -24,7 +24,7 @@ export async function createShipping(
   data: CreateShipping,
   orderId: string
 ): Promise<{ status: string; message: string }> {
-  const result = CreateShippingShema.safeParse({
+  const result = CreateShippingSchema.safeParse({
     orderId: orderId,
     orderNumber: data.orderNumber,
     section: data.section,

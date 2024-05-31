@@ -70,7 +70,6 @@ export const CreateOrderSchema = z.object({
   applicant: z.string(),
   memo: z.string().optional(),
 });
-
 export type CreateOrder = z.infer<typeof CreateOrderSchema>;
 
 export const UpdateOrderSchema = z.object({
@@ -98,5 +97,18 @@ export const UpdateOrderSchema = z.object({
   applicant: z.string(),
   memo: z.string().optional(),
 });
-
 export type UpdateOrder = z.infer<typeof UpdateOrderSchema>;
+
+export const UpdateOrderCancelSchema = z.object({
+  orderId: z.string(),
+  details: z
+    .object({
+      id: z.string(),
+      quantity: z.number().min(0),
+      orderQuantity: z.number().min(0),
+      salePrice: z.number().min(0),
+      inseam: z.number().optional(),
+    })
+    .array(),
+});
+export type UpdateOrderCancel = z.infer<typeof UpdateOrderCancelSchema>;

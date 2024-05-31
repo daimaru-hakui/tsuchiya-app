@@ -87,6 +87,12 @@ export async function createOrder(
         details.push(data);
       }
 
+      for(const sku of details) {
+        transaction.update(sku.skuRef,{
+          orderQuantity:FieldValue.increment(sku.quantity)
+        })
+      }
+
       const newCount = serialDoc.data()?.count + 1;
       transaction.update(serialRef, {
         count: newCount,

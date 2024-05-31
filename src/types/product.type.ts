@@ -44,9 +44,12 @@ export const UpdateProductSchema = z.object({
   productNumber: z.string().min(1, { message: "入力してください。" }).max(100, {
     message: "100文字以内で入力してください",
   }),
-  productName: z.string().min(1, {
-    message: "入力してください。",
-  }).max(100),
+  productName: z
+    .string()
+    .min(1, {
+      message: "入力してください。",
+    })
+    .max(100),
   displayName: z.string().min(1, { message: "入力してください。" }).max(100),
   isInseam: z.boolean(),
   isMark: z.boolean(),
@@ -68,6 +71,7 @@ export interface Sku {
   price: number;
   salePrice: number;
   costPrice: number;
+  orderQuantity: number;
   stock: number;
   parentRef: any;
   sortNum: number;
@@ -80,6 +84,7 @@ export const UpdateSkuSchema = z.object({
   salePrice: z.number(),
   costPrice: z.number(),
   stock: z.number(),
+  orderQuantity: z.number(),
   sortNum: z.number(),
 });
 export type UpdateSku = z.infer<typeof UpdateSkuSchema>;

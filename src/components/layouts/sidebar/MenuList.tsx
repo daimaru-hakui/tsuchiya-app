@@ -18,6 +18,7 @@ export default function MenuList({ setOpen }: Props) {
         <MenuItem href="/orders">発注一覧</MenuItem>
         <MenuItem href="/orders/new">発注登録</MenuItem>
         <MenuItem href="/shippings">出荷一覧</MenuItem>
+        <MenuItem href="/charges/new">保管・ピッキング料登録</MenuItem>
         <MenuItem href="/invoice">請求書</MenuItem>
         {/* <MenuItem href="/adjustments">在庫調整</MenuItem> */}
       </ul>

@@ -14,16 +14,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { OrderDetail, UpdateOrder } from "@/types/order.type";
+import { Order, OrderDetail, UpdateOrder } from "@/types/order.type";
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
 
 interface Props {
+  order: Order;
   orderDetails: OrderDetail[];
   form: UseFormReturn<UpdateOrder, any, undefined>;
 }
 
-export default function OrderEditTable({ orderDetails, form }: Props) {
+export default function OrderEditTable({ order, orderDetails, form }: Props) {
   const { register, watch, control } = form;
 
   //   const totalAmount =
@@ -90,7 +91,7 @@ export default function OrderEditTable({ orderDetails, form }: Props) {
                         onChange={(event) =>
                           field.onChange(+event.target.value)
                         }
-                        disabled={detail.quantity === 0}
+                        disabled={detail.quantity === 0 || order.status !=="pending"}
                       />
                     </FormControl>
                     <FormMessage />
