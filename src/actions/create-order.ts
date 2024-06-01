@@ -14,7 +14,7 @@ interface DataDetail {
 
 export async function createOrder(
   data: CreateOrder
-): Promise<{ status: string; message: string }> {
+): Promise<{ status: string; message: string; }> {
   const result = CreateOrderSchema.safeParse({
     section: data.section,
     employeeCode: data.employeeCode,
@@ -87,10 +87,10 @@ export async function createOrder(
         details.push(data);
       }
 
-      for(const sku of details) {
-        transaction.update(sku.skuRef,{
-          orderQuantity:FieldValue.increment(sku.quantity)
-        })
+      for (const sku of details) {
+        transaction.update(sku.skuRef, {
+          orderQuantity: FieldValue.increment(sku.quantity)
+        });
       }
 
       const newCount = serialDoc.data()?.count + 1;
@@ -134,7 +134,7 @@ export async function createOrder(
           size: detail.size,
           orderQuantity: detail.quantity,
           quantity: detail.quantity,
-          inseam: detail.inseam || null,
+          inseam: detail.inseam ?? null,
           sortNum: detail.sortNum,
           uid: session.user.uid,
           createdAt: FieldValue.serverTimestamp(),

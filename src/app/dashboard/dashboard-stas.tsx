@@ -47,7 +47,8 @@ export default function DashboardStats() {
     const coll = collection(db, "orders");
     const q = query(
       coll,
-      where("createdAt", ">=", new Date(thisYear, thisMonth, 1))
+      where("createdAt", ">=", new Date(thisYear, thisMonth, 1)),
+      where("status", "not-in", ["cancel"])
     );
     const snapshot = await getCountFromServer(q);
     setOrdersCount(snapshot.data().count);
