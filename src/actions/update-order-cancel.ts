@@ -40,7 +40,7 @@ export async function updateOrderCancel(data: UpdateOrderCancel): Promise<{
       for (const detail of result.data.details) {
         const orderDetailRef = orderRef
           .collection("orderDetails")
-          .doc(result.data.orderId);
+          .doc(detail.id);
         const orderDetailDoc = await transaction.get(orderDetailRef);
         const orderDetail = orderDetailDoc.data() as OrderDetail;
         const skuRef = orderDetail.skuRef as any;
