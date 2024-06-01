@@ -50,6 +50,13 @@ export async function deleteShipping(data: {
           } as ShippingDetail)
         );
 
+        for (const detail of shippingDetails) {
+          const ref = detail.skuRef as any;
+          transaction.update(ref, {
+            orderQuantity: FieldValue.increment(detail.quantity), // 追加
+          });
+        }
+
         const quantities = shippingDetails.filter(
           (detail) => detail.orderDetailRef
         );
@@ -57,7 +64,6 @@ export async function deleteShipping(data: {
           const ref = detail.orderDetailRef as any;
           transaction.update(ref, {
             quantity: FieldValue.increment(detail.quantity),
-            orderQuantity: FieldValue.increment(detail.quantity), // 追加
           });
         }
 
