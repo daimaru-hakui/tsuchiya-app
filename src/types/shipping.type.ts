@@ -50,6 +50,7 @@ export interface ShippingDetail {
   memo?: string;
   sortNum: number;
   isStock: boolean;
+  subTotal: number;
   createdAt: any;
   updatedAt: any;
 }

@@ -1,4 +1,4 @@
-import DashboardStats from "./DashboardStat.tsx";
+import DashboardStats from "./DashboardStat";
 
 export default function DashboardPage() {
   return (
