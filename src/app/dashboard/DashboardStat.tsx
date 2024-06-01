@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3Icon } from "lucide-react";
 import Link from "next/link";
-import DashboardChart from "./dashboard-chart";
+import DashboardChart from "./DashboardChart";
 import { useEffect, useState } from "react";
 import {
   collection,
@@ -15,10 +15,10 @@ import {
   sum,
   where,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
 import { useStore } from "@/store";
-import { Sku } from "@/types/product.type";
 import DashboardCard from "./DashboardCard";
+import { db } from "@/lib/firebase/client";
+import { Sku } from "@/types/product.type";
 
 export default function DashboardStats() {
   const [ordersCount, setOrdersCount] = useState(0);
@@ -48,7 +48,7 @@ export default function DashboardStats() {
     const q = query(
       coll,
       where("createdAt", ">=", new Date(thisYear, thisMonth, 1)),
-      where("status", "not-in", ["cancel"])
+      where("status", "not-in", ["canceled"])
     );
     const snapshot = await getCountFromServer(q);
     setOrdersCount(snapshot.data().count);
