@@ -22,6 +22,7 @@ export default function Header() {
       }
     });
   }, [router, pathname]);
+  console.log("login");
 
   return (
     <>

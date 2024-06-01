@@ -34,6 +34,7 @@ export async function updateOrderCancel(data: UpdateOrderCancel): Promise<{
   }
 
   const orderRef = db.collection("orders").doc(result.data.orderId);
+  let skus = [];
 
   try {
     await db.runTransaction(async (transaction) => {
@@ -44,8 +45,11 @@ export async function updateOrderCancel(data: UpdateOrderCancel): Promise<{
         const orderDetailDoc = await transaction.get(orderDetailRef);
         const orderDetail = orderDetailDoc.data() as OrderDetail;
         const skuRef = orderDetail.skuRef as any;
-        transaction.update(skuRef, {
-          orderQuantity: FieldValue.increment(-detail.orderQuantity),
+        skus.push({ skuRef, orderQuantity: detail.orderQuantity });
+      }
+      for (const sku of skus) {
+        transaction.update(sku.skuRef, {
+          orderQuantity: FieldValue.increment(-sku.orderQuantity),
         });
       }
       transaction.delete(orderRef);

@@ -27,6 +27,7 @@ import { useStore } from "@/store";
 import { Order, OrderDetail } from "@/types/order.type";
 import OrderEditModal from "./order-edit-modal";
 import OrderShowHeader from "./order-show-header";
+import OrderCancelButton from "./OrderCancelButton";
 
 interface Props {
   id: string;
@@ -36,7 +37,7 @@ export default function OrderShow({ id }: Props) {
   const [order, setOrder] = useState<Order>();
   const router = useRouter();
   const [orderDetails, setOrderDetails] = useState<
-    (OrderDetail & { stock: number })[]
+    (OrderDetail & { stock: number; })[]
   >([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
@@ -151,13 +152,7 @@ export default function OrderShow({ id }: Props) {
           />
           <span className="flex items-center gap-4 ml-auto">
             {order.status === "pending" && (
-              <Button
-                size="xs"
-                variant="outline"
-                onClick={() => handleStatusChange("canceled")}
-              >
-                キャンセル
-              </Button>
+              <OrderCancelButton orderId={order.id} orderDetails={orderDetails} />
             )}
             {order.status === "pending" && (
               // && session.data?.user.role === "member"
