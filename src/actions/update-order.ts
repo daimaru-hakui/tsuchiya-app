@@ -11,7 +11,7 @@ import { FieldValue } from "firebase-admin/firestore";
 
 export async function updateOrder(
   data: UpdateOrder
-): Promise<{ status: string; message: string }> {
+): Promise<{ status: string; message: string; }> {
   const result = UpdateOrderSchema.safeParse({
     orderId: data.orderId,
     section: data.section,
@@ -51,6 +51,7 @@ export async function updateOrder(
     .collection("orders")
     .doc(result.data.orderId)
     .collection("orderDetails");
+  let skus = [];
   try {
     await db.runTransaction(async (transaction) => {
       const orderSnap = await transaction.get(orderRef);
@@ -61,10 +62,17 @@ export async function updateOrder(
         const orderDetailDoc = await transaction.get(ref);
         const orderDetail = orderDetailDoc.data() as OrderDetail;
         const skuRef = orderDetail.skuRef as any;
+        skus.push({
+          skuRef,
+          inputOrderQuantity: detail.orderQuantity,
+          orderQuantity: orderDetail.orderQuantity
+        });
+      }
 
-        transaction.update(skuRef, {
+      for (const sku of skus) {
+        transaction.update(sku.skuRef, {
           orderQuantity: FieldValue.increment(
-            detail.orderQuantity - orderDetail.orderQuantity
+            sku.inputOrderQuantity - sku.orderQuantity
           ),
         });
       }
