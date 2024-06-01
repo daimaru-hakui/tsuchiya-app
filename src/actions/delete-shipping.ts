@@ -8,7 +8,7 @@ import { FieldValue } from "firebase-admin/firestore";
 export async function deleteShipping(data: {
   shippingId: string;
   orderId: string;
-}): Promise<{ status: string; message: string }> {
+}): Promise<{ status: string; message: string; }> {
   const result = DeleteShippingSchema.safeParse({
     shippingId: data.shippingId,
     orderId: data.orderId,
@@ -45,9 +45,9 @@ export async function deleteShipping(data: {
         const shippingDetailsSnap = await transaction.get(shippingDetailsRef);
         const shippingDetails = shippingDetailsSnap.docs.map(
           (doc) =>
-            ({
-              ...doc.data(),
-            } as ShippingDetail)
+          ({
+            ...doc.data(),
+          } as ShippingDetail)
         );
 
         const quantities = shippingDetails.filter(
@@ -61,10 +61,11 @@ export async function deleteShipping(data: {
         }
 
         const stocks = shippingDetails.filter((detail) => detail.isStock);
-        for (const detail of stocks) {
-          const ref = detail.skuRef as any;
+        for (const stock of stocks) {
+          const ref = stock.skuRef as any;
           transaction.update(ref, {
-            stock: FieldValue.increment(detail.quantity),
+            stock: FieldValue.increment(stock.quantity),
+            orderQuantity: FieldValue.increment(stock.quantity), // 追加
           });
         }
 

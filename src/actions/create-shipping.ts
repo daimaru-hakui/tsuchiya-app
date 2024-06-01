@@ -23,7 +23,7 @@ interface DataDetail {
 export async function createShipping(
   data: CreateShipping,
   orderId: string
-): Promise<{ status: string; message: string }> {
+): Promise<{ status: string; message: string; }> {
   const result = CreateShippingSchema.safeParse({
     orderId: orderId,
     orderNumber: data.orderNumber,
@@ -117,6 +117,9 @@ export async function createShipping(
           .where("id", "==", detail.skuId)
           .orderBy("id", "asc")
           .orderBy("sortNum", "asc");
+
+        console.log(1, skusRef);
+        console.log(2, orderDetail.skuRef);
 
         const skuDocs = await transaction.get(skusRef);
         const sku = skuDocs.docs[0].data() as Sku;
@@ -311,7 +314,7 @@ export async function createShipping(
       // 在庫引き落とし
       for (const sku of skus) {
         transaction.update(sku.skuRef, {
-          // orderQuantity: sku.orderQuantity - sku.shippingQuantity,
+          orderQuantity: sku.orderQuantity - sku.shippingQuantity, // 追加
           stock: sku.stock - sku.shippingStockQuantity,
         });
       }
