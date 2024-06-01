@@ -34,7 +34,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Edit, Loader2 } from "lucide-react";
 import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import ShippingEditTable from "./shipping-edit-table";
+import ShippingEditTable from "./ShippingEditTable";
 import * as actions from "@/actions";
 import { useToast } from "@/hooks/useToast";
 

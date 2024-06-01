@@ -106,7 +106,7 @@ export default function ProductShow({ id }: Props) {
           <Link href={paths.productAll()}>
             <ArrowLeft className="cursor-pointer" />
           </Link>
-          <span className="flex items-center gap-3 ml-auto">
+          <span className="flex items-center gap-4 ml-auto">
             <ProductEdit product={product} />
             <ChevronLeft
               className={cn("cursor-pointer", !prevPage && "opacity-35")}

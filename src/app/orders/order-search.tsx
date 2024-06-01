@@ -9,8 +9,8 @@ import {
 import { useStore } from "@/store";
 
 export default function OrderSearch() {
-  const statusSearch = useStore((state) => state.statusSearch);
-  const setStatusSearch = useStore((state) => state.setStatusSearch);
+  const orderStatus = useStore((state) => state.orderStatus);
+  const setOrderStatus = useStore((state) => state.setOrderStatus);
   const orderStartDate = useStore((state) => state.orderStartDate);
   const setOrderStartDate = useStore((state) => state.setOrderStartDate);
   const orderEndDate = useStore((state) => state.orderEndDate);
@@ -33,9 +33,9 @@ export default function OrderSearch() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-3">
-      <Select onValueChange={(e) => setStatusSearch(e)}>
+      <Select onValueChange={(e) => setOrderStatus(e)}>
         <SelectTrigger className="w-[150px]">
-          <SelectValue placeholder={statusLabel(statusSearch)} />
+          <SelectValue placeholder={statusLabel(orderStatus)} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">全て</SelectItem>
@@ -45,8 +45,16 @@ export default function OrderSearch() {
           <SelectItem value="finished">完納</SelectItem>
         </SelectContent>
       </Select>
-      <CalendarInput date={orderStartDate} setDate={setOrderStartDate} />
-      <CalendarInput date={orderEndDate} setDate={setOrderEndDate} />
+      <CalendarInput
+        date={orderStartDate}
+        setDate={setOrderStartDate}
+        title="start"
+      />
+      <CalendarInput
+        date={orderEndDate}
+        setDate={setOrderEndDate}
+        title="end"
+      />
     </div>
   );
 }

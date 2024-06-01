@@ -1,6 +1,6 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, ChevronLeft, ChevronRight, Edit } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Trash2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import paths from "@/paths";
@@ -19,12 +19,14 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import Loading from "@/app/loading";
-import ShippingShowTable from "./shipping-show-table";
-import ShippingInvoiceModal from "./shipping-invoice-modal";
+import ShippingShowTable from "./ShippingShowTable";
+import ShippingInvoiceModal from "./ShippingInvoiceModal";
 import Link from "next/link";
 import { useStore } from "@/store";
 import { Shipping, ShippingDetail } from "@/types/shipping.type";
-import ShippingEditModal from "./shipping-edit-modal";
+import ShippingEditModal from "./ShippingEditModal";
+import ShippingDeleteButton from "./ShippingDeleteButton";
+import useFunctons from "@/hooks/useFunctons";
 
 interface Props {
   id: string;
@@ -36,7 +38,9 @@ export default function ShippingShow({ id }: Props) {
   const [shippingDetails, setShippingDetails] = useState<ShippingDetail[]>([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
-  const shippingStatusSearch = useStore((state) => state.shippingStatusSearch);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const shippingStatus = useStore((state) => state.shippingStatus);
+  const { getTrackingLink } = useFunctons();
 
   useEffect(() => {
     const shippingRef = doc(db, "shippings", id);
@@ -78,9 +82,7 @@ export default function ShippingShow({ id }: Props) {
   useEffect(() => {
     if (!shipping?.shippingNumber) return;
     const status =
-      shippingStatusSearch === "all"
-        ? ["picking", "finished"]
-        : [shippingStatusSearch];
+      shippingStatus === "all" ? ["picking", "finished"] : [shippingStatus];
     const ordersRef = collection(db, "shippings");
     const q = query(
       ordersRef,
@@ -101,14 +103,12 @@ export default function ShippingShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [shipping?.shippingNumber, shippingStatusSearch]);
+  }, [shipping?.shippingNumber, shippingStatus]);
 
   useEffect(() => {
     if (!shipping?.shippingNumber) return;
     const status =
-      shippingStatusSearch === "all"
-        ? ["picking", "finished"]
-        : [shippingStatusSearch];
+      shippingStatus === "all" ? ["picking", "finished"] : [shippingStatus];
     const ordersRef = collection(db, "shippings");
     const q = query(
       ordersRef,
@@ -129,7 +129,7 @@ export default function ShippingShow({ id }: Props) {
       },
     });
     return () => unsub();
-  }, [shipping?.shippingNumber, shippingStatusSearch]);
+  }, [shipping?.shippingNumber, shippingStatus]);
 
   const getCourierName = (courier: string) => {
     switch (courier) {
@@ -142,6 +142,18 @@ export default function ShippingShow({ id }: Props) {
     }
   };
 
+  useEffect(() => {
+    const getTotalAmount = () => {
+      const total = shippingDetails.reduce(
+        (sum: number, detail) =>
+          (sum = sum + detail.quantity * detail.salePrice),
+        0
+      );
+      setTotalAmount(total);
+    };
+    getTotalAmount();
+  }, [shippingDetails]);
+
   if (!shipping) return <Loading />;
 
   return (
@@ -152,17 +164,24 @@ export default function ShippingShow({ id }: Props) {
             className="cursor-pointer"
             onClick={() => router.push(paths.shippingAll())}
           />
-          <span className="flex items-center gap-3 ml-auto">
+          <span className="flex items-center gap-4 ml-auto">
             <ShippingInvoiceModal
               shippingId={id}
               trackingNumber={shipping.trackingNumber}
               courier={shipping.courier}
+              totalAmount={totalAmount}
             />
             {shipping.status !== "finished" && (
-              <ShippingEditModal
-                shipping={shipping}
-                shippingDetails={shippingDetails}
-              />
+              <>
+                <ShippingEditModal
+                  shipping={shipping}
+                  shippingDetails={shippingDetails}
+                />
+                <ShippingDeleteButton
+                  shippingId={shipping.id}
+                  orderId={shipping.orderId}
+                />
+              </>
             )}
             <ChevronLeft
               className={cn("cursor-pointer", !prevPage && "opacity-35")}
@@ -191,20 +210,30 @@ export default function ShippingShow({ id }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 mb-5">
-          <div>
-            <dl className={cn(dlStyles)}>
+        <div className="mb-6">
+          <div className="p-3 flex bg-muted rounded-md lg:gap-12">
+            <dl className={cn("grid grid-cols-[70px_1fr] w-[200px]")}>
               <dt className={cn(dtStyles)}>出荷No.</dt>
               <dd>{shipping.shippingNumber}</dd>
             </dl>
-            <dl className={cn(dlStyles)}>
+            <dl className={cn("grid grid-cols-[70px_1fr] w-[200px]")}>
               <dt className={cn(dtStyles)}>送状No.</dt>
               <dd>{shipping.trackingNumber}</dd>
             </dl>
-            <dl className={cn(dlStyles)}>
+            <dl className={cn("grid grid-cols-[70px_1fr] w-[200px]")}>
               <dt className={cn(dtStyles)}>運送便</dt>
               <dd>
-                <Link href={``}>{getCourierName(shipping.courier)}</Link>
+                <Link
+                  href={`${getTrackingLink(
+                    shipping.trackingNumber,
+                    shipping.courier
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  {getCourierName(shipping.courier)}
+                </Link>
               </dd>
             </dl>
           </div>
@@ -268,7 +297,10 @@ export default function ShippingShow({ id }: Props) {
           </div>
         </div>
         <div className="mt-4">
-          <ShippingShowTable shippingDetails={shippingDetails} />
+          <ShippingShowTable
+            shippingDetails={shippingDetails}
+            totalAmount={totalAmount}
+          />
           {/* <OrderShowTable shippingDetails={shippingDetails} /> */}
         </div>
       </CardContent>

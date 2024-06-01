@@ -11,16 +11,10 @@ import { ShippingDetail } from "@/types/shipping.type";
 
 interface Props {
   shippingDetails: ShippingDetail[];
+  totalAmount:number
 }
 
-export default function ShippingShowTable({ shippingDetails }: Props) {
-  const totalAmount = () => {
-    const total = shippingDetails.reduce(
-      (sum: number, detail) => (sum = sum + detail.quantity * detail.salePrice),
-      0
-    );
-    return total.toLocaleString();
-  };
+export default function ShippingShowTable({ shippingDetails ,totalAmount}: Props) {
 
   return (
     <Table className="min-w-[900px]">
@@ -62,7 +56,7 @@ export default function ShippingShowTable({ shippingDetails }: Props) {
             合計
           </TableCell>
           <TableCell className="text-right font-bold">
-            {totalAmount()}
+            {totalAmount}
           </TableCell>
           <TableCell colSpan={2}></TableCell>
         </TableRow>

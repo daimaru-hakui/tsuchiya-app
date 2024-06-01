@@ -3,19 +3,20 @@ import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { OrderDetail } from "@/types/order.type";
 import { Sku } from "@/types/product.type";
-import { CreateShipping, CreateShippingShema } from "@/types/shipping.type";
+import { CreateShipping, CreateShippingSchema } from "@/types/shipping.type";
 import { format } from "date-fns";
 import { DocumentReference, FieldValue } from "firebase-admin/firestore";
 
 interface DataDetail {
   id: string;
+  orderDetailRef: DocumentReference;
   skuId: string;
+  skuRef: DocumentReference;
   quantity: number;
   shippingQuantity: number;
   shippingStockQuantity: number;
   salePrice: number;
   inseam?: number | undefined;
-  skuRef: DocumentReference;
   isStock: boolean;
 }
 
@@ -23,7 +24,7 @@ export async function createShipping(
   data: CreateShipping,
   orderId: string
 ): Promise<{ status: string; message: string }> {
-  const result = CreateShippingShema.safeParse({
+  const result = CreateShippingSchema.safeParse({
     orderId: orderId,
     orderNumber: data.orderNumber,
     section: data.section,
@@ -91,6 +92,7 @@ export async function createShipping(
   let shippingDetails: (Sku & DataDetail)[] = [];
 
   let orderDetails: (OrderDetail & {
+    orderDetailId: string;
     orderDetailRef: DocumentReference;
     shippingQuantity: number;
     shippingStockQuantity: number;
@@ -125,6 +127,7 @@ export async function createShipping(
             skuRef,
             ...sku,
             ...detail,
+            orderDetailRef: orderDetailRef,
             quantity: detail.shippingQuantity,
             isStock: false,
           });
@@ -137,6 +140,7 @@ export async function createShipping(
         });
 
         orderDetails.push({
+          orderDetailId: orderDetail.id,
           orderDetailRef: orderDetailRef,
           skuId: orderDetail.skuId,
           skuRef: orderDetail.skuRef,
@@ -151,6 +155,7 @@ export async function createShipping(
         } as Sku &
           OrderDetail & {
             skuRef: DocumentReference;
+            orderDetailId: string;
             orderDetailRef: DocumentReference;
             shippingQuantity: number;
             shippingStockQuantity: number;
@@ -188,14 +193,16 @@ export async function createShipping(
 
       stockOrderDetails.forEach(async (detail) => {
         shippingDetails.push({
+          orderDetailId: detail.id,
+          orderDetailRef: detail.orderDetailRef,
           productNumber: detail.productNumber,
           productName: detail.productName,
           size: detail.size,
           quantity: detail.shippingStockQuantity,
           salePrice: 0,
           inseam: detail.inseam,
-          skuRef: detail.skuRef,
           skuId: detail.skuId,
+          skuRef: detail.skuRef,
           sortNum: detail.sortNum + 0.5,
           isStock: true,
         } as DataDetail & Sku & any);
@@ -353,11 +360,14 @@ export async function createShipping(
 
       for (const detail of shippingDetails) {
         transaction.set(shippingRef.collection("shippingDetails").doc(), {
+          id: shippingRef.collection("shippingDetails").doc().id,
           shippingNumber: newCount,
           shippingId: shippingRef.id,
           shippingRef: shippingRef,
           orderId: orderId,
           orderRef: orderRef,
+          orderDetailId: detail.id || null,
+          orderDetailRef: detail.orderDetailRef || null,
           skuId: detail.id || "",
           skuRef: detail.skuRef,
           productNumber: detail.productNumber,

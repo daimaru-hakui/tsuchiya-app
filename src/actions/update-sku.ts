@@ -7,21 +7,21 @@ export async function updateSku(
   data: UpdateSku,
   productId: string,
   skuId: string
-): Promise<{ status: string, message: string; }> {
-
+): Promise<{ status: string; message: string }> {
   const result = UpdateSkuSchema.safeParse({
     size: data.size,
     salePrice: data.salePrice,
     costPrice: data.costPrice,
     stock: data.stock,
+    orderQuantity: data.orderQuantity,
     sortNum: data.sortNum,
   });
 
   if (!result.success) {
-    console.log(result.error.flatten().formErrors.join(','));
+    console.log(result.error.flatten().formErrors.join(","));
     return {
       status: "error",
-      message: result.error.flatten().formErrors.join(',')
+      message: result.error.flatten().formErrors.join(","),
     };
   }
 
@@ -30,7 +30,7 @@ export async function updateSku(
     console.log("no session");
     return {
       status: "error",
-      message: "認証エラー"
+      message: "認証エラー",
     };
   }
 
@@ -50,6 +50,7 @@ export async function updateSku(
       salePrice: result.data.salePrice,
       costPrice: result.data.costPrice,
       stock: result.data.stock,
+      orderQuantity:result.data.orderQuantity,
       sortNum: result.data.sortNum,
     });
   } catch (e: unknown) {
@@ -57,17 +58,17 @@ export async function updateSku(
       console.error(e.message);
       return {
         status: "error",
-        message: e.message
+        message: e.message,
       };
     } else {
       return {
         status: "error",
-        message: "更新が失敗しました"
+        message: "更新が失敗しました",
       };
     }
-  };
+  }
   return {
     status: "success",
-    message: "更新しました"
+    message: "更新しました",
   };
 }

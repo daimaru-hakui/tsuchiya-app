@@ -9,9 +9,9 @@ import {
 import { useStore } from "@/store";
 
 export default function ShippingSearch() {
-  const shippingStatusSearch = useStore((state) => state.shippingStatusSearch);
-  const setShippingStatusSearch = useStore(
-    (state) => state.setShippingStatusSearch
+  const shippingStatus = useStore((state) => state.shippingStatus);
+  const setShippingStatus = useStore(
+    (state) => state.setShippingStatus
   );
   const shippingStartDate = useStore((state) => state.shippingStartDate);
   const setShippingStartDate = useStore((state) => state.setShippingStartDate);
@@ -31,9 +31,9 @@ export default function ShippingSearch() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-3">
-      <Select onValueChange={(e) => setShippingStatusSearch(e)}>
+      <Select onValueChange={(e) => setShippingStatus(e)}>
         <SelectTrigger className="w-[150px]">
-          <SelectValue placeholder={statusLabel(shippingStatusSearch)} />
+          <SelectValue placeholder={statusLabel(shippingStatus)} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">全て</SelectItem>
@@ -44,10 +44,12 @@ export default function ShippingSearch() {
       <CalendarInput
         date={shippingStartDate}
         setDate={setShippingStartDate}
+        title="start"
       />
       <CalendarInput
         date={shippingEndDate}
         setDate={setShippingEndDate}
+        title="end"
       />
     </div>
   );

@@ -9,9 +9,10 @@ import { format } from "date-fns";
 interface Props {
   date: Date;
   setDate: (date: Date | undefined) => void;
+  title?:string
 }
 
-export default function CalendarInput({ date, setDate }: Props) {
+export default function CalendarInput({ date, setDate,title = "" }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -30,7 +31,7 @@ export default function CalendarInput({ date, setDate }: Props) {
           )}
         >
           {date ? (
-            `start: ${format(date, "yyyy-MM-dd")}`
+            `${title} ${format(date, "yyyy-MM-dd")}`
           ) : (
             <span>{date}</span>
           )}

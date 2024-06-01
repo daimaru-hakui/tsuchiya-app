@@ -41,8 +41,7 @@ export default function OrderEditModal({ order, orderDetails }: Props) {
     console.log(data);
     startTransition(async () => {
       const result = await actions.updateOrder(data);
-      console.log(result)
-      toast(result)
+      toast(result);
     });
   };
 
@@ -77,7 +76,11 @@ export default function OrderEditModal({ order, orderDetails }: Props) {
             </DialogHeader>
             <OrderEditHeader order={order} form={form} />
             <div className="mt-4">
-              <OrderEditTable orderDetails={orderDetails} form={form} />
+              <OrderEditTable
+                order={order}
+                orderDetails={orderDetails}
+                form={form}
+              />
             </div>
             <DialogFooter className="mt-3 sm:justify-end gap-2">
               <>

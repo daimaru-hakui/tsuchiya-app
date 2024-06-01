@@ -25,6 +25,7 @@ export type Shipping = {
   status: string;
   courier: "seino" | "sagawa" | "fukuyama";
   userId: string;
+  totalAmount: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
@@ -53,7 +54,7 @@ export interface ShippingDetail {
   updatedAt: any;
 }
 
-export const CreateShippingShema = z.object({
+export const CreateShippingSchema = z.object({
   orderId: z.string(),
   orderNumber: z.number().max(100),
   section: z.string().max(100),
@@ -83,7 +84,7 @@ export const CreateShippingShema = z.object({
   shippingDate: z.string(),
   shippingCharge: z.number(),
 });
-export type CreateShipping = z.infer<typeof CreateShippingShema>;
+export type CreateShipping = z.infer<typeof CreateShippingSchema>;
 
 export const UpdateShippingSchema = z.object({
   shippingDate: z.any(),
@@ -97,3 +98,9 @@ export const UpdateShippingSchema = z.object({
     .array(),
 });
 export type UpdateShipping = z.infer<typeof UpdateShippingSchema>;
+
+export const DeleteShippingSchema = z.object({
+  shippingId: z.string(),
+  orderId: z.string(),
+});
+export type DeleteShipping = z.infer<typeof DeleteShippingSchema>;
