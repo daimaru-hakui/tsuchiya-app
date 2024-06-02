@@ -7,7 +7,7 @@ export async function updateSku(
   data: UpdateSku,
   productId: string,
   skuId: string
-): Promise<{ status: string; message: string }> {
+): Promise<{ status: string; message: string; }> {
   const result = UpdateSkuSchema.safeParse({
     size: data.size,
     salePrice: data.salePrice,
@@ -50,22 +50,14 @@ export async function updateSku(
       salePrice: result.data.salePrice,
       costPrice: result.data.costPrice,
       stock: result.data.stock,
-      orderQuantity:result.data.orderQuantity,
+      orderQuantity: result.data.orderQuantity,
       sortNum: result.data.sortNum,
     });
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      console.error(e.message);
-      return {
-        status: "error",
-        message: e.message,
-      };
-    } else {
-      return {
-        status: "error",
-        message: "更新が失敗しました",
-      };
-    }
+    return {
+      status: "error",
+      message: e instanceof Error ? e.message : "登録が失敗しました"
+    };
   }
   return {
     status: "success",

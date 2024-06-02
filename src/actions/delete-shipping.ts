@@ -92,20 +92,11 @@ export async function deleteShipping(data: {
             .delete();
         }
       });
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(e.message);
-      return {
-        status: "error",
-        message: e.message,
-      };
-    } else {
-      console.error(e);
-      return {
-        status: "error",
-        message: "エラーが発生しました",
-      };
-    }
+  } catch (e: unknown) {
+    return {
+      status: "error",
+      message: e instanceof Error ? e.message : "登録が失敗しました"
+    };
   }
 
   return {

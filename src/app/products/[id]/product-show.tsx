@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import ProductEdit from "./product-edit";
 import Loading from "../../loading";
 import { cn } from "@/lib/utils";
-import paths from "@/paths";
+import paths from "@/utils/paths";
 import Link from "next/link";
 import useFunctons from "@/hooks/useFunctons";
 import { Product } from "@/types/product.type";

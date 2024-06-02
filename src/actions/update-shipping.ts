@@ -6,7 +6,7 @@ import { UpdateShipping, UpdateShippingSchema } from "@/types/shipping.type";
 export async function updateShipping(
   data: UpdateShipping,
   shippingId: string
-): Promise<{ status: string; message: string }> {
+): Promise<{ status: string; message: string; }> {
   const result = UpdateShippingSchema.safeParse({
     details: data.details,
     shippingDate: data.shippingDate,
@@ -46,20 +46,11 @@ export async function updateShipping(
         salePrice: detail.salePrice,
       });
     }
-  } catch (e) {
-    if (e instanceof Error) {
-      console.log(e.message);
-      return {
-        status: "error",
-        message: e.message,
-      };
-    } else {
-      console.log(e);
-      return {
-        status: "error",
-        message: "更新に失敗しました",
-      };
-    }
+  } catch (e: unknown) {
+    return {
+      status: "error",
+      message: e instanceof Error ? e.message : "登録が失敗しました"
+    };
   }
 
   return {

@@ -54,18 +54,11 @@ export async function updateOrderCancel(data: UpdateOrderCancel): Promise<{
       }
       transaction.delete(orderRef);
     });
-  } catch (e) {
-    if (e instanceof Error) {
-      return {
-        status: "error",
-        message: e.message,
-      };
-    } else {
-      return {
-        status: "error",
-        message: "エラーが発生しました",
-      };
-    }
+  } catch (e: unknown) {
+    return {
+      status: "error",
+      message: e instanceof Error ? e.message : "登録が失敗しました"
+    };
   }
 
   return {

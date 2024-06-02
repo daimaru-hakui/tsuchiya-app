@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, ChevronLeft, ChevronRight, Trash2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import paths from "@/paths";
+import paths from "@/utils/paths";
 import Status from "@/components/status";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";

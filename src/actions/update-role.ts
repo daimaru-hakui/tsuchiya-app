@@ -45,11 +45,10 @@ export async function updateRole(
     await firebaseAuth.updateUser(user.uid, {
       displayName: result.data.displayName,
     });
-  } catch (e: any) {
-    console.log(e);
+  } catch (e: unknown) {
     return {
       status: "error",
-      message: e.message,
+      message: e instanceof Error ? e.message : "登録が失敗しました"
     };
   }
   return {

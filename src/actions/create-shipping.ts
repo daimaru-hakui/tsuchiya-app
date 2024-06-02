@@ -389,19 +389,10 @@ export async function createShipping(
       }
     });
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      console.error(e.message);
-      return {
-        status: "error",
-        message: e.message || "エラーが発生しました",
-      };
-    } else {
-      console.error(e);
-      return {
-        status: "error",
-        message: "エラーが発生しました",
-      };
-    }
+    return {
+      status: "error",
+      message: e instanceof Error ? e.message : "登録が失敗しました"
+    };
   }
   return {
     status: "success",

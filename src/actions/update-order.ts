@@ -7,57 +7,33 @@ import {
   UpdateOrder,
   UpdateOrderSchema,
 } from "@/types/order.type";
+import { validateWithZodSchema } from "@/utils/schemas";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function updateOrder(
   data: UpdateOrder
 ): Promise<{ status: string; message: string; }> {
-  const result = UpdateOrderSchema.safeParse({
-    orderId: data.orderId,
-    section: data.section,
-    employeeCode: data.employeeCode,
-    initial: data.initial,
-    username: data.username,
-    companyName: data.companyName,
-    position: data.position,
-    details: data.details,
-    siteCode: data.siteCode,
-    siteName: data.siteName,
-    zipCode: data.zipCode,
-    address: data.address,
-    tel: data.tel,
-    applicant: data.applicant,
-    memo: data.memo,
-  });
-
-  if (!result.success) {
-    console.log(result.error);
-    return {
-      status: "error",
-      message: result.error.errors.join(","),
-    };
-  }
-
-  const session = await auth();
-  if (!session) {
-    return {
-      status: "error",
-      message: "認証エラー",
-    };
-  }
-
-  const orderRef = db.collection("orders").doc(result.data.orderId);
-  const orderDetailsRef = db
-    .collection("orders")
-    .doc(result.data.orderId)
-    .collection("orderDetails");
-  let skus = [];
   try {
+    const result = validateWithZodSchema(UpdateOrderSchema, data);
+
+    const session = await auth();
+    if (!session) {
+      throw new Error("認証エラー");
+    }
+
+    const orderRef = db.collection("orders").doc(result.orderId);
+    const orderDetailsRef = db
+      .collection("orders")
+      .doc(result.orderId)
+      .collection("orderDetails");
+
+    let skus = [];
+
     await db.runTransaction(async (transaction) => {
       const orderSnap = await transaction.get(orderRef);
       const order = orderSnap.data() as Order;
 
-      for (const detail of result.data.details) {
+      for (const detail of result.details) {
         const ref = orderDetailsRef.doc(detail.id);
         const orderDetailDoc = await transaction.get(ref);
         const orderDetail = orderDetailDoc.data() as OrderDetail;
@@ -78,23 +54,23 @@ export async function updateOrder(
       }
 
       transaction.update(orderRef, {
-        orderId: result.data.orderId,
-        section: result.data.section,
-        employeeCode: result.data.employeeCode,
-        initial: result.data.initial,
-        username: result.data.username,
-        companyName: result.data.companyName,
-        position: result.data.position,
-        details: result.data.details,
-        siteCode: result.data.siteCode,
-        siteName: result.data.siteName,
-        zipCode: result.data.zipCode,
-        address: result.data.address,
-        tel: result.data.tel,
-        applicant: result.data.applicant,
-        memo: result.data.memo,
+        orderId: result.orderId,
+        section: result.section,
+        employeeCode: result.employeeCode,
+        initial: result.initial,
+        username: result.username,
+        companyName: result.companyName,
+        position: result.position,
+        details: result.details,
+        siteCode: result.siteCode,
+        siteName: result.siteName,
+        zipCode: result.zipCode,
+        address: result.address,
+        tel: result.tel,
+        applicant: result.applicant,
+        memo: result.memo,
       });
-      for (const detail of result.data.details) {
+      for (const detail of result.details) {
         transaction.update(orderDetailsRef.doc(detail.id), {
           orderQuantity: detail.orderQuantity,
           quantity:
@@ -105,21 +81,11 @@ export async function updateOrder(
       }
     });
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      console.log(e.message);
-      return {
-        status: "error",
-        message: e.message,
-      };
-    } else {
-      console.log(e);
-      return {
-        status: "error",
-        message: "更新に失敗しました",
-      };
-    }
+    return {
+      status: "error",
+      message: e instanceof Error ? e.message : "更新が失敗しました"
+    };
   }
-
   return {
     status: "success",
     message: "更新に成功しました",

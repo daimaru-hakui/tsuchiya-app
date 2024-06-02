@@ -2,49 +2,29 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { CreateProduct, CreateProductSchema } from "@/types/product.type";
+import { validateWithZodSchema } from "@/utils/schemas";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function createProduct(data: CreateProduct):
   Promise<{ status: string, message: string; }> {
-
-  const result = CreateProductSchema.safeParse({
-    productNumber: data.productNumber,
-    productName: data.productName,
-    displayName: data.displayName,
-    isInseam: data.isInseam,
-    isMark: data.isMark,
-    gender: data.gender,
-    skus: data.skus
-  });
-
-  if (!result.success) {
-    console.log(result.error);
-    return {
-      status: "error",
-      message: "バリデーション エラー"
-    };
-  }
-
-  const session = await auth();
-  if (!session) {
-    console.log("no session");
-    return {
-      status: "error",
-      message: "認証エラー"
-    };
-  }
-
   try {
+    const result = validateWithZodSchema(CreateProductSchema, data);
+
+    const session = await auth();
+    if (!session) {
+      throw new Error("認証エラー");
+    }
+
     const batch = db.batch();
     const productRef = db.collection("products").doc();
     batch.set(productRef, {
       id: productRef.id,
-      productNumber: result.data.productNumber,
-      productName: result.data.productName,
-      displayName: result.data.displayName,
-      isInseam: result.data.isInseam,
-      isMark: result.data.isMark,
-      gender: result.data.gender,
+      productNumber: result.productNumber,
+      productName: result.productName,
+      displayName: result.displayName,
+      isInseam: result.isInseam,
+      isMark: result.isMark,
+      gender: result.gender,
       sortNum: 0,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
@@ -62,30 +42,22 @@ export async function createProduct(data: CreateProduct):
         parentRef: productRef,
         sortNum: idx + 1,
 
-        productNumber: result.data.productNumber,
-        productName: result.data.productName,
-        displayName: result.data.displayName,
-        isInseam: result.data.isInseam,
-        isMark: result.data.isMark,
-        gender: result.data.gender,
+        productNumber: result.productNumber,
+        productName: result.productName,
+        displayName: result.displayName,
+        isInseam: result.isInseam,
+        isMark: result.isMark,
+        gender: result.gender,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
     });
     await batch.commit();
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      console.log(e.message);
-      return {
-        status: "error",
-        message: e.message
-      };
-    } else {
-      return {
-        status: "error",
-        message: "登録が失敗しました"
-      };
-    }
+    return {
+      status: "error",
+      message: e instanceof Error ? e.message : "登録が失敗しました"
+    };
   }
   return {
     status: "success",

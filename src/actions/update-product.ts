@@ -2,42 +2,25 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { UpdateProduct, UpdateProductSchema } from "@/types/product.type";
+import { validateWithZodSchema } from "@/utils/schemas";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function updateProduct(
   data: UpdateProduct,
   productId: string
-): Promise<{ status: string; message: string }> {
-  const result = UpdateProductSchema.safeParse({
-    productNumber: data.productNumber,
-    productName: data.productName,
-    displayName: data.displayName,
-    isInseam: data.isInseam,
-    isMark: data.isMark,
-    gender: data.gender,
-  });
-
-  if (!result.success) {
-    console.log(result.error.flatten().formErrors.join(","));
-    return {
-      status: "error",
-      message: result.error.flatten().formErrors.join(","),
-    };
-  }
-
-  const session = await auth();
-  if (!session) {
-    console.log("no session");
-    return {
-      status: "error",
-      message: "認証エラー",
-    };
-  }
+): Promise<{ status: string; message: string; }> {
 
   try {
+    const result = validateWithZodSchema(UpdateProductSchema, data);
+
+    const session = await auth();
+    if (!session) {
+      throw new Error("認証エラー");
+    }
+
     const productRef = db.collection("products").doc(productId);
     productRef.update({
-      ...result.data,
+      ...result,
       updatedAt: FieldValue.serverTimestamp(),
     });
 
@@ -61,18 +44,10 @@ export async function updateProduct(
       });
     }
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      console.error(e.message);
-      return {
-        status: "error",
-        message: e.message,
-      };
-    } else {
-      return {
-        status: "error",
-        message: "更新が失敗しました",
-      };
-    }
+    return {
+      status: "error",
+      message: e instanceof Error ? e.message : "登録が失敗しました"
+    };
   }
   return {
     status: "success",

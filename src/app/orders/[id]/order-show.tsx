@@ -19,7 +19,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Edit } from "lucide-react";
 import OrderShippingModal from "./order-shipping-modal";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import paths from "@/paths";
+import paths from "@/utils/paths";
 import Status from "@/components/status";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
