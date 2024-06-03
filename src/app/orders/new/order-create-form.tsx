@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import emailjs from "@emailjs/browser";
 import {
   Card,
   CardContent,
@@ -38,6 +39,7 @@ interface Props {
 }
 
 export default function OrderCreateForm({ products, skus }: Props) {
+  const formRef = useRef(null);
   const [items, setItems] = useState<(Sku & Product)[][]>([]);
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
@@ -53,7 +55,30 @@ export default function OrderCreateForm({ products, skus }: Props) {
     startTransition(async () => {
       const result = await actions.createOrder(data);
       toast(result);
+      if (result.status === "success") {
+        // sendEmail();
+      }
     });
+  };
+
+  const sendEmail = () => {
+    emailjs.init({
+      publicKey: process.env.NEXT_PUBLIC_YOUR_PUBLIC_KEY,
+    })
+    emailjs
+      .send(
+        process.env.NEXT_PUBLIC_YOUR_SERVICE_ID as string,
+        process.env.NEXT_PUBLIC_YOUR_TEMPLATE_ID as string,
+        {} as any,
+      )
+      .then(
+        (response) => {
+          console.log("SUCCESS!", response.status, response.text);
+        },
+        (err) => {
+          console.log("FAILED...", err);
+        }
+      );
   };
 
   const isCompanyName = form.watch("companyName", true);
@@ -126,11 +151,11 @@ export default function OrderCreateForm({ products, skus }: Props) {
     form.setValue("memo", data.memo);
   };
 
-  if(!items) return <Loading/>
+  if (!items) return <Loading />;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" ref={formRef}>
         <Card className="w-full md:w-[550px]">
           <CardHeader>
             <CardTitle>商品発注</CardTitle>

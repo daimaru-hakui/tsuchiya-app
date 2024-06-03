@@ -3,41 +3,27 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { DeleteShippingSchema, ShippingDetail } from "@/types/shipping.type";
+import { validateWithZodSchema } from "@/utils/schemas";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function deleteShipping(data: {
   shippingId: string;
   orderId: string;
 }): Promise<{ status: string; message: string; }> {
-  const result = DeleteShippingSchema.safeParse({
-    shippingId: data.shippingId,
-    orderId: data.orderId,
-  });
-
-  if (!result.success) {
-    console.log(result.error.errors);
-    return {
-      status: "error",
-      message: result.error.errors.join(","),
-    };
-  }
+  const result = validateWithZodSchema(DeleteShippingSchema, data);
 
   const session = await auth();
   if (!session) {
-    console.log("認証エラー");
-    return {
-      status: "error",
-      message: "認証エラー",
-    };
+    throw new Error("認証エラー");
   }
 
-  const orderRef = db.collection("orders").doc(result.data.orderId);
-  const shippingRef = db.collection("shippings").doc(result.data.shippingId);
+  const orderRef = db.collection("orders").doc(result.orderId);
+  const shippingRef = db.collection("shippings").doc(result.shippingId);
   const shippingDetailsRef = db
     .collection("shippings")
-    .doc(result.data.shippingId)
+    .doc(result.shippingId)
     .collection("shippingDetails")
-    .where("shippingId", "==", result.data.shippingId);
+    .where("shippingId", "==", result.shippingId);
 
   try {
     await db
@@ -86,7 +72,7 @@ export async function deleteShipping(data: {
         const shippingDetails = shippingDetailsSnap.docs;
         for (const detail of shippingDetails) {
           db.collection("shippings")
-            .doc(result.data.shippingId)
+            .doc(result.shippingId)
             .collection("shippingDetails")
             .doc(detail.id)
             .delete();
