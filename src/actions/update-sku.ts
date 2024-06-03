@@ -2,6 +2,7 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/firebase/server";
 import { UpdateSku, UpdateSkuSchema } from "@/types/product.type";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function updateSku(
   data: UpdateSku,
@@ -52,6 +53,7 @@ export async function updateSku(
       stock: result.data.stock,
       orderQuantity: result.data.orderQuantity,
       sortNum: result.data.sortNum,
+      updatedAt: FieldValue.serverTimestamp(),
     });
   } catch (e: unknown) {
     return {

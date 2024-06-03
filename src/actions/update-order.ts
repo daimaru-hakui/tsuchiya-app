@@ -61,7 +61,6 @@ export async function updateOrder(
         username: result.username,
         companyName: result.companyName,
         position: result.position,
-        details: result.details,
         siteCode: result.siteCode,
         siteName: result.siteName,
         zipCode: result.zipCode,
@@ -69,6 +68,7 @@ export async function updateOrder(
         tel: result.tel,
         applicant: result.applicant,
         memo: result.memo,
+        updatedAt: FieldValue.serverTimestamp(),
       });
       for (const detail of result.details) {
         transaction.update(orderDetailsRef.doc(detail.id), {
@@ -77,6 +77,7 @@ export async function updateOrder(
             order.status === "pending" ? detail.orderQuantity : detail.quantity,
           salePrice: detail.salePrice,
           inseam: detail.inseam || null,
+          updatedAt: FieldValue.serverTimestamp(),
         });
       }
     });

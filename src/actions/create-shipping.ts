@@ -4,6 +4,7 @@ import { db } from "@/lib/firebase/server";
 import { OrderDetail } from "@/types/order.type";
 import { Sku } from "@/types/product.type";
 import { CreateShipping, CreateShippingSchema } from "@/types/shipping.type";
+import { validateWithZodSchema } from "@/utils/schemas";
 import { format } from "date-fns";
 import { DocumentReference, FieldValue } from "firebase-admin/firestore";
 
@@ -23,84 +24,57 @@ interface DataDetail {
 export async function createShipping(
   data: CreateShipping,
   orderId: string
-): Promise<{ status: string; message: string; }> {
-  const result = CreateShippingSchema.safeParse({
-    orderId: orderId,
-    orderNumber: data.orderNumber,
-    section: data.section,
-    employeeCode: data.employeeCode,
-    initial: data.initial,
-    username: data.username,
-    companyName: data.companyName,
-    position: data.position,
-    details: data.details,
-    siteCode: data.siteCode,
-    siteName: data.siteName,
-    zipCode: data.zipCode,
-    address: data.address,
-    tel: data.tel,
-    applicant: data.applicant,
-    nemo: data.memo || "",
-    shippingDate: format(data.shippingDate, "yyyy-MM-dd"),
-    shippingCharge: data.shippingCharge,
-  });
-
-  if (!result.success) {
-    console.log(result.error);
-    return {
-      status: "error",
-      message: result.error.flatten().formErrors.join(","),
-    };
-  }
-
-  const session = await auth();
-  if (!session) {
-    return {
-      status: "error",
-      message: "認証エラー",
-    };
-  }
-
-  const filterDetails = result.data.details
-    .filter(
-      (detail) => detail.shippingQuantity + detail.shippingStockQuantity > 0
-    )
-    .map((detail, idx) => ({ ...detail, sortNum: idx + 1 }));
-
-  if (filterDetails.length === 0) {
-    return {
-      status: "error",
-      message: "出荷数量を入力してください",
-    };
-  }
-
-  const serialRef = db.collection("serialNumbers").doc("shippingNumber");
-  const shippingRef = db.collection("shippings").doc();
-  const orderRef = db.collection("orders").doc(orderId);
-  const optionsRef = db.collection("options").doc("marking").collection("skus");
-  const companyNameRef = optionsRef.doc("companyName");
-  const initialNameRef = optionsRef.doc("initialName");
-  const transferSheetRef = optionsRef.doc("transferSheet");
-  const pressFeeRef = optionsRef.doc("pressFee");
-  const inseamRef = optionsRef.doc("inseamProcessing");
-  const shippingFeeRef = db
-    .collection("options")
-    .doc("delivery")
-    .collection("skus")
-    .doc("shippingFee");
-
-  let shippingDetails: (Sku & DataDetail)[] = [];
-
-  let orderDetails: (OrderDetail & {
-    orderDetailId: string;
-    orderDetailRef: DocumentReference;
-    shippingQuantity: number;
-    shippingStockQuantity: number;
-  })[] = [];
-
-  let skus = [];
-
+): Promise<{ status: string; message: string }> {
   try {
+    const result = validateWithZodSchema(CreateShippingSchema, {
+      ...data,
+      shippingDate: format(data.shippingDate, "yyyy-MM-dd"),
+    });
+
+    const session = await auth();
+    if (!session) {
+      throw new Error("認証エラー");
+    }
+
+    const filterDetails = result.details
+      .filter(
+        (detail) => detail.shippingQuantity + detail.shippingStockQuantity > 0
+      )
+      .map((detail, idx) => ({ ...detail, sortNum: idx + 1 }));
+
+    if (filterDetails.length === 0) {
+      throw new Error("出荷数量を入力してください");
+    }
+
+    const serialRef = db.collection("serialNumbers").doc("shippingNumber");
+    const shippingRef = db.collection("shippings").doc();
+    const orderRef = db.collection("orders").doc(orderId);
+    const optionsRef = db
+      .collection("options")
+      .doc("marking")
+      .collection("skus");
+    const companyNameRef = optionsRef.doc("companyName");
+    const initialNameRef = optionsRef.doc("initialName");
+    const transferSheetRef = optionsRef.doc("transferSheet");
+    const pressFeeRef = optionsRef.doc("pressFee");
+    const inseamRef = optionsRef.doc("inseamProcessing");
+    const shippingFeeRef = db
+      .collection("options")
+      .doc("delivery")
+      .collection("skus")
+      .doc("shippingFee");
+
+    let shippingDetails: (Sku & DataDetail)[] = [];
+
+    let orderDetails: (OrderDetail & {
+      orderDetailId: string;
+      orderDetailRef: DocumentReference;
+      shippingQuantity: number;
+      shippingStockQuantity: number;
+    })[] = [];
+
+    let skus = [];
+
     await db.runTransaction(async (transaction) => {
       const serialDoc = await transaction.get(serialRef);
 
@@ -108,7 +82,6 @@ export async function createShipping(
         const orderDetailRef = orderRef
           .collection("orderDetails")
           .doc(detail.id);
-
         const orderDetailSnap = await transaction.get(orderDetailRef);
         const orderDetail = { ...orderDetailSnap.data() } as OrderDetail;
 
@@ -117,9 +90,6 @@ export async function createShipping(
           .where("id", "==", detail.skuId)
           .orderBy("id", "asc")
           .orderBy("sortNum", "asc");
-
-        console.log(1, skusRef);
-        console.log(2, orderDetail.skuRef);
 
         const skuDocs = await transaction.get(skusRef);
         const sku = skuDocs.docs[0].data() as Sku;
@@ -250,7 +220,7 @@ export async function createShipping(
 
       // イニシャル刺繍
       const initialNameSum = shippingDetails
-        .filter((detail) => detail.isMark && result.data.initial)
+        .filter((detail) => detail.isMark && result.initial)
         .reduce((sum: number, detail) => sum + detail.shippingQuantity, 0);
 
       if (initialNameSum > 0) {
@@ -264,7 +234,7 @@ export async function createShipping(
       }
 
       // 裾上げ修理
-      const inseamSum = result.data.details
+      const inseamSum = result.details
         .filter((detail) => detail.inseam)
         .reduce(
           (sum, detail) =>
@@ -287,7 +257,7 @@ export async function createShipping(
       shippingDetails.push({
         ...shippingSnap.data(),
         skuRef: shippingFeeRef,
-        salePrice: result.data.shippingCharge || 0,
+        salePrice: result.shippingCharge || 0,
         costPrice: 0,
         quantity: 1,
         skuId: "",
@@ -314,7 +284,9 @@ export async function createShipping(
       // 在庫引き落とし
       for (const sku of skus) {
         transaction.update(sku.skuRef, {
-          orderQuantity: sku.orderQuantity - sku.shippingQuantity, // 追加
+          orderQuantity: FieldValue.increment(
+            -(sku.shippingStockQuantity + sku.shippingQuantity)
+          ),
           stock: sku.stock - sku.shippingStockQuantity,
         });
       }
@@ -339,24 +311,24 @@ export async function createShipping(
         shippingNumber: newCount,
         trackingNumber: "",
         courier: "",
-        orderNumber: result.data.orderNumber,
+        orderNumber: result.orderNumber,
         orderId: orderId,
         orderRef: orderRef,
-        section: result.data.section,
-        employeeCode: result.data.employeeCode,
-        initial: result.data.initial,
-        username: result.data.username,
-        companyName: result.data.companyName,
-        position: result.data.position,
-        siteCode: result.data.siteCode,
-        siteName: result.data.siteName,
-        zipCode: result.data.zipCode,
-        address: result.data.address,
-        tel: result.data.tel,
-        memo: result.data.memo || "",
+        section: result.section,
+        employeeCode: result.employeeCode,
+        initial: result.initial,
+        username: result.username,
+        companyName: result.companyName,
+        position: result.position,
+        siteCode: result.siteCode,
+        siteName: result.siteName,
+        zipCode: result.zipCode,
+        address: result.address,
+        tel: result.tel,
+        memo: result.memo || "",
         uid: session.user.uid,
         status: "picking",
-        shippingDate: result.data.shippingDate,
+        shippingDate: result.shippingDate,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
@@ -382,7 +354,7 @@ export async function createShipping(
           inseam: detail.inseam || null,
           sortNum: detail.sortNum,
           isStock: detail.isStock || false,
-          shippingDate: result.data.shippingDate,
+          shippingDate: result.shippingDate,
           createdAt: FieldValue.serverTimestamp(),
           updatedAt: FieldValue.serverTimestamp(),
         });
@@ -391,7 +363,7 @@ export async function createShipping(
   } catch (e: unknown) {
     return {
       status: "error",
-      message: e instanceof Error ? e.message : "登録が失敗しました"
+      message: e instanceof Error ? e.message : "登録が失敗しました",
     };
   }
   return {
