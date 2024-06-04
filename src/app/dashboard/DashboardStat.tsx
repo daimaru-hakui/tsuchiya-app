@@ -26,6 +26,7 @@ export default function DashboardStats() {
   const [shippingsTotalAmount, setShippingsTotalAmount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [openOrderCount, setOpenOrderCount] = useState(0);
+  const [processingCount, setProcessingCount] = useState(0);
   const [pickingCount, setPickingCount] = useState(0);
   const [stockTotalAmount, setStockTotalAmount] = useState(0);
   const setOrderStatus = useStore((state) => state.setOrderStatus);
@@ -37,6 +38,7 @@ export default function DashboardStats() {
     getShippingTotalAmount();
     getPendingCount();
     getOpenOrderCount();
+    getProcessingCount()
     getPickingCount();
     getTotalStockAmount();
   }, []);
@@ -96,6 +98,13 @@ export default function DashboardStats() {
     setOpenOrderCount(snapshot.data().count);
   };
 
+  const getProcessingCount = async () => {
+    const coll = collection(db, "orders");
+    const q = query(coll, where("status", "==", "processing"));
+    const snapshot = await getCountFromServer(q);
+    setProcessingCount(snapshot.data().count);
+  };
+
   const getPickingCount = async () => {
     const coll = collection(db, "shippings");
     const q = query(coll, where("status", "==", "picking"));
@@ -151,7 +160,7 @@ export default function DashboardStats() {
             <Link href="/orders">一覧へ</Link>
           </Button>
         </DashboardCard>
-        <DashboardCard title="受注処理中件数" quantity={pendingCount}>
+        <DashboardCard title="受注処理中件数" quantity={processingCount}>
           <Button
             size="xs"
             asChild
