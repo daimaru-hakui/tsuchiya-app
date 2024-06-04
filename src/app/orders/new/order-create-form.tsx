@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/useToast";
 import { Product, Sku } from "@/types/product.type";
 import { CreateOrder, CreateOrderSchema } from "@/types/order.type";
 import Loading from "@/app/loading";
+import OrderAddressList from "./OrderAddressList";
 
 interface Props {
   products: Product[];
@@ -40,7 +41,7 @@ interface Props {
 
 export default function OrderCreateForm({ products, skus }: Props) {
   const formRef = useRef(null);
-  const [items, setItems] = useState<(Sku & Product)[][]>([]);
+  const [items, setItems] = useState<(Sku & Product)[][]>();
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
@@ -64,12 +65,12 @@ export default function OrderCreateForm({ products, skus }: Props) {
   const sendEmail = () => {
     emailjs.init({
       publicKey: process.env.NEXT_PUBLIC_YOUR_PUBLIC_KEY,
-    })
+    });
     emailjs
       .send(
         process.env.NEXT_PUBLIC_YOUR_SERVICE_ID as string,
         process.env.NEXT_PUBLIC_YOUR_TEMPLATE_ID as string,
-        {} as any,
+        {} as any
       )
       .then(
         (response) => {
@@ -155,7 +156,11 @@ export default function OrderCreateForm({ products, skus }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" ref={formRef}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8"
+        ref={formRef}
+      >
         <Card className="w-full md:w-[550px]">
           <CardHeader>
             <CardTitle>商品発注</CardTitle>
@@ -288,25 +293,28 @@ export default function OrderCreateForm({ products, skus }: Props) {
               ))}
             </div>
             <hr />
-            <FormField
-              control={form.control}
-              name="siteCode"
-              defaultValue=""
-              render={({ field }) => (
-                <FormItem id="siteCode">
-                  <FormLabel>工事コード又は組織コード</FormLabel>
-                  <FormControl>
-                    <Input
-                      style={{ WebkitAppearance: "none" }}
-                      type="number"
-                      placeholder=""
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex items-end gap-3">
+              <FormField
+                control={form.control}
+                name="siteCode"
+                defaultValue=""
+                render={({ field }) => (
+                  <FormItem id="siteCode" className="w-full">
+                    <FormLabel>工事コード又は組織コード</FormLabel>
+                    <FormControl>
+                      <Input
+                        style={{ WebkitAppearance: "none" }}
+                        type="number"
+                        placeholder=""
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <OrderAddressList setValue={form.setValue} />
+            </div>
             <FormField
               control={form.control}
               name="siteName"
