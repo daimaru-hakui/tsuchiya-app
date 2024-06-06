@@ -69,10 +69,10 @@ export const CreateShippingSchema = z.object({
       id: z.string(),
       skuId: z.string(),
       quantity: z.number(),
-      inseam: z.number().optional(),
       shippingStockQuantity: z.number(),
       shippingQuantity: z.number(),
       salePrice: z.number(),
+      inseam: z.number().optional(),
     })
     .array(),
   siteCode: z.string().max(100),
