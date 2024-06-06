@@ -38,7 +38,7 @@ export default function DashboardStats() {
     getShippingTotalAmount();
     getPendingCount();
     getOpenOrderCount();
-    getProcessingCount()
+    getProcessingCount();
     getPickingCount();
     getTotalStockAmount();
   }, []);
@@ -126,7 +126,11 @@ export default function DashboardStats() {
     <div className="space-y-4">
       <div className="grid lg:grid-cols-4 gap-4">
         <DashboardCard title="当月受注件数" quantity={ordersCount}>
-          <Button size="xs" asChild>
+          <Button
+            size="xs"
+            asChild
+            onClick={() => setOrderStatus("all")}
+          >
             <Link href="/orders">一覧へ</Link>
           </Button>
         </DashboardCard>

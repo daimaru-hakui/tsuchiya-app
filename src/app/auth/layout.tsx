@@ -4,7 +4,7 @@ import React, { ReactNode } from "react";
 const AuthLayout = ({ children }: { children: ReactNode }) => {
   return (
     <>
-      <div className="grid place-items-center min-h-[calc(100vh-50px)]">
+      <div className="grid place-items-center h-[calc(100vh-200px)]">
         {children}
       </div>
     </>

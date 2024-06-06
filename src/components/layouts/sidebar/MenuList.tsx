@@ -23,7 +23,7 @@ export default function MenuList({ setOpen }: Props) {
         {/* <MenuItem href="/adjustments">在庫調整</MenuItem> */}
       </ul>
       <footer className="md:flex md:items-end md:grow-1">
-        <div className="flex items-center w-full justify-around">
+        <div className="flex items-center w-full justify-around mt-6 px-4 md:px-0">
           <LogoutButton />
           <DarkModToggle />
         </div>

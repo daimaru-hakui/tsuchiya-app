@@ -1,7 +1,9 @@
+import Link from "next/link";
+
 export default function MenuTitle() {
   return (
     <div className="text-lg px-2 ">
-      TSUCHIYA APP
+      <Link href="/">TSUCHIYA APP</Link>
     </div>
   );
 }
