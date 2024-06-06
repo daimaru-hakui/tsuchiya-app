@@ -32,14 +32,16 @@ export default async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/",
-    "/products/:path*",
-    "/dashboard/:path*",
-    "/orders/:path*",
-    "/admin/:path*",
-    "/api/products/:path*",
-    "/shippings/:path*",
-    "/adjustments/:path*",
-    "/invoice/:path*"
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    // "/",
+    // "/products/:path*",
+    // "/dashboard/:path*",
+    // "/orders/:path*",
+    // "/admin/:path*",
+    // "/api/products/:path*",
+    // "/shippings/:path*",
+    // "/adjustments/:path*",
+    // "/charges/:path*",
+    // "/invoice/:path*"
   ],
 };
