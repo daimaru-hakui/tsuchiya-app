@@ -74,8 +74,8 @@ export default function LoginForm() {
   
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card className={cn("w-[350px]")}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+        <Card className={cn("")}>
           <CardHeader>
             <CardTitle className="text-center">Login</CardTitle>
           </CardHeader>

@@ -55,11 +55,11 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
   const toast = useToast();
 
   const onSubmit = (data: CreateShipping) => {
-    console.log(data.shippingCharge)
     startTransition(async () => {
       const d = {
-        ...order,
         ...data,
+        ...order,
+        orderId: order.id,
         createdAt: "",
         updatedAt: "",
         shippingCharge: Number(data.shippingCharge || 700),
@@ -99,90 +99,90 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
             <DialogHeader className="mb-6">
               <DialogTitle>出荷処理</DialogTitle>
             </DialogHeader>
-              <div className="flex gap-3 mx-2 my-3">
-                <input
-                  className="hidden"
-                  defaultValue={Number(order.orderNumber)}
-                  {...form.register("orderNumber", { valueAsNumber: true })}
-                />
-                <FormField
-                  control={form.control}
-                  name="shippingDate"
-                  defaultValue={new Date()?.toString()}
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>出荷日</FormLabel>
-                      <Popover
-                        open={calendarOpen}
-                        onOpenChange={() => {
-                          setCalendarOpen(!calendarOpen);
-                        }}
-                      >
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "yyyy-MM-dd")
-                              ) : (
-                                <span>{field.value}</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            numberOfMonths={1}
-                            selected={new Date(field.value)}
-                            onSelect={field.onChange}
-                            initialFocus
-                          />
-                          <div className="w-full text-center">
-                            <Button
-                              size="xs"
-                              variant="outline"
-                              className="mb-2"
-                              onClick={() => setCalendarOpen(!calendarOpen)}
-                            >
-                              閉じる
-                            </Button>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shippingCharge"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col w-[150px]">
-                      <FormLabel>送料</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={"700"}>
+            <div className="flex gap-3 mx-2 my-3">
+              <input
+                className="hidden"
+                defaultValue={Number(order.orderNumber)}
+                {...form.register("orderNumber", { valueAsNumber: true })}
+              />
+              <FormField
+                control={form.control}
+                name="shippingDate"
+                defaultValue={new Date()?.toString()}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>出荷日</FormLabel>
+                    <Popover
+                      open={calendarOpen}
+                      onOpenChange={() => {
+                        setCalendarOpen(!calendarOpen);
+                      }}
+                    >
+                      <PopoverTrigger asChild>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={field.value} />
-                          </SelectTrigger>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "yyyy-MM-dd")
+                            ) : (
+                              <span>{field.value}</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
                         </FormControl>
-                        <SelectContent className="w-[200px]">
-                          <SelectItem value={"700"}>{700}円</SelectItem>
-                          <SelectItem value={"1500"}>沖縄 {1500}円</SelectItem>
-                          <SelectItem value={"3400"}>大阪 {3400}円</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          numberOfMonths={1}
+                          selected={new Date(field.value)}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
+                        <div className="w-full text-center">
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            className="mb-2"
+                            onClick={() => setCalendarOpen(!calendarOpen)}
+                          >
+                            閉じる
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="shippingCharge"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col w-[150px]">
+                    <FormLabel>送料</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={"700"}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={field.value} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="w-[200px]">
+                        <SelectItem value={"700"}>{700}円</SelectItem>
+                        <SelectItem value={"1500"}>沖縄 {1500}円</SelectItem>
+                        <SelectItem value={"3400"}>大阪 {3400}円</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <OrderShippingTable
               orderDetails={orderDetails}
               form={form}
@@ -191,10 +191,7 @@ export default function OrderShippingModal({ order, orderDetails }: Props) {
             <DialogFooter className="mt-3 sm:justify-end gap-2">
               <>
                 <DialogClose asChild>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                  >
+                  <Button type="button" variant="secondary">
                     閉じる
                   </Button>
                 </DialogClose>

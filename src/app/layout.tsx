@@ -45,7 +45,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <MainMenu />
-            <div className="md:overflow-auto pb-2 px-4 h-screen">
+            <div className="md:overflow-auto pb-2 px-4 h-[calc(100vh-70px)] md:min-h-dvh">
               <Header />
               <ToastProvider>{children}</ToastProvider>
             </div>

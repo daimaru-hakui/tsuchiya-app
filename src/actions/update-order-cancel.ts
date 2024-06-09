@@ -50,7 +50,9 @@ export async function updateOrderCancel(data: UpdateOrderCancel): Promise<{
           updatedAt: FieldValue.serverTimestamp(),
         });
       }
-      transaction.delete(orderRef);
+      transaction.update(orderRef,{
+        status:"canceled"
+      });
     });
   } catch (e: unknown) {
     console.log(e);

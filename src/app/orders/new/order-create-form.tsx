@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/useToast";
 import { Product, Sku } from "@/types/product.type";
 import { CreateOrder, CreateOrderSchema } from "@/types/order.type";
 import Loading from "@/app/loading";
+import OrderAddressList from "./OrderAddressList";
 
 interface Props {
   products: Product[];
@@ -40,7 +41,7 @@ interface Props {
 
 export default function OrderCreateForm({ products, skus }: Props) {
   const formRef = useRef(null);
-  const [items, setItems] = useState<(Sku & Product)[][]>([]);
+  const [items, setItems] = useState<(Sku & Product)[][]>();
   const [gender, setGender] = useState("man");
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
@@ -57,6 +58,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
       toast(result);
       if (result.status === "success") {
         // sendEmail();
+        form.reset()
       }
     });
   };
@@ -64,12 +66,12 @@ export default function OrderCreateForm({ products, skus }: Props) {
   const sendEmail = () => {
     emailjs.init({
       publicKey: process.env.NEXT_PUBLIC_YOUR_PUBLIC_KEY,
-    })
+    });
     emailjs
       .send(
         process.env.NEXT_PUBLIC_YOUR_SERVICE_ID as string,
         process.env.NEXT_PUBLIC_YOUR_TEMPLATE_ID as string,
-        {} as any,
+        {} as any
       )
       .then(
         (response) => {
@@ -155,27 +157,16 @@ export default function OrderCreateForm({ products, skus }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" ref={formRef}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8"
+        ref={formRef}
+      >
         <Card className="w-full md:w-[550px]">
           <CardHeader>
             <CardTitle>商品発注</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <RadioGroup
-              onValueChange={handleGenderChange}
-              defaultValue={gender}
-              className="flex flex-col space-y-1"
-            >
-              <Label>性別</Label>
-              <div className="flex space-x-2">
-                {genders.map(({ value, title }) => (
-                  <div key={value} className="flex items-center space-x-2">
-                    <RadioGroupItem value={value} id={value} />
-                    <Label htmlFor={value}>{title}</Label>
-                  </div>
-                ))}
-              </div>
-            </RadioGroup>
             <FormField
               control={form.control}
               name="section"
@@ -184,7 +175,7 @@ export default function OrderCreateForm({ products, skus }: Props) {
                 <FormItem>
                   <FormLabel>所属名</FormLabel>
                   <FormControl>
-                    <Input placeholder="派遣社員" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormDescription>
                     所属名又は派遣社員・JV構成員・協力会社
@@ -276,7 +267,22 @@ export default function OrderCreateForm({ products, skus }: Props) {
                 )}
               />
             </div>
-            <hr className="mt-3" />
+            <RadioGroup
+              onValueChange={handleGenderChange}
+              defaultValue={gender}
+              className="flex flex-col space-y-1 mt-3"
+            >
+              <Label>性別</Label>
+              <div className="flex space-x-2">
+                {genders.map(({ value, title }) => (
+                  <div key={value} className="flex items-center space-x-2">
+                    <RadioGroupItem value={value} id={value} />
+                    <Label htmlFor={value}>{title}</Label>
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
+            <hr className="mt-1" />
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
               {items.map((skus, index: number) => (
                 <OrderFormItem
@@ -288,25 +294,28 @@ export default function OrderCreateForm({ products, skus }: Props) {
               ))}
             </div>
             <hr />
-            <FormField
-              control={form.control}
-              name="siteCode"
-              defaultValue=""
-              render={({ field }) => (
-                <FormItem id="siteCode">
-                  <FormLabel>工事コード又は組織コード</FormLabel>
-                  <FormControl>
-                    <Input
-                      style={{ WebkitAppearance: "none" }}
-                      type="number"
-                      placeholder=""
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex items-end gap-3">
+              <FormField
+                control={form.control}
+                name="siteCode"
+                defaultValue=""
+                render={({ field }) => (
+                  <FormItem id="siteCode" className="w-full">
+                    <FormLabel>工事コード又は組織コード</FormLabel>
+                    <FormControl>
+                      <Input
+                        style={{ WebkitAppearance: "none" }}
+                        type="number"
+                        placeholder=""
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <OrderAddressList setValue={form.setValue} />
+            </div>
             <FormField
               control={form.control}
               name="siteName"
@@ -377,7 +386,6 @@ export default function OrderCreateForm({ products, skus }: Props) {
                     <Input
                       type="tel"
                       className="w-[200px]"
-                      placeholder="TEL"
                       pattern="[\d\-]*"
                       {...field}
                     />

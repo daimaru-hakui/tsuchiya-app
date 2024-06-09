@@ -77,25 +77,25 @@ export default function OrderList() {
       </CardHeader>
       <CardContent className="overflow-auto">
         {orders.length > 0 ? (
-          <Table className="min-w-[2000px]">
+          <Table className="min-w-[2500px]">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[80px]">詳細</TableHead>
                 <TableHead className="w-[120px]">日付</TableHead>
                 <TableHead className="w-[105px]">ステータス</TableHead>
                 <TableHead className="w-[90px]">発注No.</TableHead>
-                <TableHead>所属名</TableHead>
-                <TableHead>社員コード</TableHead>
-                <TableHead>イニシャル</TableHead>
-                <TableHead>氏名</TableHead>
-                <TableHead>役職</TableHead>
-                <TableHead>社名</TableHead>
-                <TableHead>工事コード</TableHead>
-                <TableHead>現場名 又は組織名</TableHead>
-                <TableHead>郵便番号</TableHead>
-                <TableHead>住所</TableHead>
-                <TableHead>電話番号</TableHead>
-                <TableHead>備考</TableHead>
+                <TableHead className="w-[100px]">所属名</TableHead>
+                <TableHead className="w-[150px]">社員コード</TableHead>
+                <TableHead className="w-[120px]">イニシャル</TableHead>
+                <TableHead className="w-[120px]">氏名</TableHead>
+                <TableHead className="w-[120px]">役職</TableHead>
+                <TableHead className="w-[80px]">社名</TableHead>
+                <TableHead className="w-[150px]">工事コード</TableHead>
+                <TableHead className="w-[350px]">現場名 又は組織名</TableHead>
+                <TableHead className="w-[90px]">郵便番号</TableHead>
+                <TableHead className="w-[400px]">住所</TableHead>
+                <TableHead className="w-[150px]">電話番号</TableHead>
+                <TableHead className="w-[200px]">備考</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

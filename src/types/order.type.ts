@@ -49,7 +49,7 @@ export interface OrderDetail {
 }
 
 export const CreateOrderSchema = z.object({
-  section: z.string().min(1, { message: "所属名を入力してください。" }),
+  section: z.string(),
   employeeCode: z.string(),
   initial: z.string(),
   username: z.string(),

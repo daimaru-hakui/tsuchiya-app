@@ -132,7 +132,7 @@ export default function OrderEditHeader({ order, form }: Props) {
         <FormField
           control={control}
           name="siteName"
-          defaultValue={order.siteCode}
+          defaultValue={order.siteName}
           render={({ field }) => (
             <FormItem>
               <FormLabel>現場名</FormLabel>

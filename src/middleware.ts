@@ -31,15 +31,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/",
-    "/products/:path*",
-    "/dashboard/:path*",
-    "/orders/:path*",
-    "/admin/:path*",
-    "/api/products/:path*",
-    "/shippings/:path*",
-    "/adjustments/:path*",
-    "/invoice/:path*"
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth).*)"],
 };
