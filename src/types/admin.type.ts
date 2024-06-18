@@ -9,7 +9,7 @@ export interface AdminUser {
 
 export const UpdatedAdminUserSchema = z.object({
   displayName: z.string(),
-  role: z.enum(["admin", "user", "member"]),
+  role: z.enum(["admin", "user", "member","observer"]),
 });
 
 export type UpdatedAdminUser = z.infer<typeof UpdatedAdminUserSchema>;

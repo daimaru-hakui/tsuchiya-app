@@ -10,6 +10,10 @@ export interface Product {
   isMark: boolean;
   displayName: string;
   gender: "man" | "woman" | "other";
+  image: {
+    url: string;
+    path: string;
+  };
   createdAt: any;
   updatedAt: any;
 }

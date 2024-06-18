@@ -10,7 +10,7 @@ import {
   orderBy,
   query,
   startAfter,
-  where,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
@@ -22,6 +22,9 @@ import paths from "@/utils/paths";
 import Link from "next/link";
 import useFunctons from "@/hooks/useFunctons";
 import { Product } from "@/types/product.type";
+import ProductShowImage from "./ProductShowImage";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 interface Props {
   id: string;
@@ -32,11 +35,8 @@ export default function ProductShow({ id }: Props) {
   const router = useRouter();
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
+  const currentUser = useSession();
   const { getGender } = useFunctons();
-
-  // const handlePageBack = () => {
-  //   router.back();
-  // };
 
   useEffect(() => {
     const productRef = doc(db, "products", id);
@@ -97,6 +97,21 @@ export default function ProductShow({ id }: Props) {
     return () => unsub();
   }, [product?.sortNum]);
 
+  const handleDeleteImage = async (product: Product) => {
+    if (
+      currentUser.data?.user.role === "user" ||
+      currentUser.data?.user.role === "observer"
+    ) {
+      return;
+    }
+    const result = confirm("削除して宜しいでしょうか");
+    if (!result) return;
+    const productRef = doc(db, "products", product.id);
+    await updateDoc(productRef, {
+      image: {},
+    });
+  };
+
   if (!product) return <Loading />;
 
   return (
@@ -125,7 +140,7 @@ export default function ProductShow({ id }: Props) {
         <CardTitle>商品詳細</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 mb-3">
           <div>
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>品番</dt>
@@ -139,23 +154,38 @@ export default function ProductShow({ id }: Props) {
               <dt className={cn(dtStyles)}>表示名</dt>
               <dd>{product.displayName}</dd>
             </dl>
+            <div>
+              <dl className={cn(dlStyles)}>
+                <dt className={cn(dtStyles)}>裾上</dt>
+                <dd>{product.isInseam ? "あり" : "-"}</dd>
+              </dl>
+              <dl className={cn(dlStyles)}>
+                <dt className={cn(dtStyles)}>刺繍</dt>
+                <dd>{product.isMark ? "あり" : "-"}</dd>
+              </dl>
+              <dl className={cn(dlStyles)}>
+                <dt className={cn(dtStyles)}>性別</dt>
+                <dd>{getGender(product.gender)}</dd>
+              </dl>
+            </div>
           </div>
-          <div>
-            <dl className={cn(dlStyles)}>
-              <dt className={cn(dtStyles)}>裾上</dt>
-              <dd>{product.isInseam ? "あり" : "-"}</dd>
-            </dl>
-            <dl className={cn(dlStyles)}>
-              <dt className={cn(dtStyles)}>刺繍</dt>
-              <dd>{product.isMark ? "あり" : "-"}</dd>
-            </dl>
-            <dl className={cn(dlStyles)}>
-              <dt className={cn(dtStyles)}>性別</dt>
-              <dd>{getGender(product.gender)}</dd>
-            </dl>
+          <div className="flex justify-center md:justify-end my-6 px-6 md:my-0">
+            {product.image?.url ? (
+              <div>
+                <Image
+                  width={150}
+                  height={150}
+                  src={product.image.url}
+                  className="object-cover w-[300px] h-[300px] md:w-48 md:h-48"
+                  alt={product.displayName}
+                  onClick={() => handleDeleteImage(product)}
+                />
+              </div>
+            ) : (
+              <ProductShowImage id={id} />
+            )}
           </div>
         </div>
-
         <div className="mt-3">
           <ProductShowTable id={id} />
         </div>
