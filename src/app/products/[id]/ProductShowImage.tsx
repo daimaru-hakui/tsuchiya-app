@@ -58,7 +58,7 @@ export default function ProductShowImage({ id }: Props) {
           width={300}
           height={300}
           src={window.URL.createObjectURL(file)}
-          className="object-cover w-[300px] h-[300px] md:w-48 md:h-48"
+          className="object-container w-[300px] h-[300px] md:w-48 md:h-48"
           alt=""
         />
       ) : (

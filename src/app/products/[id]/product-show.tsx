@@ -171,12 +171,12 @@ export default function ProductShow({ id }: Props) {
           </div>
           <div className="flex justify-center md:justify-end my-6 px-6 md:my-0">
             {product.image?.url ? (
-              <div>
+              <div className="border p-2">
                 <Image
                   width={150}
                   height={150}
                   src={product.image.url}
-                  className="object-cover w-[300px] h-[300px] md:w-48 md:h-48"
+                  className="object-cover w-[300px] h-auto md:w-48 md:h-auto"
                   alt={product.displayName}
                   onClick={() => handleDeleteImage(product)}
                 />
