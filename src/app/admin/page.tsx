@@ -22,7 +22,7 @@ export default async function AdminPage() {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName || "",
-      role: user.customClaims?.role as "admin" | "user" | "member",
+      role: user.customClaims?.role as "admin" | "user" | "member" | "observer",
     };
   });
 

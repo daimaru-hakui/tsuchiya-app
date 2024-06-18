@@ -12,6 +12,8 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import ProductSkuEdit from "./product-sku-edit";
 import { Sku } from "@/types/product.type";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   id: string;
@@ -19,6 +21,7 @@ interface Props {
 
 export default function ProductShowTable({ id }: Props) {
   const [skus, setSkus] = useState<Sku[]>([]);
+  const role = useSession().data?.user.role || "user";
 
   useEffect(() => {
     const productsRef = collection(db, "products", id, "skus");
@@ -44,29 +47,42 @@ export default function ProductShowTable({ id }: Props) {
       <TableHeader>
         <TableRow>
           <TableHead className="">サイズ</TableHead>
+
           <TableHead>販売価格</TableHead>
           <TableHead>仕入価格</TableHead>
+
           <TableHead>在庫</TableHead>
           <TableHead className="w-[100px]">受注数量</TableHead>
-          <TableHead>順番</TableHead>
-          <TableHead>詳細</TableHead>
+          <TableHead>編集</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {skus.map((sku) => (
           <TableRow key={sku.id}>
             <TableCell className="font-medium">{sku.size}</TableCell>
-            <TableCell className="text-right">
-              {sku?.salePrice?.toLocaleString()}
-            </TableCell>
-            <TableCell className="text-right">
-              {sku?.costPrice?.toLocaleString()}
-            </TableCell>
+            {role === "admin" || role === "member" ? (
+              <>
+                <TableCell className="text-right">
+                  {sku?.salePrice?.toLocaleString()}
+                </TableCell>
+                <TableCell className="text-right">
+                  {sku?.costPrice?.toLocaleString()}
+                </TableCell>
+              </>
+            ) : (
+              <>
+                <TableCell className="text-right">非公開</TableCell>
+                <TableCell className="text-right">非公開</TableCell>
+              </>
+            )}
             <TableCell className="text-right">{sku.stock}</TableCell>
             <TableCell className="text-right">{sku.orderQuantity}</TableCell>
-            <TableCell className="text-right">{sku.sortNum}</TableCell>
             <TableCell className="text-right">
-              <ProductSkuEdit sku={sku} />
+              {role === "admin" || role === "member" ? (
+                <ProductSkuEdit sku={sku} />
+              ) : (
+                <Button size="xs" disabled={true}>編集</Button>
+              )}
             </TableCell>
           </TableRow>
         ))}

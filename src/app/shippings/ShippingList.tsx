@@ -87,29 +87,29 @@ export default function ShippingList() {
       </CardHeader>
       <CardContent className="overflow-auto">
         {shippings.length > 0 ? (
-          <Table className="min-w-[2000px]">
+          <Table className="min-w-[2500px]">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[80px]">詳細</TableHead>
-                <TableHead className="w-[115px]">日付</TableHead>
-                <TableHead className="w-[115px] text-center">
+                <TableHead className="min-w-[120px]">日付</TableHead>
+                <TableHead className="min-w-[120px] text-center">
                   ステータス
                 </TableHead>
-                <TableHead className="w-[120px]">送状No.</TableHead>
-                <TableHead className="w-[90px]">出荷No.</TableHead>
-                <TableHead className="w-[90px]">発注No.</TableHead>
-                <TableHead>所属名</TableHead>
-                <TableHead>社員コード</TableHead>
-                <TableHead>イニシャル</TableHead>
-                <TableHead>氏名</TableHead>
-                <TableHead>役職</TableHead>
-                <TableHead>社名</TableHead>
-                <TableHead>工事コード</TableHead>
-                <TableHead>現場名 又は組織名</TableHead>
-                <TableHead>郵便番号</TableHead>
-                <TableHead>住所</TableHead>
-                <TableHead>電話番号</TableHead>
-                <TableHead>備考</TableHead>
+                <TableHead className="min-w-[120px]">送状No.</TableHead>
+                <TableHead className="min-w-[90px]">出荷No.</TableHead>
+                <TableHead className="min-w-[90px]">発注No.</TableHead>
+                <TableHead className="min-w-[150px]">所属名</TableHead>
+                <TableHead className="min-w-[120px]">社員コード</TableHead>
+                <TableHead className="min-w-[120px]">イニシャル</TableHead>
+                <TableHead className="min-w-[150px]">氏名</TableHead>
+                <TableHead className="min-w-[100px]">役職</TableHead>
+                <TableHead className="min-w-[80px]">社名</TableHead>
+                <TableHead className="min-w-[120px]">工事コード</TableHead>
+                <TableHead className="min-w-[300px]">現場名 又は組織名</TableHead>
+                <TableHead className="min-w-[80px]">郵便番号</TableHead>
+                <TableHead className="min-w-[400px]">住所</TableHead>
+                <TableHead className="min-w-[130px]">電話番号</TableHead>
+                <TableHead className="min-w-[300px]">備考</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

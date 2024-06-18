@@ -29,7 +29,8 @@ export default function Header() {
       {pathname !== "/auth/login" && pathname !== "/auth/signup" && (
         <div className="h-4 md:h-14">
           <h1 className="p-4 text-lg hidden md:block">
-            {session.data && session.data?.user.email + " 様"}
+            {(session.data && session.data.user.name + " 様") ||
+              session?.data?.user.email + " 様"}
           </h1>
         </div>
       )}

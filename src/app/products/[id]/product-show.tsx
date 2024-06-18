@@ -115,7 +115,7 @@ export default function ProductShow({ id }: Props) {
   if (!product) return <Loading />;
 
   return (
-    <Card className="w-full md:w-[750px]">
+    <Card className="w-full md:w-[700px]">
       <CardHeader>
         <div className="flex justify-between mb-4">
           <Link href={paths.productAll()}>
@@ -140,7 +140,7 @@ export default function ProductShow({ id }: Props) {
         <CardTitle>商品詳細</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_250px] mb-3">
           <div>
             <dl className={cn(dlStyles)}>
               <dt className={cn(dtStyles)}>品番</dt>

@@ -28,16 +28,18 @@ import { Order, OrderDetail } from "@/types/order.type";
 import OrderEditModal from "./order-edit-modal";
 import OrderShowHeader from "./order-show-header";
 import OrderCancelButton from "./OrderCancelButton";
+import { useSession } from "next-auth/react";
 
 interface Props {
   id: string;
 }
 
 export default function OrderShow({ id }: Props) {
+  const role = useSession().data?.user.role || "user";
   const [order, setOrder] = useState<Order>();
   const router = useRouter();
   const [orderDetails, setOrderDetails] = useState<
-    (OrderDetail & { stock: number; })[]
+    (OrderDetail & { stock: number })[]
   >([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [prevPage, setPrevPage] = useState<string | null>(null);
@@ -152,24 +154,33 @@ export default function OrderShow({ id }: Props) {
           />
           <span className="flex items-center gap-4 ml-auto">
             {order.status === "pending" && (
-              <OrderCancelButton orderId={order.id} orderDetails={orderDetails} />
+              <OrderCancelButton
+                orderId={order.id}
+                orderDetails={orderDetails}
+              />
             )}
-            {order.status === "pending" && (
-              // && session.data?.user.role === "member"
-              <>
-                <Button
-                  size="xs"
-                  variant="default"
-                  onClick={() => handleStatusChange("processing")}
-                >
-                  受注する
-                </Button>
-              </>
-            )}
-            {order.status !== "pending" && (
-              <OrderShippingModal order={order} orderDetails={orderDetails} />
-            )}
-            <OrderEditModal order={order} orderDetails={orderDetails} />
+            {order.status === "pending" &&
+              (role === "member" || role === "admin") && (
+                <>
+                  <Button
+                    size="xs"
+                    variant="default"
+                    onClick={() => handleStatusChange("processing")}
+                  >
+                    受注する
+                  </Button>
+                </>
+              )}
+            {order.status !== "pending" &&
+              (role === "member" || role === "admin") && (
+                <>
+                  <OrderShippingModal
+                    order={order}
+                    orderDetails={orderDetails}
+                  />
+                  <OrderEditModal order={order} orderDetails={orderDetails} />
+                </>
+              )}
             <ChevronLeft
               className={cn("cursor-pointer", !prevPage && "opacity-35")}
               onClick={() => prevPage && router.push(paths.orderShow(prevPage))}

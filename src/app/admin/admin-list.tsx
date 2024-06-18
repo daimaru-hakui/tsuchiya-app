@@ -18,7 +18,7 @@ export interface Props {
 export default function AdminList({ users }: Props) {
   return (
     <div>
-      <Table className="w-[800px]">
+      <Table className="w-[900px]">
         <TableCaption>Account list</TableCaption>
         <TableHeader>
           <TableRow>

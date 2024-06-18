@@ -101,6 +101,7 @@ export default function AdminEditModal({ user }: Props) {
                               <SelectLabel>role</SelectLabel>
                               <SelectItem value="admin">Adimn</SelectItem>
                               <SelectItem value="member">Member</SelectItem>
+                              <SelectItem value="observer">Observer</SelectItem>
                               <SelectItem value="user">User</SelectItem>
                             </SelectGroup>
                           </SelectContent>
