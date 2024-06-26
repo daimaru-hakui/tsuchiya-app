@@ -103,19 +103,23 @@ export default function ShippingShowHeader({
           onClick={() => router.push(paths.shippingAll())}
         />
         <span className="flex items-center gap-4 ml-auto">
+          {(role === "admin" || role === "member") && (
+            <>
+              <ShippingInvoiceModal
+                shippingId={id}
+                trackingNumber={shipping.trackingNumber}
+                courier={shipping.courier}
+                totalAmount={totalAmount}
+              />
+              <ShippingEditModal
+                shipping={shipping}
+                shippingDetails={shippingDetails}
+              />
+            </>
+          )}
           {shipping.status !== "finished" &&
             (role === "admin" || role === "member") && (
               <>
-                <ShippingInvoiceModal
-                  shippingId={id}
-                  trackingNumber={shipping.trackingNumber}
-                  courier={shipping.courier}
-                  totalAmount={totalAmount}
-                />
-                <ShippingEditModal
-                  shipping={shipping}
-                  shippingDetails={shippingDetails}
-                />
                 <ShippingDeleteButton
                   shippingId={shipping.id}
                   orderId={shipping.orderId}
